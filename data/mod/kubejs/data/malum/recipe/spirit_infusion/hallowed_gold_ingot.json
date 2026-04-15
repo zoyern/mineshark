@@ -1,0 +1,27 @@
+{
+  "type": "malum:spirit_infusion",
+  "extraInputs": [
+    {
+      "count": 1,
+      "item": "irons_spellbooks:arcane_essence"
+    }
+  ],
+  "input": {
+    "count": 1,
+    "item": "minecraft:gold_ingot"
+  },
+  "result": {
+    "count": 1,
+    "id": "malum:hallowed_gold_ingot"
+  },
+  "spirits": [
+    {
+      "type": "malum:sacred",
+      "count": 2
+    },
+    {
+      "type": "malum:arcane",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "alexscaves:fissile_core"
+    },
+    "C": {
+      "item": "createnuclear:reactor_casing"
+    },
+    "P": {
+      "item": "alexscaves:charred_remnant"
+    },
+    "S": {
+      "item": "c:ingots/steel"
+    }
+  },
+  "pattern": [
+    "CCCCC",
+    "CPSPC",
+    "CSBSC",
+    "CPSPC",
+    "CCCCC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "createnuclear:reactor_core"
+  }
+}

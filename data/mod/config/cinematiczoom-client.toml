@@ -1,0 +1,30 @@
+#Height of black bars in percent of screen height (total 2 * value)
+# Default: 15.0
+# Range: 0.0 ~ 50.0
+barsPercent = 15.0
+#Smoothing speed: time to reach ~90% to target, milliseconds. 0 = instant
+# Default: 240
+# Range: 0 ~ 2000
+smoothMs = 240
+#Allow zoom control with mouse wheel while holding zoom key
+mouseWheelEnabled = true
+#Hide HUD/crosshair during zoom
+hideHudDuringZoom = true
+#Enable cinematic camera (smooth camera) during zoom
+enableCinematicCamera = true
+#Base FOV multiplier when starting zoom (less than 1 = zoom in)
+# Default: 0.33
+# Range: 0.05 ~ 1.0
+baseZoomMultiplier = 0.33
+#Minimum zoom multiplier when using mouse wheel
+# Default: 0.1
+# Range: 0.05 ~ 1.0
+minZoomMultiplier = 0.1
+#Maximum zoom multiplier when using mouse wheel
+# Default: 1.0
+# Range: 0.05 ~ 1.0
+maxZoomMultiplier = 1.0
+#Step for changing multiplier per mouse wheel tick
+# Default: 0.05
+# Range: 0.01 ~ 0.25
+wheelStep = 0.05

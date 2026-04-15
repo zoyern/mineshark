@@ -1,0 +1,63 @@
+{
+  "parent": "bettercombat:spear",
+  "attributes": {
+    "pose": "malfu_combat_animation:leftside_polearm_pose",
+    "attacks": [
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:spear_stab_lr",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab",
+          "pitch": 1.3
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:halberd_lr_stab",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab",
+          "pitch": 1.4
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:battlestaff_poke",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab",
+          "pitch": 1.35
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:glaive_rl",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_quick",
+          "pitch": 1
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:glaive_lr",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_quick",
+          "pitch": 0.9
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,343 @@
+{
+	autofocus_id: "1F3C64299F7730B6"
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "nether"
+	group: "0DADF96DBC50AC3A"
+	icon: {
+		id: "minecraft:netherrack"
+	}
+	id: "40B4790CF73DF2E2"
+	images: [
+		{
+			height: 1.5d
+			image: "minecraft:block/obsidian"
+			rotation: 0.0d
+			width: 1.5d
+			x: 0.0d
+			y: -3.9d
+		}
+		{
+			height: 2.0d
+			image: "kubejs:textures/quests/titles/the_nether.png"
+			rotation: 0.0d
+			width: 13.0d
+			x: 0.0d
+			y: -6.0d
+		}
+	]
+	order_index: 1
+	quest_links: [
+		{
+			id: "437CA18200B09FB1"
+			linked_quest: "0FAFE1943A28AF86"
+			x: 0.3249999999999993d
+			y: 0.475d
+		}
+		{
+			id: "3FD2095134A1DF0F"
+			linked_quest: "39475684487F1958"
+			x: 2.3249999999999993d
+			y: 0.475d
+		}
+		{
+			id: "5E46CB8C3BBDDA0F"
+			linked_quest: "394E9F83FB77E302"
+			x: -0.6750000000000007d
+			y: 0.475d
+		}
+		{
+			id: "4DEFA8E722BE45A2"
+			linked_quest: "51040727BD2ABC19"
+			x: 3.3d
+			y: -0.5d
+		}
+		{
+			id: "205A6BC8ABFA2AD2"
+			linked_quest: "45C92BD615F3B7EB"
+			x: 1.3249999999999993d
+			y: 0.475d
+		}
+	]
+	quests: [
+		{
+			dependencies: ["1F3C64299F7730B6"]
+			id: "582ED715B5623E90"
+			rewards: [{
+				id: "456E47E6A47C7728"
+				type: "loot"
+			}]
+			tasks: [{
+				id: "56EA276F58C1598C"
+				item: { count: 1, id: "minecraft:netherite_scrap" }
+				type: "item"
+			}]
+			x: -0.4d
+			y: -2.5d
+		}
+		{
+			dependencies: ["582ED715B5623E90"]
+			id: "5AF5CFA1A9880D2B"
+			rewards: [{
+				id: "2CB9767094FA51C0"
+				type: "loot"
+			}]
+			shape: "circle"
+			size: 0.75d
+			tasks: [{
+				id: "3335728D9F168DEF"
+				item: { count: 1, id: "minecraft:netherite_ingot" }
+				type: "item"
+			}]
+			x: 0.07500000000000001d
+			y: -1.6500000000000001d
+		}
+		{
+			dependencies: ["7F972B3D9AF131FC"]
+			hide_until_deps_complete: true
+			id: "1F3C64299F7730B6"
+			rewards: [{
+				id: "1B19C42E0387CED9"
+				type: "loot"
+			}]
+			shape: "none"
+			size: 1.5d
+			tasks: [{
+				dimension: "minecraft:the_nether"
+				id: "28B92DEB7D410A6A"
+				type: "dimension"
+			}]
+			x: 0.0d
+			y: -3.9000000000000004d
+		}
+		{
+			dependencies: ["1F3C64299F7730B6"]
+			hide_dependency_lines: true
+			icon: {
+				components: {
+					"ftbquests:icon": "supplementaries:textures/map/decorations/nether_fortress.png"
+				}
+				id: "ftbquests:custom_icon"
+			}
+			id: "290BBC2EE0FB5A41"
+			rewards: [{
+				id: "38975A804FF0371C"
+				type: "loot"
+			}]
+			tasks: [{
+				id: "35A66010A41B8C90"
+				structure: "minecraft:fortress"
+				type: "structure"
+			}]
+			x: -2.7250000000000005d
+			y: 0.4374999999999999d
+		}
+		{
+			dependencies: ["290BBC2EE0FB5A41"]
+			id: "3D4AE8E64B761BB0"
+			rewards: [{
+				id: "589678188CC99893"
+				type: "loot"
+			}]
+			shape: "circle"
+			size: 0.75d
+			tasks: [{
+				id: "25FD97060087C1D4"
+				item: { count: 1, id: "minecraft:blaze_rod" }
+				type: "item"
+			}]
+			x: -2.700000000000001d
+			y: 1.3875000000000006d
+		}
+		{
+			dependencies: ["3D4AE8E64B761BB0"]
+			id: "41E1F2A2D07C8D21"
+			rewards: [{
+				id: "40DC5B364E35CB58"
+				type: "loot"
+			}]
+			shape: "circle"
+			size: 0.75d
+			tasks: [{
+				id: "45BFD1498A9A9064"
+				item: { count: 1, id: "minecraft:brewing_stand" }
+				type: "item"
+			}]
+			x: -2.7d
+			y: 2.1d
+		}
+		{
+			dependencies: ["1F3C64299F7730B6"]
+			hide_dependency_lines: true
+			icon: {
+				components: {
+					"ftbquests:icon": "mynethersdelight:block/nether_stove_top"
+				}
+				id: "ftbquests:custom_icon"
+			}
+			id: "7181D0EA872B842F"
+			rewards: [{
+				id: "09F0B64D06B8EA75"
+				type: "loot"
+			}]
+			tasks: [{
+				id: "4FAE6BEA0B447472"
+				structure: "friendsandfoes:citadel"
+				type: "structure"
+			}]
+			x: -1.6750000000000007d
+			y: -0.525d
+		}
+		{
+			dependencies: ["33DC8EAC2A0F2263"]
+			id: "50BBCF2F906C1E40"
+			rewards: [{
+				id: "09BD386526DEB4AB"
+				type: "loot"
+			}]
+			shape: "circle"
+			size: 0.75d
+			tasks: [{
+				id: "6F0010312AC03886"
+				item: { count: 1, id: "friendsandfoes:wildfire_crown" }
+				type: "item"
+			}]
+			x: -1.6125000000000007d
+			y: 1.1d
+		}
+		{
+			dependencies: ["1F3C64299F7730B6"]
+			hide_dependency_lines: true
+			icon: {
+				components: {
+					"ftbquests:icon": "supplementaries:textures/map/decorations/bastion.png"
+				}
+				id: "ftbquests:custom_icon"
+			}
+			id: "517D927F6C015007"
+			rewards: [{
+				id: "3757E17C59D93676"
+				type: "loot"
+			}]
+			tasks: [{
+				id: "31C9C033CAF703B9"
+				structure: "minecraft:bastion_remnant"
+				type: "structure"
+			}]
+			x: -2.6750000000000007d
+			y: -0.525d
+		}
+		{
+			dependencies: ["1F3C64299F7730B6"]
+			hide_dependency_lines: true
+			id: "247CA3EA18B94B1F"
+			rewards: [{
+				id: "10F4F7A22276EFEE"
+				type: "loot"
+			}]
+			tasks: [{
+				icon: {
+					components: {
+						"ftbquests:icon": "irons_spellbooks:block/cinderous_soul_rune"
+					}
+					id: "ftbquests:custom_icon"
+				}
+				id: "62424046D1684555"
+				structure: "irons_spellbooks:citadel"
+				type: "structure"
+			}]
+			x: -0.6750000000000007d
+			y: -0.525d
+		}
+		{
+			dependencies: ["1F3C64299F7730B6"]
+			hide_dependency_lines: true
+			icon: {
+				id: "cataclysm:altar_of_fire"
+			}
+			id: "1134B8B955B40235"
+			rewards: [{
+				id: "079C4F70A6E7CDA4"
+				type: "loot"
+			}]
+			tasks: [{
+				id: "320ECA6194AF9934"
+				structure: "cataclysm:burning_arena"
+				type: "structure"
+			}]
+			x: 1.3249999999999993d
+			y: -0.525d
+		}
+		{
+			dependencies: ["1F3C64299F7730B6"]
+			hide_dependency_lines: true
+			icon: {
+				id: "eternal_starlight:thermal_springstone_hammer"
+			}
+			id: "070749FB18F3B0BD"
+			rewards: [{
+				id: "3BCE57F451557D28"
+				type: "loot"
+			}]
+			tasks: [{
+				id: "074186E7DFC287C7"
+				structure: "cataclysm:soul_black_smith"
+				type: "structure"
+			}]
+			x: 2.3249999999999993d
+			y: -0.525d
+		}
+		{
+			dependencies: ["7181D0EA872B842F"]
+			id: "33DC8EAC2A0F2263"
+			rewards: [{
+				id: "58EA38A32CE8A763"
+				type: "loot"
+			}]
+			shape: "circle"
+			size: 0.75d
+			tasks: [{
+				entity: "friendsandfoes:wildfire"
+				id: "78B2363589B6109A"
+				type: "kill"
+				value: 1L
+			}]
+			x: -1.6125000000000007d
+			y: 0.35d
+		}
+		{
+			dependencies: ["1F3C64299F7730B6"]
+			dependency_requirement: "all_started"
+			hide_dependency_lines: true
+			icon: {
+				components: {
+					"ftbquests:icon": "bosses_of_mass_destruction:block/gauntlet_blackstone"
+				}
+				id: "ftbquests:custom_icon"
+			}
+			id: "0C45D51752B49C3B"
+			rewards: [{
+				id: "5805FEB8DD9AA9D8"
+				type: "loot"
+			}]
+			tasks: [{
+				id: "34DAB1044D098260"
+				structure: "bosses_of_mass_destruction:gauntlet_arena"
+				type: "structure"
+			}]
+			x: 0.3249999999999993d
+			y: -0.525d
+		}
+		{
+			dependencies: ["1F3C64299F7730B6"]
+			id: "604DB80D34BE4E40"
+			tasks: [{
+				id: "44E177F8B3D4DF89"
+				item: { count: 1, id: "malum:blazing_quartz" }
+				type: "item"
+			}]
+			x: 0.5d
+			y: -2.5d
+		}
+	]
+}

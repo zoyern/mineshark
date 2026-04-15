@@ -1,0 +1,16 @@
+{
+  "cmd.help": "List of TIMM commands:",
+  "cmd.help.cfg": "Open the mod's settings",
+  "cmd.help.nowPlaying": "Print current song",
+  "cmd.help.skip": "Skip current song / Play a new one",
+  "cmd.help.stop": "Stop current song",
+  "cmd.nowPlaying.none": "Not playing any song",
+  "cmd.stop": "Stopped playing song",
+  "cmd.stop.none": "No song to stop",
+
+  "text.autoconfig.timm.title": "The Immersive Music Mod - Configuration",
+  "text.autoconfig.timm.option.general.minDelay": "Minimum delay between songs",
+  "text.autoconfig.timm.option.general.maxDelay": "Maximum delay between songs",
+  "text.autoconfig.timm.option.general.printOnSkip": "Display song info on skip",
+  "text.autoconfig.timm.option.general.structureFadeOut": "Structure should fade out"
+}

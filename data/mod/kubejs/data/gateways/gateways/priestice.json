@@ -1,0 +1,682 @@
+{
+  "size": "large",
+  "color": "#A0D6FF",
+  "name": "Ice Dragon Temple",
+  "spawn_algorithm": "gateways:open_field",
+  "waves": [
+    {
+      "entities": [
+        {
+          "entity": "eternal_starlight:lonestar_skeleton",
+          "count": 8
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 0.2
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 2.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 4.0
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 600,
+          "orb_size": 20
+        }
+      ],
+      "max_wave_time": 3000,
+      "setup_time": 200
+    },
+    {
+      "entities": [
+        {
+          "entity": "eternal_starlight:lonestar_skeleton",
+          "count": 8
+        },
+        {
+          "entity": "irons_spellbooks:ice_spider",
+          "count": 2,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacial Widow\",\"color\":\"white\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 50
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.1
+            }
+          ]
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 0.25
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 4.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 5.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.30
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 900,
+          "orb_size": 25
+        }
+      ],
+      "max_wave_time": 3500,
+      "setup_time": 200
+    },
+    {
+      "entities": [
+        {
+          "entity": "eternal_starlight:lonestar_skeleton",
+          "count": 10
+        },
+        {
+          "entity": "irons_spellbooks:ice_spider",
+          "count": 3,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacial Widow\",\"color\":\"white\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 50
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.1
+            }
+          ]
+        },
+        {
+          "entity": "mythsandlegends:karakondjul",
+          "count": 1,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Yeti of the Frozen Peaks\",\"color\":\"dark_aqua\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 100
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.2
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.attack_damage",
+              "operation": "add_value",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 0.3
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 6.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 6.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor_toughness",
+          "operation": "add_value",
+          "value": 4.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.35
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 1300,
+          "orb_size": 30
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "apotheosis:rare_material",
+            "count": 1
+          }
+        }
+      ],
+      "max_wave_time": 4000,
+      "setup_time": 200
+    },
+    {
+      "entities": [
+        {
+          "entity": "eternal_starlight:lonestar_skeleton",
+          "count": 12
+        },
+        {
+          "entity": "irons_spellbooks:ice_spider",
+          "count": 4,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacial Widow\",\"color\":\"white\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 50
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.1
+            }
+          ]
+        },
+        {
+          "entity": "iceandfire:ice_dragon",
+          "count": 1,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacierwing the Eternal Frost\",\"color\":\"dark_blue\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 150
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.3
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.attack_damage",
+              "operation": "add_value",
+              "value": 4
+            }
+          ]
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 0.35
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 8.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 7.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor_toughness",
+          "operation": "add_value",
+          "value": 6.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.40
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 1800,
+          "orb_size": 35
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "apotheosis:epic_material",
+            "count": 1
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "iceandfire:ice_dragon_heart",
+            "count": 1
+          }
+        }
+      ],
+      "max_wave_time": 4500,
+      "setup_time": 200
+    },
+    {
+      "entities": [
+        {
+          "entity": "eternal_starlight:lonestar_skeleton",
+          "count": 15
+        },
+        {
+          "entity": "irons_spellbooks:ice_spider",
+          "count": 5,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacial Widow\",\"color\":\"white\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 50
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.1
+            }
+          ]
+        },
+        {
+          "entity": "iceandfire:ice_dragon",
+          "count": 1,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacierwing the Eternal Frost\",\"color\":\"dark_blue\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 200
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.4
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.attack_damage",
+              "operation": "add_value",
+              "value": 6
+            }
+          ]
+        },
+        {
+          "type": "gateways:standard",
+          "entity": "irons_spellbooks:cryomancer",
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacier Priest of the Ice Dragon\",\"color\":\"aqua\",\"bold\":true}",
+            "ArmorItems": [
+              { "id": "ice_and_fire_spellbooks:ice_dragon_priest_boots", "Count": 1 },
+              { "id": "ice_and_fire_spellbooks:ice_dragon_priest_leggings", "Count": 1 },
+              { "id": "ice_and_fire_spellbooks:ice_dragon_priest_chestplate", "Count": 1 },
+              { "id": "ice_and_fire_spellbooks:ice_dragon_priest_helmet", "Count": 1 }
+            ],
+            "HandItems": [
+              { "id": "ice_and_fire_spellbooks:draconic_cryonic_staff", "Count": 1 }
+            ]
+          },
+          "count": 1,
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 200
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.3
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.attack_damage",
+              "operation": "add_value",
+              "value": 5
+            }
+          ],
+          "finalize_spawn": false
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 0.4
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 10.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 8.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor_toughness",
+          "operation": "add_value",
+          "value": 8.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.45
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 2400,
+          "orb_size": 40
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "apotheosis:epic_material",
+            "count": 2
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "iceandfire:ice_dragon_heart",
+            "count": 2
+          }
+        }
+      ],
+      "max_wave_time": 5000,
+      "setup_time": 200
+    },
+    {
+      "entities": [
+        {
+          "entity": "eternal_starlight:lonestar_skeleton",
+          "count": 20
+        },
+        {
+          "entity": "irons_spellbooks:ice_spider",
+          "count": 6,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacial Widow\",\"color\":\"white\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 50
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.1
+            }
+          ]
+        },
+        {
+          "entity": "iceandfire:ice_dragon",
+          "count": 1,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacierwing the Eternal Frost\",\"color\":\"dark_blue\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 200
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.4
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.attack_damage",
+              "operation": "add_value",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "type": "gateways:standard",
+          "entity": "irons_spellbooks:cryomancer",
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacier Priest of the Ice Dragon\",\"color\":\"aqua\",\"bold\":true}",
+            "ArmorItems": [
+              { "id": "ice_and_fire_spellbooks:ice_dragon_priest_boots", "Count": 1 },
+              { "id": "ice_and_fire_spellbooks:ice_dragon_priest_leggings", "Count": 1 },
+              { "id": "ice_and_fire_spellbooks:ice_dragon_priest_chestplate", "Count": 1 },
+              { "id": "ice_and_fire_spellbooks:ice_dragon_priest_helmet", "Count": 1 }
+            ],
+            "HandItems": [
+              { "id": "ice_and_fire_spellbooks:draconic_cryonic_staff", "Count": 1 }
+            ]
+          },
+          "count": 1,
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 200
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.3
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.attack_damage",
+              "operation": "add_value",
+              "value": 8
+            }
+          ],
+          "finalize_spawn": false
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 0.5
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 10.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 8.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor_toughness",
+          "operation": "add_value",
+          "value": 8.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.45
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 3000,
+          "orb_size": 45
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "apotheosis:mythic_material",
+            "count": 3
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "apotheosis:epic_material",
+            "count": 5
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "iceandfire:ice_dragon_heart",
+            "count": 3
+          }
+        }
+      ],
+      "max_wave_time": 6000,
+      "setup_time": 200
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "apotheosis:mythic_material",
+        "count": 5
+      }
+    },
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "apotheosis:sigil_of_socketing",
+        "count": 3
+      }
+    },
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "ice_and_fire_spellbooks:draconic_cryonic_staff",
+        "count": 1
+      }
+    },
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "iceandfire:ice_dragon_heart",
+        "count": 5
+      }
+    }
+  ],
+  "failures": [
+    {
+      "type": "gateways:explosion",
+      "strength": 3,
+      "fire": false,
+      "block_damage": true
+    }
+  ],
+  "rules": {
+    "lives": 3,
+    "requires_nearby_player": true
+  }
+}

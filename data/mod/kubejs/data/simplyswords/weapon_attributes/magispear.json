@@ -1,0 +1,68 @@
+{
+  "attributes" : {
+    "attack_range": 3.2,
+    "category": "trident",
+    "attacks": [
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:trident_rl_stab",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
+          "volume": 0.3,
+          "pitch": 1.5
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:trident_rl_stabup",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
+          "volume": 0.3,
+          "pitch": 1.4
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:trident_lr_stab",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
+          "volume": 0.3,
+          "pitch": 1.45
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 90,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:trident_lr",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.3,
+          "pitch": 1.5
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 90,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:trident_rl",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.3,
+          "pitch": 1.4
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+    "iceandfire:dragonsteel_ice_sword": {
+        "attributes": [
+            {
+                "attribute": "minecraft:generic.attack_damage",
+                "action": "modify",
+                "amount": 10.0,
+                "operation": "add_value"
+            }
+        ]
+    },
+    "iceandfire:dragonsteel_ice_shovel": {
+        "attributes": [
+            {
+                "attribute": "minecraft:generic.attack_damage",
+                "action": "modify",
+                "amount": 7.0,
+                "operation": "add_value"
+            }
+        ]
+    },
+    "iceandfire:dragonsteel_ice_pickaxe": {
+        "attributes": [
+            {
+                "attribute": "minecraft:generic.attack_damage",
+                "action": "modify",
+                "amount": 7.0,
+                "operation": "add_value"
+            }
+        ]
+    },
+    "iceandfire:dragonsteel_ice_hoe": {
+        "attributes": [
+            {
+                "attribute": "minecraft:generic.attack_damage",
+                "action": "modify",
+                "amount": 6.0,
+                "operation": "add_value"
+            }
+        ]
+    },
+    "iceandfire:dragonsteel_ice_axe": {
+        "attributes": [
+            {
+                "attribute": "minecraft:generic.attack_damage",
+                "action": "modify",
+                "amount": 11.0,
+                "operation": "add_value"
+            }
+        ]
+    }
+}

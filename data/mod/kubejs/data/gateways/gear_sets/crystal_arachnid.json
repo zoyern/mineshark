@@ -1,0 +1,43 @@
+{
+    "type": "placebo:gear_set",
+    "boots": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:crystal_arachnid_boots"
+            },
+            "weight": 10
+        }
+    ],
+    "chestplates": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:crystal_arachnid_chestplate"
+            },
+            "weight": 10
+        }
+    ],
+    "helmets": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:crystal_arachnid_helmet"
+            },
+            "weight": 10
+        }
+    ],
+    "leggings": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:crystal_arachnid_leggings"
+            },
+            "weight": 10
+        }
+    ],
+    "tags": [
+        "crystal_arachnid"
+    ],
+    "weight": 100
+}

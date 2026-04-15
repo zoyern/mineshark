@@ -1,0 +1,28 @@
+{
+  "entity.mowziesmobs.foliaath.description": "A maneating plant which drops foliaath seeds upon death.",
+  "entity.mowziesmobs.baby_foliaath.description": "Needs to be fed by tossing it meat to fully grow over the course of two days.",
+  "entity.mowziesmobs.bluff.description": "An earthen elemental which drops bluff rods, used to repair geomantic items or begin the sculptor's test.",
+  "entity.mowziesmobs.boulder_platform.description": "A swath of earth which may be stood upon.",
+  "entity.mowziesmobs.boulder_platform_crumbling.description": "A decaying swath of earth.",
+  "entity.mowziesmobs.boulder_projectile.description": "It's bouldering along.",
+  "entity.mowziesmobs.rock_sling.description": "It's bouldering along.",
+  "entity.mowziesmobs.earth_spike.description": "A spindle of earth.",
+  "entity.mowziesmobs.pillar.description": "A spindle of earth.",
+  "entity.mowziesmobs.pillar_piece.description": "A spindle of earth.",
+  "entity.mowziesmobs.pillar_sculptor.description": "A spindle of earth.",
+  "entity.mowziesmobs.ferrous_wroughtnaut.description": "Not man nor statue, these beings are fated to senselessly guard something forgotten, their equipment invulnurable to the test of time.",
+  "entity.mowziesmobs.fissure.description": "A break in the earth.",
+  "entity.mowziesmobs.fissure_piece.description": "A break in the earth.",
+  "entity.mowziesmobs.frostmaw.description": "A behemoth of frigid air and size. It guards an ice crystal in it's maw, which expulses cold when blown through.",
+  "entity.mowziesmobs.grottol.description": "'Living ore', crablike creatures which boast diamonds on their backs. Only pickaxes can collect them- silk touch yields an interesting result.",
+  "entity.mowziesmobs.lantern.description": "A bioluminecent floating sort of jellyfish which are said to contain the souls of the recently deceased.",
+  "entity.mowziesmobs.naga.description": "Found in the lifeless coastal cliffs, these winged serpents are evasive and will hurl acidic venom towards you, yet are easily felled with projectiles.",
+  "entity.mowziesmobs.sculptor.description": "An ancient monk with extensive knowledge in earthrending magic- the last of their kind, challenging visitors to a test of scaling great heights.",
+  "entity.mowziesmobs.umvuthana.description": "Bird-like masked creatures which scorch the ground under them, said to be fragments of the sun.",
+  "entity.mowziesmobs.umvuthana_crane.description": "Bird-like masked creatures which scorch the ground under them, said to be fragments of the sun.",
+  "entity.mowziesmobs.umvuthana_crane_player.description": "Bird-like masked creatures which scorch the ground under them, said to be fragments of the sun.",
+"entity.mowziesmobs.umvuthana_crane_raptor.description": "Bird-like masked creatures which scorch the ground under them, said to be fragments of the sun.",
+"entity.mowziesmobs.umvuthana_raptor.description": "Bird-like masked creatures which scorch the ground under them, said to be fragments of the sun.",
+"entity.mowziesmobs.umvuthi.description": "The creator of the Abavuthana, wielding the power of the sun to smite enemies and summon new followers with masks upon wearing the Sol Visage."
+
+}

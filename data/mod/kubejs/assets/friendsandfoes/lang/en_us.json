@@ -1,0 +1,10 @@
+{
+  "lore.friendsandfoes.wildfire_crown": "Grants 8 seconds of Fire Resistance (starts ticking down upon being on fire).",
+  "lore.friendsandfoes.totem_of_freezing": "Upon reaching half-health, removes all status effects, slows nearby mobs and grants Speed II.",
+  "lore.friendsandfoes.totem_of_illusion": "Upon reaching 1/3 health, removes all status effects, summons Illusions and grants Invisibility.",
+  "lore.friendsandfoes.copper_golem_spawn_egg": "Created by placing a Lightning Rod on a Carved Pumpkin on top of a Copper Block. Randomly presses Copper Buttons and oxidizes over time unless Waxed.",
+  "lore.friendsandfoes.tuff_golem_spawn_egg": "Created by placing a Carved Pumpkin on top of Wool on top of a Tuff Block. Can hold items. Doesnt move if Waxed.",
+  "lore.friendsandfoes.glare_spawn_egg": "Tame with Glow Berries. Flies to dark spots where monsters can spawn and shakes. Breed with Glow Berries.",
+  "lore.friendsandfoes.mauler_spawn_egg": "Feed by Right Clicking with an Enchanted item or book. Stores Exp. Recover by Right Clicking with an empty Glass Bottle. Drops all stored Exp on death."
+
+}

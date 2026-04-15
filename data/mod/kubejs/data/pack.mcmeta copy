@@ -1,0 +1,13 @@
+{
+  "pack": {
+    "description": "",
+    "pack_format": 48
+  },
+  "filter": {
+    "block": [
+      {
+        "namespace": "tombstone"
+      }
+    ]
+  }
+}

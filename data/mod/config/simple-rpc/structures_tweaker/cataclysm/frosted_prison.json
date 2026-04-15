@@ -1,0 +1,10 @@
+{
+  "individualOverrides": {
+    "canBreakBlocks": false,
+    "blockBreakWhitelist": [
+      "irons_spellbooks:armor_pile"
+    ],
+    "canPlaceBlocks": false
+  },
+  "note": "Only properties that differ from global config are saved here. See global.json for defaults."
+}

@@ -1,0 +1,100 @@
+{
+  "attributes": {
+    "attack_range": 3.5,
+    "pose": "malfu_combat_animation:leftside_polearm_pose",
+    "two_handed": true,
+    "category": "spear",
+    "attacks": [
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:spear_stab_lr",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:spear_stab_lr",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 60,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:spear_narrow_slash_lr",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 60,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:spear_narrow_slash_rl",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:spear_stab_lr",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:battlestaff_poke",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.2,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:spear_updown_slash_rl",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 60,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:spear_narrow_slash_lr",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 60,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:spear_narrow_slash_rl",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab"
+        }
+      }
+    ]
+  }
+}

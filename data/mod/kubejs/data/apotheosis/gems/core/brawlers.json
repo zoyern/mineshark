@@ -1,0 +1,55 @@
+{
+  "type": "apotheosis:gem",
+  "min_purity": "normal",
+  "weights": {
+    "quality": 0.1,
+    "weight": 100
+  },
+  "bonuses": [
+    {
+      "type": "apotheosis:attribute",
+      "attribute": "minecraft:generic.attack_speed",
+      "gem_class": {
+        "key": "light_weapon",
+        "types": [
+          "apotheosis:melee_weapon",
+          "apotheosis:trident"
+        ]
+      },
+      "operation": "add_multiplied_base",
+      "values": {
+        "normal": 0.05,
+        "flawless": 0.075,
+        "perfect": 0.1
+      }
+    },
+    {
+      "type": "apotheosis:attribute",
+      "attribute": "minecraft:generic.max_health",
+      "gem_class": {
+        "key": "core_armor",
+        "types": [
+          "apotheosis:chestplate",
+          "apotheosis:leggings"
+        ]
+      },
+      "operation": "add_value",
+      "values": {
+        "normal": 0.5,
+        "flawless": 1.0,
+        "perfect": 2.0
+      }
+    },
+    {
+      "type": "apotheosis:attribute",
+      "attribute": "minecraft:generic.max_health",
+      "gem_class": "apotheosis:shield",
+      "operation": "add_multiplied_total",
+      "values": {
+        "normal": 0.025,
+        "flawless": 0.05,
+        "perfect": 0.075
+      }
+    }
+  ]
+}

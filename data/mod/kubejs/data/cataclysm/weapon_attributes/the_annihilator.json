@@ -1,0 +1,73 @@
+{
+  "parent": "bettercombat:mace",
+  "attributes": {
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_swipe_horizontal_rl_hori",
+        "swing_sound": {
+          "id": "bettercombat:mace_slash",
+          "pitch": 0.8
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_lr",
+        "swing_sound": {
+          "id": "bettercombat:mace_slash",
+          "pitch": 0.9
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_heavy_up_lr",
+        "swing_sound": {
+          "id": "bettercombat:mace_slash",
+          "pitch": 0.94
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_heavy_up_rl",
+        "swing_sound": {
+          "id": "bettercombat:mace_slash",
+          "pitch": 0.83
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_swipe_horizontal_rl_hori",
+        "swing_sound": {
+          "id": "bettercombat:mace_slash",
+          "pitch": 0.87
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_lr",
+        "swing_sound": {
+          "id": "bettercombat:mace_slash",
+          "pitch": 0.92
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+    "type": "apotheosis:extra_gem_bonus",
+    "gem": "apotheosis:core/warlord",
+    "bonuses": [
+        {
+            "type": "apotheosis:attribute",
+            "attribute": "irons_spellbooks:spell_power",
+            "gem_class": {
+                "key": "magic_gear",
+                "types": [
+                    "irons_apothic:staff",
+                    "irons_apothic:spellbook"
+                ]
+            },
+            "operation": "add_multiplied_base", 
+            "values": { 
+                "normal": 0.025,
+                "flawless": 0.05,
+                "perfect": 0.1
+            }
+        }
+    ]
+} 

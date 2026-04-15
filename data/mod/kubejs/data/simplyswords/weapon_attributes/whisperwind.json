@@ -1,0 +1,58 @@
+{
+  "attributes": {
+    "attack_range": 2.9,
+    "pose": "bettercombat:pose_two_handed_katana",
+    "two_handed": true,
+    "category": "katana",
+    "attacks": [
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.1,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:katana_updown_slash_kendo",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_holy_attack_03",
+          "volume": 0.3,
+          "pitch": 1.2
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.1,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:katana_updown_slash_kendo",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_holy_attack_03",
+          "volume": 0.3,
+          "pitch": 1.2
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:katana_slash_rl",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_holy_attack_01",
+          "volume": 0.3,
+          "pitch": 1.1
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:katana_slash_lr",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_holy_attack_01",
+          "volume": 0.3,
+          "pitch": 1.2
+        }
+      }
+    ]
+  }
+}

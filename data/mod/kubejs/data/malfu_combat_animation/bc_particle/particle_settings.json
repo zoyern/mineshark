@@ -1,0 +1,920 @@
+{
+  "replace": false,
+  "values": {
+    "malfu_combat_animation:axe_updown_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0.0,
+        "roll_set": 210.0
+      }
+    ],
+    "malfu_combat_animation:axe_double_updown": [
+      {
+        "particle_type": "slash90",
+        "x_addition": -0.55,
+        "y_addition": 0.0,
+        "roll_set": 260.0
+      },
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.55,
+        "y_addition": 0.0,
+        "roll_set": 280.0
+      }
+    ],
+    "malfu_combat_animation:axe_updown_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0.0,
+        "roll_set": -30.0
+      }
+    ],
+    "malfu_combat_animation:axe_downup_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0.0,
+        "roll_set": 160.0
+      }
+    ],
+    "malfu_combat_animation:axe_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0.0,
+        "roll_set": -15.0
+      }
+    ],
+    "malfu_combat_animation:battlestaff_rl_style": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": 0.0,
+        "local_yaw": 20,
+        "roll_set": 20.0
+      }
+    ],
+    "malfu_combat_animation:battlestaff_lr": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": 0.0,
+        "local_yaw": 0,
+        "roll_set": 210.0
+      }
+    ],
+    "malfu_combat_animation:battlestaff_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0.0,
+        "roll_set": -15.0
+      }
+    ],
+    "malfu_combat_animation:battlestaff_poke": [
+      {
+        "particle_type": "stab",
+        "z_addition": 0.0
+      }
+    ],
+    "malfu_combat_animation:claw_updown": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.0,
+        "y_addition": 0.0,
+        "roll_set": 275
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.08,
+        "y_addition": 0.0,
+        "roll_set": 275
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.16,
+        "y_addition": 0.0,
+        "roll_set": 275
+      }
+    ],
+    "malfu_combat_animation:claw_double_ii": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.2,
+        "y_addition": 0.0,
+        "roll_set": 275
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.28,
+        "y_addition": 0.0,
+        "roll_set": 275
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.36,
+        "y_addition": 0.0,
+        "roll_set": 275
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": -0.2,
+        "y_addition": 0.0,
+        "roll_set": 265
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": -0.28,
+        "y_addition": 0.0,
+        "roll_set": 265
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": -0.36,
+        "y_addition": 0.0,
+        "roll_set": 265
+      }
+    ],
+    "malfu_combat_animation:claw_double_x": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.1,
+        "y_addition": -0.10,
+        "roll_set": 310
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.18,
+        "y_addition": -0.10,
+        "roll_set": 310
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.26,
+        "y_addition": -0.10,
+        "roll_set": 310
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": -0.1,
+        "y_addition": -0.10,
+        "roll_set": 230
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": -0.18,
+        "y_addition": -0.10,
+        "roll_set": 230
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": -0.26,
+        "y_addition": -0.10,
+        "roll_set": 230
+      }
+    ],
+    "malfu_combat_animation:claw_double_u": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.1,
+        "y_addition": 0.0,
+        "roll_set": 310
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.18,
+        "y_addition": 0.0,
+        "roll_set": 310
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.26,
+        "y_addition": 0.0,
+        "roll_set": 310
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": -0.1,
+        "y_addition": 0.0,
+        "roll_set": 230
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": -0.18,
+        "y_addition": 0.0,
+        "roll_set": 230
+      },
+      {
+        "particle_type": "slash45",
+        "x_addition": -0.26,
+        "y_addition": 0.0,
+        "roll_set": 230
+      }
+    ],
+    "malfu_combat_animation:claw_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": -0.2,
+        "roll_set": -20
+      },
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": -0.28,
+        "roll_set": -20
+      },
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": -0.36,
+        "roll_set": -20
+      }
+    ],
+    "malfu_combat_animation:claw_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": 0.0,
+        "roll_set": 200
+      },
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": 0.08,
+        "roll_set": 200
+      },
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": 0.16,
+        "roll_set": 200
+      }
+    ],
+    "malfu_combat_animation:claymore_stab_rl": [
+      {
+        "particle_type": "stab",
+        "x_addition": 0.1,
+        "y_addition": 0.0
+      }
+    ],
+    "malfu_combat_animation:claymore_stab_lr": [
+      {
+        "particle_type": "stab",
+        "x_addition": -0.1,
+        "y_addition": 0.0
+      }
+    ],
+    "malfu_combat_animation:claymore_rotate_rl": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 70,
+        "roll_set": -28
+      }
+    ],
+    "malfu_combat_animation:claymore_rlr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "roll_set": 215
+      }
+    ],
+    "malfu_combat_animation:claymore_lrl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.05,
+        "roll_set": -40
+      }
+    ],
+    "malfu_combat_animation:claymore_hori_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 0,
+        "roll_set": 205
+      }
+    ],
+    "malfu_combat_animation:claymore_hori_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0,
+        "local_yaw": 0,
+        "roll_set": -20
+      }
+    ],
+    "malfu_combat_animation:cutlass_rl": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.0,
+        "y_addition": 0,
+        "roll_set": -30
+      }
+    ],
+    "malfu_combat_animation:cutlass_lr": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.0,
+        "y_addition": 0,
+        "roll_set": 220
+      }
+    ],
+    "malfu_combat_animation:cutlass_lr_hori": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "roll_set": 165
+      }
+    ],
+    "malfu_combat_animation:cutlass_rl_hori": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "roll_set": 15
+      }
+    ],
+    "malfu_combat_animation:dagger_rl": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "roll_set": -10
+      }
+    ],
+    "malfu_combat_animation:dagger_lr": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "roll_set": 195
+      }
+    ],
+    "malfu_combat_animation:dagger_lr_stab": [
+      {
+        "particle_type": "stab",
+        "x_addition": 0.0,
+        "y_addition": -0.20
+      }
+    ],
+    "malfu_combat_animation:dagger_rl_stab": [
+      {
+        "particle_type": "stab",
+        "x_addition": 0.10,
+        "y_addition": -0.15
+      }
+    ],
+    "malfu_combat_animation:doubleaxe_updown_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0,
+        "roll_set": 225
+      }
+    ],
+    "malfu_combat_animation:doubleaxe_updown_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0,
+        "roll_set": -45
+      }
+    ],
+    "malfu_combat_animation:doubleaxe_lrl": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": -0.15,
+        "roll_set": 0
+      }
+    ],
+    "malfu_combat_animation:doubleaxe_hori_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "roll_set": 25
+      }
+    ],
+    "malfu_combat_animation:er_sword_double_cross_slash": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.10,
+        "y_addition": -0.2,
+        "local_yaw": -20,
+        "roll_set": -4
+      },
+      {
+        "particle_type": "slash90",
+        "x_addition": -0.10,
+        "y_addition": -0.15,
+        "local_yaw": -20,
+        "roll_set": 175
+      }
+    ],
+    "malfu_combat_animation:er_sword_double_stab": [
+      {
+        "particle_type": "stab",
+        "x_addition": -0.15,
+        "y_addition": -0.15,
+        "pitch_addition": -15
+      },
+      {
+        "particle_type": "stab",
+        "x_addition": 0.15,
+        "y_addition": -0.15,
+        "pitch_addition": -15
+      }
+    ],
+    "malfu_combat_animation:er_sword_updown_lr": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": -0.15,
+        "local_yaw": -50,
+        "roll_set": 225
+      }
+    ],
+    "malfu_combat_animation:er_sword_updown_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.15,
+        "local_yaw": 5,
+        "roll_set": -30
+      }
+    ],
+    "malfu_combat_animation:er_sword_vert_lr": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": -0.15,
+        "local_yaw": -10,
+        "roll_set": 183
+      }
+    ],
+    "malfu_combat_animation:fist_punch": [
+      {
+        "particle_type": "stab",
+        "x_addition": 0.15,
+        "y_addition": -0.05
+      }
+    ],
+    "malfu_combat_animation:fist_uppercut": [
+      {
+        "particle_type": "stab",
+        "x_addition": 0.0,
+        "y_addition": -0.15,
+        "pitch_addition": -20
+      }
+    ],
+    "malfu_combat_animation:greataxe_rl": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.1,
+        "y_addition": -0.1,
+        "local_yaw": 40,
+        "roll_set": 2
+      }
+    ],
+    "malfu_combat_animation:greataxe_lr": [
+      {
+        "particle_type": "slash180",
+        "x_addition": -0.1,
+        "y_addition": -0.1,
+        "local_yaw": 40,
+        "roll_set": 178
+      }
+    ],
+    "malfu_combat_animation:greathammer_slamslash_rl": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0,
+        "y_addition": -0.1,
+        "local_yaw": 0,
+        "roll_set": -35
+      }
+    ],
+    "malfu_combat_animation:greathammer_slamslash_lr": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0,
+        "y_addition": -0.1,
+        "local_yaw": 0,
+        "roll_set": 210
+      }
+    ],
+    "malfu_combat_animation:greathammer_slam_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.4,
+        "y_addition": -0.1,
+        "local_yaw": 20,
+        "roll_set": -65
+      }
+    ],
+    "malfu_combat_animation:greathammer_slam_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": -0.4,
+        "y_addition": -0.1,
+        "local_yaw": 20,
+        "roll_set": 250
+      }
+    ],
+    "malfu_combat_animation:greatsword_rl": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 20,
+        "roll_set": 3
+      }
+    ],
+    "malfu_combat_animation:greatsword_lr": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 20,
+        "roll_set": 177
+      }
+    ],
+    "malfu_combat_animation:glaive_updown": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 20,
+        "roll_set": 250
+      }
+    ],
+    "malfu_combat_animation:glaive_downup_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": -0.10,
+        "y_addition": -0.1,
+        "roll_set": 50
+      }
+    ],
+    "malfu_combat_animation:glaive_downup_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.10,
+        "y_addition": -0.1,
+        "roll_set": 135
+      }
+    ],
+    "malfu_combat_animation:glaive_lr": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "roll_set": 190
+      }
+    ],
+    "malfu_combat_animation:glaive_rl": [
+      {
+        "particle_type": "slash180",
+        "x_addition": 0.0,
+        "y_addition": -0.20,
+        "local_yaw" : 45,
+        "roll_set": -10
+      }
+    ],
+    "malfu_combat_animation:halberd_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "roll_set": -32
+      }
+    ],
+    "malfu_combat_animation:halberd_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "roll_set": 213
+      }
+    ],
+    "malfu_combat_animation:halberd_lr_stab": [
+      {
+        "particle_type": "stab",
+        "x_addition": -0.15,
+        "y_addition": -0.1
+      }
+    ],
+    "malfu_combat_animation:halberd_rl_stab": [
+      {
+        "particle_type": "stab",
+        "x_addition": 0.15,
+        "y_addition": -0.05
+      }
+    ],
+    "malfu_combat_animation:katana_updown_slash_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 35,
+        "roll_set": -45
+      }
+    ],
+    "malfu_combat_animation:katana_updown_slash_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 35,
+        "roll_set": 225
+      }
+    ],
+    "malfu_combat_animation:katana_updown_slash_kendo": [
+      {
+        "particle_type": "slash90",
+        "x_addition": -0.03,
+        "y_addition": -0.1,
+        "local_yaw": 58,
+        "roll_set": 270
+      }
+    ],
+    "malfu_combat_animation:katana_slash_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": -0.1,
+        "local_yaw": 30,
+        "roll_set": 0
+      }
+    ],
+    "malfu_combat_animation:katana_slash_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": -0.1,
+        "local_yaw": 30,
+        "roll_set": 180
+      }
+    ],
+    "malfu_combat_animation:katana_downup_slash_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": -0.25,
+        "local_yaw": 40,
+        "roll_set": 50
+      }
+    ],
+    "malfu_combat_animation:katana_downup_slash_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0,
+        "y_addition": -0.25,
+        "local_yaw": 40,
+        "roll_set": 130
+      }
+    ],
+    "malfu_combat_animation:one_handed_swipe_vertical_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 25,
+        "roll_set": 245
+      }
+    ],
+    "malfu_combat_animation:one_handed_swipe_vertical_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.2,
+        "y_addition": -0.1,
+        "local_yaw": 0,
+        "roll_set": -70
+      }
+    ],
+    "malfu_combat_animation:one_handed_swipe_horizontal_rl_hori": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 0,
+        "roll_set": -30
+      }
+    ],
+    "malfu_combat_animation:one_handed_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 0,
+        "roll_set": -47
+      }
+    ],
+    "malfu_combat_animation:one_handed_lr_rleg_lead": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 0,
+        "roll_set": 225
+      }
+    ],
+    "malfu_combat_animation:one_handed_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0,
+        "local_yaw": 0,
+        "roll_set": 200
+      }
+    ],
+    "malfu_combat_animation:one_handed_heavy_up_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 0,
+        "roll_set": 20
+      }
+    ],
+    "malfu_combat_animation:one_handed_heavy_up_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 0,
+        "roll_set": 160
+      }
+    ],
+    "malfu_combat_animation:rapier_lr": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 10,
+        "roll_set": 205
+      }
+    ],
+    "malfu_combat_animation:rapier_rl": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 15,
+        "roll_set": -45
+      }
+    ],
+    "malfu_combat_animation:rapier_rl_down": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.1,
+        "y_addition": -0.1,
+        "local_yaw": 25,
+        "roll_set": -75
+      }
+    ],
+    "malfu_combat_animation:rapier_lr_stab": [
+      {
+        "particle_type": "stab",
+        "y_addition": -0.1,
+        "x_addition": -0.05
+      }
+    ],
+    "malfu_combat_animation:spear_updown_slash_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 45,
+        "roll_set": -70
+      }
+    ],
+    "malfu_combat_animation:spear_narrow_slash_rl": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.0,
+        "y_addition": -0.3,
+        "local_yaw": 15,
+        "roll_set": 0
+      }
+    ],
+    "malfu_combat_animation:spear_narrow_slash_lr": [
+      {
+        "particle_type": "slash45",
+        "x_addition": 0.0,
+        "y_addition": -0.3,
+        "local_yaw": 5,
+        "roll_set": 180
+      }
+    ],
+    "malfu_combat_animation:spear_stab_lr": [
+      {
+        "particle_type": "stab",
+        "y_addition": -0.15,
+        "z_addition": 0.0
+      }
+    ],
+    "malfu_combat_animation:trident_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0,
+        "local_yaw": 10,
+        "roll_set": -25
+      }
+    ],
+    "malfu_combat_animation:trident_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.1,
+        "local_yaw": 10,
+        "roll_set": 215
+      }
+    ],
+    "malfu_combat_animation:trident_rl_stab": [
+      {
+        "particle_type": "stab",
+        "y_addition": -0.17,
+        "x_addition": 0.0
+      }
+    ],
+    "malfu_combat_animation:trident_rl_stabup": [
+      {
+        "particle_type": "stab",
+        "y_addition": 0.0,
+        "x_addition": 0.0
+      }
+    ],
+    "malfu_combat_animation:trident_lr_stab": [
+      {
+        "particle_type": "stab",
+        "y_addition": -0.1,
+        "x_addition": 0.0
+      }
+    ],
+    "malfu_combat_animation:two_handed_slice_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.30,
+        "local_yaw": 20,
+        "roll_set": -45
+      }
+    ],
+    "malfu_combat_animation:two_handed_slice_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": -0.15,
+        "y_addition": -0.30,
+        "local_yaw": 35,
+        "roll_set": 220
+      }
+    ],
+    "malfu_combat_animation:two_handed_heavy_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0,
+        "local_yaw": 0,
+        "roll_set": -20
+      }
+    ],
+    "malfu_combat_animation:two_handed_heavy_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": 0.05,
+        "local_yaw": 0,
+        "roll_set": 205
+      }
+    ],
+    "malfu_combat_animation:two_handed_downup_rl": [
+      {
+        "particle_type": "slash90",
+        "x_addition": -0.10,
+        "y_addition": -0.30,
+        "local_yaw": 20,
+        "roll_set": 40
+      }
+    ],
+    "malfu_combat_animation:two_handed_up_lr": [
+      {
+        "particle_type": "slash90",
+        "x_addition": 0.0,
+        "y_addition": -0.30,
+        "local_yaw": 20,
+        "roll_set": 130
+      }
+    ]
+  }
+}

@@ -1,0 +1,2054 @@
+{
+  "creative": [
+    "timm:menu",
+    "minecraft:music.creative"
+  ],
+  "menu": [
+    "timm:menu",
+    "minecraft:music.menu"
+  ],
+  "minecraft:badlands": [
+    "timm:badlands",
+    "minecraft:music.overworld.badlands"
+  ],
+  "minecraft:bamboo_jungle": [
+    "timm:bamboo_jungle",
+    "minecraft:music.overworld.bamboo_jungle"
+  ],
+  "minecraft:basalt_deltas": [
+    "timm:basalt_deltas",
+    "minecraft:music.nether.basalt_deltas"
+  ],
+  "minecraft:beach": [
+    "timm:beach",
+    "timm:warm_ocean",
+    "timm:ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:birch_forest": [
+    "timm:birch_forest",
+    "minecraft:music.overworld.forest"
+  ],
+  "minecraft:cherry_grove": [
+    "timm:cherry_grove",
+    "minecraft:music.overworld.cherry_grove"
+  ],
+  "minecraft:cold_ocean": [
+    "timm:ocean",
+    "timm:cold_ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:crimson_forest": [
+    "timm:crimson_forest",
+    "minecraft:music.nether.crimson_forest"
+  ],
+  "minecraft:dark_forest": [
+    "timm:dark_forest",
+    "minecraft:music.overworld.forest"
+  ],
+  "minecraft:deep_cold_ocean": [
+    "timm:cold_ocean",
+    "timm:ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:deep_dark": [
+    "timm:deep_dark",
+    "minecraft:music.overworld.deep_dark"
+  ],
+  "minecraft:deep_frozen_ocean": [
+    "timm:cold_ocean",
+    "timm:ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:deep_lukewarm_ocean": [
+    "timm:warm_ocean",
+    "timm:ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:deep_ocean": [
+    "timm:ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:desert": [
+    "timm:desert",
+    "minecraft:music.overworld.desert"
+  ],
+  "minecraft:dripstone_caves": [
+    "timm:dripstone_caves",
+    "minecraft:music.overworld.dripstone_caves"
+  ],
+  "minecraft:eroded_badlands": [
+    "timm:badlands",
+    "minecraft:music.overworld.badlands"
+  ],
+  "minecraft:flower_forest": [
+    "timm:flower_forest",
+    "minecraft:music.overworld.flower_forest"
+  ],
+  "minecraft:forest": [
+    "timm:forest",
+    "minecraft:music.overworld.forest"
+  ],
+  "minecraft:frozen_ocean": [
+    "timm:ocean",
+    "timm:cold_ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:frozen_peaks": [
+    "timm:mountains",
+    "minecraft:music.overworld.frozen_peaks"
+  ],
+  "minecraft:frozen_river": [
+    "timm:river",
+    "minecraft:music.game"
+  ],
+  "minecraft:grove": [
+    "timm:taiga",
+    "minecraft:music.overworld.grove"
+  ],
+  "minecraft:ice_spikes": [
+    "timm:snow_plains",
+    "minecraft:music.game"
+  ],
+  "minecraft:jagged_peaks": [
+    "timm:mountains",
+    "minecraft:music.overworld.jagged_peaks"
+  ],
+  "minecraft:jungle": [
+    "timm:jungle",
+    "minecraft:music.overworld.jungle"
+  ],
+  "minecraft:lukewarm_ocean": [
+    "timm:warm_ocean",
+    "timm:ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:lush_caves": [
+    "timm:lush_caves",
+    "minecraft:music.overworld.lush_caves"
+  ],
+  "minecraft:mangrove_swamp": [
+    "timm:swamp",
+    "minecraft:music.overworld.swamp"
+  ],
+  "minecraft:meadow": [
+    "timm:meadow",
+    "minecraft:music.overworld.meadow"
+  ],
+  "minecraft:mushroom_fields": [
+    "timm:mushroom",
+    "minecraft:music.game"
+  ],
+  "minecraft:nether_wastes": [
+    "timm:nether_wastes",
+    "minecraft:music.nether.nether_wastes"
+  ],
+  "minecraft:ocean": [
+    "timm:ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:old_growth_birch_forest": [
+    "timm:birch_forest",
+    "minecraft:music.overworld.forest"
+  ],
+  "minecraft:old_growth_pine_taiga": [
+    "timm:taiga",
+    "minecraft:music.overworld.old_growth_taiga"
+  ],
+  "minecraft:old_growth_spruce_taiga": [
+    "timm:taiga",
+    "minecraft:music.overworld.old_growth_taiga"
+  ],
+  "minecraft:pale_garden": [],
+  "minecraft:plains": [
+    "timm:plains",
+    "minecraft:music.game"
+  ],
+  "minecraft:river": [
+    "timm:river",
+    "minecraft:music.game"
+  ],
+  "minecraft:savanna": [
+    "timm:savanna",
+    "minecraft:music.game"
+  ],
+  "minecraft:savanna_plateau": [
+    "timm:savanna",
+    "minecraft:music.game"
+  ],
+  "minecraft:snowy_beach": [
+    "timm:cold_ocean",
+    "timm:ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:snowy_plains": [
+    "timm:snow_plains",
+    "minecraft:music.game"
+  ],
+  "minecraft:snowy_slopes": [
+    "timm:mountains",
+    "minecraft:music.overworld.snowy_slopes"
+  ],
+  "minecraft:snowy_taiga": [
+    "timm:snow_plains",
+    "timm:taiga",
+    "minecraft:music.game"
+  ],
+  "minecraft:soul_sand_valley": [
+    "timm:soul_sand_valley",
+    "minecraft:music.nether.soul_sand_valley"
+  ],
+  "minecraft:sparse_jungle": [
+    "timm:jungle",
+    "minecraft:music.overworld.sparse_jungle"
+  ],
+  "minecraft:stony_peaks": [
+    "timm:mountains",
+    "minecraft:music.overworld.stony_peaks"
+  ],
+  "minecraft:stony_shore": [
+    "timm:river",
+    "minecraft:music.game"
+  ],
+  "minecraft:sunflower_plains": [
+    "timm:plains",
+    "timm:flower_forest",
+    "minecraft:music.game"
+  ],
+  "minecraft:swamp": [
+    "timm:swamp",
+    "minecraft:music.overworld.swamp"
+  ],
+  "minecraft:taiga": [
+    "timm:taiga",
+    "minecraft:music.game"
+  ],
+  "minecraft:the_void": [
+    "minecraft:music.game"
+  ],
+  "minecraft:warm_ocean": [
+    "timm:warm_ocean",
+    "timm:ocean",
+    "minecraft:music.game"
+  ],
+  "minecraft:warped_forest": [],
+  "minecraft:windswept_forest": [
+    "timm:windy_hills",
+    "timm:forest",
+    "minecraft:music.game"
+  ],
+  "minecraft:windswept_gravelly_hills": [
+    "timm:windy_hills",
+    "minecraft:music.game"
+  ],
+  "minecraft:windswept_hills": [
+    "timm:windy_hills",
+    "minecraft:music.game"
+  ],
+  "minecraft:windswept_savanna": [
+    "timm:windy_hills",
+    "timm:savanna",
+    "minecraft:music.game"
+  ],
+  "minecraft:wooded_badlands": [
+    "timm:badlands",
+    "minecraft:music.overworld.badlands"
+  ],
+  "terralith:alpha_islands": [
+    "minecraft:music.game"
+  ],
+  "terralith:alpha_islands_winter": [
+    "minecraft:music.game"
+  ],
+  "terralith:alpine_grove": [
+    "timm:taiga"
+  ],
+  "terralith:alpine_highlands": [
+    "timm:mountains"
+  ],
+  "terralith:amethyst_canyon": [
+    "minecraft:music.game"
+  ],
+  "terralith:amethyst_rainforest": [
+    "minecraft:music.game"
+  ],
+  "terralith:ancient_sands": [
+    "timm:badlands"
+  ],
+  "terralith:arid_highlands": [
+    "timm:mountains"
+  ],
+  "terralith:ashen_savanna": [
+    "timm:badlands"
+  ],
+  "terralith:basalt_cliffs": [
+    "timm:mountains"
+  ],
+  "terralith:birch_taiga": [
+    "timm:birch_forest"
+  ],
+  "terralith:blooming_plateau": [
+    "timm:meadow"
+  ],
+  "terralith:blooming_valley": [
+    "timm:meadow"
+  ],
+  "terralith:brushland": [
+    "timm:plains"
+  ],
+  "terralith:bryce_canyon": [
+    "timm:badlands"
+  ],
+  "terralith:caldera": [
+    "timm:bamboo_jungle"
+  ],
+  "terralith:cloud_forest": [
+    "timm:dark_forest"
+  ],
+  "terralith:cold_shrubland": [
+    "timm:snow_plains"
+  ],
+  "terralith:desert_canyon": [
+    "timm:desert"
+  ],
+  "terralith:desert_oasis": [
+    "timm:desert",
+    "timm:bamboo_jungle"
+  ],
+  "terralith:desert_spires": [
+    "timm:desert",
+    "timm:mountains"
+  ],
+  "terralith:emerald_peaks": [
+    "timm:mountains"
+  ],
+  "terralith:forested_highlands": [
+    "timm:taiga"
+  ],
+  "terralith:fractured_savanna": [
+    "timm:savanna"
+  ],
+  "terralith:frozen_cliffs": [
+    "timm:snow_plains"
+  ],
+  "terralith:glacial_chasm": [
+    "timm:snow_plains"
+  ],
+  "terralith:granite_cliffs": [
+    "minecraft:music.game"
+  ],
+  "terralith:gravel_beach": [
+    "timm:warm_ocean",
+    "timm:windy_hills"
+  ],
+  "terralith:gravel_desert": [
+    "minecraft:music.game"
+  ],
+  "terralith:haze_mountain": [
+    "timm:mountains"
+  ],
+  "terralith:highlands": [
+    "timm:mountains",
+    "timm:plains"
+  ],
+  "terralith:hot_shrubland": [
+    "timm:savanna"
+  ],
+  "terralith:ice_marsh": [
+    "timm:snow_plains",
+    "timm:swamp"
+  ],
+  "terralith:jungle_mountains": [
+    "timm:jungle",
+    "timm:mountains"
+  ],
+  "terralith:lavender_forest": [
+    "timm:meadow"
+  ],
+  "terralith:lavender_valley": [
+    "timm:meadow"
+  ],
+  "terralith:lush_desert": [
+    "timm:lush_caves",
+    "timm:desert"
+  ],
+  "terralith:lush_valley": [
+    "timm:taiga"
+  ],
+  "terralith:mirage_isles": [
+    "timm:mushroom"
+  ],
+  "terralith:moonlight_grove": [
+    "timm:dark_forest"
+  ],
+  "terralith:moonlight_valley": [
+    "timm:dark_forest"
+  ],
+  "terralith:orchid_swamp": [
+    "timm:swamp"
+  ],
+  "terralith:painted_mountains": [
+    "timm:badlands"
+  ],
+  "terralith:red_oasis": [
+    "timm:badlands"
+  ],
+  "terralith:rocky_jungle": [
+    "timm:mountains",
+    "timm:jungle"
+  ],
+  "terralith:rocky_mountains": [
+    "timm:mountains"
+  ],
+  "terralith:rocky_shrubland": [
+    "timm:taiga"
+  ],
+  "terralith:sakura_grove": [
+    "timm:cherry_grove"
+  ],
+  "terralith:sakura_valley": [
+    "timm:cherry_grove"
+  ],
+  "terralith:sandstone_valley": [
+    "timm:desert"
+  ],
+  "terralith:savanna_badlands": [
+    "timm:savanna",
+    "timm:badlands"
+  ],
+  "terralith:savanna_slopes": [
+    "timm:savanna"
+  ],
+  "terralith:scarlet_mountains": [
+    "timm:mountains"
+  ],
+  "terralith:shield_clearing": [
+    "minecraft:music.game"
+  ],
+  "terralith:shield": [
+    "timm:taiga"
+  ],
+  "terralith:shrubland": [
+    "timm:savanna"
+  ],
+  "terralith:siberian_grove": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "terralith:siberian_taiga": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "terralith:skylands_autumn": [
+    "minecraft:music.game"
+  ],
+  "terralith:skylands_spring": [
+    "minecraft:music.game"
+  ],
+  "terralith:skylands_summer": [
+    "minecraft:music.game"
+  ],
+  "terralith:skylands_winter": [
+    "minecraft:music.game"
+  ],
+  "terralith:snowy_badlands": [
+    "timm:badlands"
+  ],
+  "terralith:snowy_cherry_grove": [
+    "timm:cherry_grove"
+  ],
+  "terralith:snowy_maple_forest": [
+    "timm:forest"
+  ],
+  "terralith:snowy_shield": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "terralith:steppe": [
+    "timm:plains"
+  ],
+  "terralith:stony_spires": [
+    "timm:mountains"
+  ],
+  "terralith:temperate_highlands": [
+    "timm:mountains"
+  ],
+  "terralith:tropical_jungle": [
+    "timm:jungle"
+  ],
+  "terralith:valley_clearing": [
+    "minecraft:music.game"
+  ],
+  "terralith:volcanic_crater": [
+    "timm:basalt_deltas"
+  ],
+  "terralith:volcanic_peaks": [
+    "timm:basalt_deltas"
+  ],
+  "terralith:warm_river": [
+    "timm:river"
+  ],
+  "terralith:warped_mesa": [
+    "timm:badlands"
+  ],
+  "terralith:white_cliffs": [
+    "timm:birch_forest"
+  ],
+  "terralith:white_mesa": [
+    "timm:badlands"
+  ],
+  "terralith:windswept_spires": [
+    "timm:mountains"
+  ],
+  "terralith:wintry_forest": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "terralith:wintry_lowlands": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "terralith:yellowstone": [
+    "timm:badlands"
+  ],
+  "terralith:yosemite_cliffs": [
+    "timm:mountains"
+  ],
+  "terralith:yosemite_lowlands": [
+    "timm:mountains"
+  ],
+  "terralith:cave/andesite_caves": [
+    "minecraft:music.game"
+  ],
+  "terralith:cave/desert_caves": [
+    "timm:desert"
+  ],
+  "terralith:cave/diorite_caves": [
+    "minecraft:music.game"
+  ],
+  "terralith:cave/fungal_caves": [
+    "minecraft:music.game"
+  ],
+  "natures_spirit:alpine_clearings": [
+    "timm:mountains"
+  ],
+  "natures_spirit:alpine_highlands": [
+    "timm:mountains"
+  ],
+  "natures_spirit:ambert_covert": [
+    "timm:birch_forest"
+  ],
+  "natures_spirit:arid_highlands": [
+    "timm:desert"
+  ],
+  "natures_spirit:arid_savanna": [
+    "timm:desert",
+    "timm:savanna"
+  ],
+  "natures_spirit:aspen_forest": [
+    "timm:birch_forest"
+  ],
+  "natures_spirit:bamboo_wetlands": [
+    "timm:bamboo_jungle"
+  ],
+  "natures_spirit:blooming_dunes": [
+    "timm:desert"
+  ],
+  "natures_spirit:blooming_sugi_forest": [
+    "timm:forest",
+    "timm:cherry_grove"
+  ],
+  "natures_spirit:boreal_taiga": [
+    "timm:taiga"
+  ],
+  "natures_spirit:carnation_fields": [
+    "timm:meadow"
+  ],
+  "natures_spirit:chaparral": [
+    "timm:meadow"
+  ],
+  "natures_spirit:coniferous_covert": [
+    "timm:taiga"
+  ],
+  "natures_spirit:cypress_fields": [
+    "timm:meadow"
+  ],
+  "natures_spirit:drylands": [
+    "timm:desert"
+  ],
+  "natures_spirit:dusty_slopes": [
+    "timm:desert",
+    "timm:mountains"
+  ],
+  "natures_spirit:eroded_river": [
+    "timm:river"
+  ],
+  "natures_spirit:fir_forest": [
+    "timm:taiga"
+  ],
+  "natures_spirit:floral_ridges": [
+    "timm:meadow"
+  ],
+  "natures_spirit:flowering_shrubland": [
+    "timm:meadow"
+  ],
+  "natures_spirit:heather_fields": [
+    "timm:meadow"
+  ],
+  "natures_spirit:golden_wilds": [
+    "timm:forest"
+  ],
+  "natures_spirit:lavender_fields": [
+    "timm:meadow"
+  ],
+  "natures_spirit:lively_dunes": [
+    "timm:desert"
+  ],
+  "natures_spirit:maple_woodlands": [
+    "timm:forest"
+  ],
+  "natures_spirit:marigold_meadows": [
+    "timm:meadow"
+  ],
+  "natures_spirit:marsh": [
+    "timm:swamp"
+  ],
+  "natures_spirit:oak_savanna": [
+    "timm:forest",
+    "timm:savanna"
+  ],
+  "natures_spirit:prairie": [
+    "timm:plains"
+  ],
+  "natures_spirit:red_peaks": [
+    "timm:mountains",
+    "timm:desert"
+  ],
+  "natures_spirit:redwood_forest": [
+    "timm:taiga"
+  ],
+  "natures_spirit:scorched_dunes": [
+    "timm:badlands"
+  ],
+  "natures_spirit:shrubby_highlands": [
+    "timm:plains"
+  ],
+  "natures_spirit:shrubland": [
+    "timm:plains",
+    "timm:meadow"
+  ],
+  "natures_spirit:sleeted_slopes": [
+    "timm:mountains"
+  ],
+  "natures_spirit:snowcapped_red_peaks": [
+    "timm:mountains"
+  ],
+  "natures_spirit:snowy_fir_forest": [
+    "timm:taiga"
+  ],
+  "natures_spirit:sparse_tropical_woods": [
+    "timm:jungle"
+  ],
+  "natures_spirit:stratified_desert": [
+    "timm:desert",
+    "timm:badlands"
+  ],
+  "natures_spirit:sugi_forest": [
+    "timm:forest"
+  ],
+  "natures_spirit:tropical_basin": [
+    "minecraft:music.game"
+  ],
+  "natures_spirit:tropical_shores": [
+    "timm:beach"
+  ],
+  "natures_spirit:tropical_woods": [
+    "timm:jungle"
+  ],
+  "natures_spirit:tundra": [
+    "timm:snow_plains"
+  ],
+  "natures_spirit:white_cliffs": [
+    "timm:mountains"
+  ],
+  "natures_spirit:windswept_sugi_forest": [
+    "timm:taiga"
+  ],
+  "natures_spirit:wisteria_forest": [
+    "minecraft:music.game"
+  ],
+  "natures_spirit:wooded_drylands": [
+    "timm:savanna"
+  ],
+  "natures_spirit:woody_highlands": [
+    "timm:plains"
+  ],
+  "natures_spirit:xeric_plains": [
+    "timm:plains",
+    "timm:savanna"
+  ],
+  "biomesoplenty:aspen_glade": [
+    "timm:birch_forest"
+  ],
+  "biomesoplenty:auroral_garden": [
+    "timm:birch_forest",
+    "timm:lush_caves"
+  ],
+  "biomesoplenty:bayou": [
+    "timm:swamp"
+  ],
+  "biomesoplenty:bog": [
+    "timm:swamp"
+  ],
+  "biomesoplenty:cold_desert": [
+    "timm:windy_hills"
+  ],
+  "biomesoplenty:crag": [
+    "timm:meadow"
+  ],
+  "biomesoplenty:crystalline_chasm": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:coniferous_forest": [
+    "timm:taiga"
+  ],
+  "biomesoplenty:dead_forest": [
+    "timm:forest"
+  ],
+  "biomesoplenty:dryland": [
+    "timm:savanna"
+  ],
+  "biomesoplenty:dune_beach": [
+    "timm:warm_ocean"
+  ],
+  "biomesoplenty:end_corruption": [
+    "timm:end"
+  ],
+  "biomesoplenty:end_reef": [
+    "timm:end"
+  ],
+  "biomesoplenty:end_wilds": [
+    "timm:end"
+  ],
+  "biomesoplenty:erupting_inferno": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:field": [
+    "timm:meadow"
+  ],
+  "biomesoplenty:fir_clearing": [
+    "timm:plains"
+  ],
+  "biomesoplenty:floodplain": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:fungal_jungle": [
+    "timm:jungle",
+    "timm:lush_caves"
+  ],
+  "biomesoplenty:forested_field": [
+    "timm:forest",
+    "timm:flower_forest"
+  ],
+  "biomesoplenty:glowing_grotto": [
+    "timm:lush_caves"
+  ],
+  "biomesoplenty:grassland": [
+    "timm:plains"
+  ],
+  "biomesoplenty:gravel_beach": [
+    "timm:windy_hills"
+  ],
+  "biomesoplenty:highland": [
+    "timm:plains"
+  ],
+  "biomesoplenty:hot_springs": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:jade_cliffs": [
+    "timm:taiga"
+  ],
+  "biomesoplenty:jacaranda_glade": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:lavender_field": [
+    "timm:flower_forest",
+    "timm:meadow"
+  ],
+  "biomesoplenty:lush_desert": [
+    "timm:meadow"
+  ],
+  "biomesoplenty:lush_savanna": [
+    "timm:meadow"
+  ],
+  "biomesoplenty:maple_woods": [
+    "timm:forest"
+  ],
+  "biomesoplenty:marsh": [
+    "timm:swamp"
+  ],
+  "biomesoplenty:mediterranean_forest": [
+    "timm:forest",
+    "timm:warm_ocean"
+  ],
+  "biomesoplenty:moor": [
+    "timm:meadow"
+  ],
+  "biomesoplenty:muskeg": [
+    "timm:snow_plains"
+  ],
+  "biomesoplenty:mystic_grove": [
+    "timm:flower_forest"
+  ],
+  "biomesoplenty:ominous_woods": [
+    "timm:dark_forest"
+  ],
+  "biomesoplenty:old_growth_dead_forest": [
+    "timm:dark_forest"
+  ],
+  "biomesoplenty:old_growth_woodland": [
+    "timm:dark_forest"
+  ],
+  "biomesoplenty:orchard": [
+    "timm:flower_forest"
+  ],
+  "biomesoplenty:origin_calley": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:overgrown_greens": [
+    "timm:flower_forest",
+    "timm:plains"
+  ],
+  "biomesoplenty:pasture": [
+    "timm:plains"
+  ],
+  "biomesoplenty:prairie": [
+    "timm:plains"
+  ],
+  "biomesoplenty:pumpkin_patch": [
+    "timm:plains"
+  ],
+  "biomesoplenty:rainforest": [
+    "timm:jungle"
+  ],
+  "biomesoplenty:redwood_forest": [
+    "timm:taiga"
+  ],
+  "biomesoplenty:rocky_rainforest": [
+    "timm:meadow"
+  ],
+  "biomesoplenty:rocky_shrubland": [
+    "timm:meadow"
+  ],
+  "biomesoplenty:scrubland": [
+    "timm:flower_forest"
+  ],
+  "biomesoplenty:seasonal_forest": [
+    "timm:forest"
+  ],
+  "biomesoplenty:shrubland": [
+    "timm:taiga"
+  ],
+  "biomesoplenty:snowblossom_grove": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:snowy_coniferous_forest": [
+    "timm:taiga"
+  ],
+  "biomesoplenty:snowy_fir_forest": [
+    "timm:taiga"
+  ],
+  "biomesoplenty:snowy_maple_woods": [
+    "timm:forest"
+  ],
+  "biomesoplenty:spider_nest": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:tropics": [
+    "timm:jungle"
+  ],
+  "biomesoplenty:tundra": [
+    "timm:snow_plains"
+  ],
+  "biomesoplenty:undergrowth": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:visceral_heap": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:volcanic_plains": [
+    "timm:basalt_deltas"
+  ],
+  "biomesoplenty:volcano": [
+    "timm:basalt_deltas"
+  ],
+  "biomesoplenty:wasteland": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:wasteland_steppe": [
+    "timm:plains"
+  ],
+  "biomesoplenty:wetland": [
+    "timm:flower_forest"
+  ],
+  "biomesoplenty:wintry_origin_valley": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:withered_abyss": [
+    "minecraft:music.game"
+  ],
+  "biomesoplenty:woodland": [
+    "timm:forest"
+  ],
+  "byg:allium_fields": [
+    "timm:flower_forest",
+    "timm:meadow"
+  ],
+  "byg:amaranth_fields": [
+    "timm:flower_forest",
+    "timm:meadow"
+  ],
+  "byg:araucaria_savanna": [
+    "timm:plains",
+    "timm:savanna"
+  ],
+  "byg:arisian_undergrowth": [
+    "minecraft:music.game"
+  ],
+  "byg:aspen_forest": [
+    "timm:birch_forest"
+  ],
+  "byg:atacama_desert": [
+    "timm:desert"
+  ],
+  "byg:autumnal_taiga": [
+    "timm:taiga"
+  ],
+  "byg:autumnal_valley": [
+    "timm:plains"
+  ],
+  "byg:baobab_savanna": [
+    "timm:savanna"
+  ],
+  "byg:basalt_barrera": [
+    "timm:basalt_deltas"
+  ],
+  "byg:bayou": [
+    "minecraft:music.game"
+  ],
+  "byg:black_forest": [
+    "timm:dark_forest"
+  ],
+  "byg:borealis_grove": [
+    "timm:birch_forest"
+  ],
+  "byg:brimstone_caverns": [
+    "minecraft:music.game"
+  ],
+  "byg:bulbis_gardens": [
+    "timm:basalt_deltas"
+  ],
+  "byg:canadian_shield": [
+    "timm:taiga"
+  ],
+  "byg:cardinal_tundra": [
+    "timm:snow_plains"
+  ],
+  "byg:cherry_blossom_forest": [
+    "timm:cherry_grove"
+  ],
+  "byg:cika_woods": [
+    "timm:taiga"
+  ],
+  "byg:coconino_meadow": [
+    "timm:meadow"
+  ],
+  "byg:coniferous_forest": [
+    "timm:taiga"
+  ],
+  "byg:crag_gardens": [
+    "timm:bamboo_jungle"
+  ],
+  "byg:crimson_gardens": [
+    "minecraft:music.game"
+  ],
+  "byg:cryptic_wastes": [
+    "minecraft:music.game"
+  ],
+  "byg:cypress_swamplands": [
+    "timm:swamp"
+  ],
+  "byg:dacite_ridges": [
+    "timm:taiga"
+  ],
+  "byg:dacite_shore": [
+    "timm:warm_ocean"
+  ],
+  "byg:dead_sea": [
+    "timm:ocean"
+  ],
+  "byg:ebony_woods": [
+    "timm:jungle"
+  ],
+  "byg:embur_bog": [
+    "minecraft:music.game"
+  ],
+  "byg:ethereal_islands": [
+    "minecraft:music.game"
+  ],
+  "byg:firecracker_shrubland": [
+    "timm:plains"
+  ],
+  "byg:forgotten_forest": [
+    "timm:dark_forest"
+  ],
+  "byg:fragment_forest": [
+    "timm:forest"
+  ],
+  "byg:frosted_coniferous_forest": [
+    "timm:taiga",
+    "timm:snow_plains"
+  ],
+  "byg:frosted_forest": [
+    "timm:taiga",
+    "timm:snow_plains"
+  ],
+  "byg:glowstone_gardens": [
+    "minecraft:music.game"
+  ],
+  "byg:guiana_shield": [
+    "timm:jungle"
+  ],
+  "byg:howling_peaks": [
+    "timm:mountains"
+  ],
+  "byg:imparius_grove": [
+    "minecraft:music.game"
+  ],
+  "byg:ivis_fields": [
+    "minecraft:music.game"
+  ],
+  "byg:jacaranda_forest": [
+    "timm:dark_forest",
+    "timm:lush_caves"
+  ],
+  "byg:lush_stacks": [
+    "timm:lush_caves"
+  ],
+  "byg:magma_wastes": [
+    "minecraft:music.game"
+  ],
+  "byg:maple_taiga": [
+    "timm:forest",
+    "timm:taiga"
+  ],
+  "byg:mojave_desert": [
+    "timm:desert"
+  ],
+  "byg:nightshade_forest": [
+    "minecraft:music.game"
+  ],
+  "byg:orchard": [
+    "timm:flower_forest"
+  ],
+  "byg:prairie": [
+    "timm:plains"
+  ],
+  "byg:quartz_desert": [
+    "minecraft:music.game"
+  ],
+  "byg:rainbow_beach": [
+    "timm:warm_ocean"
+  ],
+  "byg:red_oak_forest": [
+    "timm:forest"
+  ],
+  "byg:red_rock_valley": [
+    "timm:badlands"
+  ],
+  "byg:redwood_thicket": [
+    "timm:taiga"
+  ],
+  "byg:rose_fields": [
+    "timm:flower_forest"
+  ],
+  "byg:shattered_glacier": [
+    "timm:snow_plains",
+    "timm:mountains"
+  ],
+  "byg:shulkren_forest": [
+    "minecraft:music.game"
+  ],
+  "byg:sierra_badlands": [
+    "timm:badlands"
+  ],
+  "byg:skyris_vale": [
+    "timm:dark_forest"
+  ],
+  "byg:subzero_hypogeal": [
+    "minecraft:music.game"
+  ],
+  "byg:sythian_torrids": [
+    "minecraft:music.game"
+  ],
+  "byg:temperate_grove": [
+    "timm:birch_forest"
+  ],
+  "byg:temperate_rainforest": [
+    "timm:taiga"
+  ],
+  "byg:tropical_rainforest": [
+    "timm:jungle"
+  ],
+  "byg:twilight_meadow": [
+    "timm:meadow"
+  ],
+  "byg:viscal_isles": [
+    "minecraft:music.game"
+  ],
+  "byg:wailing_garth": [
+    "timm:soul_sand_valley"
+  ],
+  "byg:warped_desert": [
+    "minecraft:music.game"
+  ],
+  "byg:weeping_mire": [
+    "timm:crimson_forest"
+  ],
+  "byg:weeping_witch_forest": [
+    "timm:dark_forest"
+  ],
+  "byg:white_mangrove_marshes": [
+    "timm:swamp"
+  ],
+  "byg:windswept_beach": [
+    "timm:beach"
+  ],
+  "byg:windswept_dunes": [
+    "timm:desert"
+  ],
+  "byg:windswept_desert": [
+    "timm:desert"
+  ],
+  "byg:zelkova_forest": [
+    "timm:dark_forest",
+    "timm:flower_forest"
+  ],
+  "regions_unexplored:alpha_grove": [
+    "minecraft:music.game"
+  ],
+  "regions_unexplored:ancient_delta": [
+    "timm:lush_caves"
+  ],
+  "regions_unexplored:arid_mountains": [
+    "timm:badlands"
+  ],
+  "regions_unexplored:ashen_woodlands": [
+    "timm:dark_forest"
+  ],
+  "regions_unexplored:bamboo_forest": [
+    "timm:bamboo_jungle"
+  ],
+  "regions_unexplored:boabab_savanna": [
+    "timm:taiga"
+  ],
+  "regions_unexplored:barley_fields": [
+    "timm:plains"
+  ],
+  "regions_unexplored:bioshroom_caves": [
+    "timm:lush_caves"
+  ],
+  "regions_unexplored:blackstone_basin": [
+    "timm:bamboo_jungle"
+  ],
+  "regions_unexplored:blackwood_taiga": [
+    "timm:dark_forest"
+  ],
+  "regions_unexplored:boreal_taiga": [
+    "timm:taiga"
+  ],
+  "regions_unexplored:chalk_cliffs": [
+    "timm:mountains"
+  ],
+  "regions_unexplored:clover_plains": [
+    "timm:flower_forest"
+  ],
+  "regions_unexplored:cold_boreal_taiga": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "regions_unexplored:cold_deciduous_forest": [
+    "minecraft:music.game"
+  ],
+  "regions_unexplored:cold_river": [
+    "timm:river"
+  ],
+  "regions_unexplored:deciduous_forest": [
+    "timm:forest"
+  ],
+  "regions_unexplored:dry_brushland": [
+    "timm:savanna"
+  ],
+  "regions_unexplored:eucalyptus_forest": [
+    "timm:flower_forest",
+    "timm:dark_forest"
+  ],
+  "regions_unexplored:fen": [
+    "minecraft:music.game"
+  ],
+  "regions_unexplored:flower_fields": [
+    "timm:flower_forest"
+  ],
+  "regions_unexplored:frozen_pine_taiga": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "regions_unexplored:frozen_tundra": [
+    "timm:snow_plains"
+  ],
+  "regions_unexplored:fungal_fen": [
+    "timm:dark_forest"
+  ],
+  "regions_unexplored:glistering_meadow": [
+    "minecraft:music.game"
+  ],
+  "regions_unexplored:golden_boreal_taiga": [
+    "timm:birch_forest",
+    "timm:taiga"
+  ],
+  "regions_unexplored:grassland": [
+    "timm:plains"
+  ],
+  "regions_unexplored:grassy_beach": [
+    "timm:warm_ocean",
+    "timm:ocean"
+  ],
+  "regions_unexplored:gravel_beach": [
+    "timm:warm_ocean",
+    "timm:ocean"
+  ],
+  "regions_unexplored:highland_fields": [
+    "timm:meadow"
+  ],
+  "regions_unexplored:hyacinth_deeps": [
+    "minecraft:music.game"
+  ],
+  "regions_unexplored:icy_heights": [
+    "timm:snow_plains",
+    "timm:mountains"
+  ],
+  "regions_unexplored:infernal_holt": [
+    "minecraft:music.game"
+  ],
+  "regions_unexplored:joshua_desert": [
+    "timm:desert"
+  ],
+  "regions_unexplored:magnolia_woodland": [
+    "timm:cherry_grove"
+  ],
+  "regions_unexplored:maple_forest": [
+    "timm:forest"
+  ],
+  "regions_unexplored:marsh": [
+    "timm:swamp"
+  ],
+  "regions_unexplored:mauve_hills": [
+    "timm:dark_forest"
+  ],
+  "regions_unexplored:mountains": [
+    "timm:mountains"
+  ],
+  "regions_unexplored:muddy_river": [
+    "timm:river"
+  ],
+  "regions_unexplored:mycotoxic_undergrowth": [
+    "minecraft:music.game"
+  ],
+  "regions_unexplored:old_growth_bayou": [
+    "timm:swamp"
+  ],
+  "regions_unexplored:orchard": [
+    "timm:forest"
+  ],
+  "regions_unexplored:outback": [
+    "timm:badlands",
+    "timm:desert"
+  ],
+  "regions_unexplored:poppy_fields": [
+    "timm:flower_forest"
+  ],
+  "regions_unexplored:prairie": [
+    "timm:plains"
+  ],
+  "regions_unexplored:prismachasm": [
+    "timm:lush_caves"
+  ],
+  "regions_unexplored:pumpkin_fields": [
+    "timm:plains"
+  ],
+  "regions_unexplored:rainforest": [
+    "timm:jungle"
+  ],
+  "regions_unexplored:redstone_abyss": [
+    "minecraft:music.game"
+  ],
+  "regions_unexplored:redstone_caves": [
+    "timm:dripstone_caves"
+  ],
+  "regions_unexplored:redwoods": [
+    "timm:taiga"
+  ],
+  "regions_unexplored:rocky_meadow": [
+    "timm:river"
+  ],
+  "regions_unexplored:rocky_reef": [
+    "timm:river"
+  ],
+  "regions_unexplored:saguaro_desert": [
+    "timm:desert"
+  ],
+  "regions_unexplored:scorching_caves": [
+    "minecraft:music.game"
+  ],
+  "regions_unexplored:shrubland": [
+    "timm:meadow"
+  ],
+  "regions_unexplored:silver_birch_forest": [
+    "timm:birch_forest"
+  ],
+  "regions_unexplored:sparse_rainforest": [
+    "timm:jungle"
+  ],
+  "regions_unexplored:sparse_redwoods": [
+    "timm:taiga"
+  ],
+  "regions_unexplored:spires": [
+    "timm:snow_plains"
+  ],
+  "regions_unexplored:steppe": [
+    "timm:savanna"
+  ],
+  "regions_unexplored:temperate_grove": [
+    "timm:forest"
+  ],
+  "regions_unexplored:towering_cliffs": [
+    "timm:taiga"
+  ],
+  "regions_unexplored:tropical_river": [
+    "timm:river"
+  ],
+  "regions_unexplored:tropics": [
+    "timm:warm_ocean"
+  ],
+  "regions_unexplored:willow_forest": [
+    "timm:swamp"
+  ],
+  "terrestria:caldera": [
+    "timm:mountains"
+  ],
+  "terrestria:canyon": [
+    "minecraft:music.game"
+  ],
+  "terrestria:cypress_forest": [
+    "timm:birch_forest"
+  ],
+  "terrestria:cypress_swamp": [
+    "timm:swamp"
+  ],
+  "terrestria:dense_woodlands": [
+    "timm:forest"
+  ],
+  "terrestria:dunes": [
+    "timm:desert"
+  ],
+  "terrestria:hemlock_rainforest": [
+    "timm:taiga"
+  ],
+  "terrestria:hemlock_treeline": [
+    "timm:taiga"
+  ],
+  "terrestria:japanese_maple_forest": [
+    "timm:forest"
+  ],
+  "terrestria:lush_desert": [
+    "timm:desert"
+  ],
+  "terrestria:lush_redwood_forest": [
+    "timm:jungle"
+  ],
+  "terrestria:oasis": [
+    "minecraft:music.game"
+  ],
+  "terrestria:outback": [
+    "timm:desert",
+    "timm:badlands"
+  ],
+  "terrestria:rainbow_rainforest": [
+    "timm:jungle"
+  ],
+  "terrestria:redwood_forest": [
+    "timm:taiga"
+  ],
+  "terrestria:sakura_forest": [
+    "timm:cherry_grove"
+  ],
+  "terrestria:snowy_hemlock_forest": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "terrestria:snowy_hemlock_treeline": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "terrestria:volcanic_island": [
+    "timm:warm_ocean"
+  ],
+  "terrestria:windswept_redwood_forest": [
+    "timm:taiga"
+  ],
+  "wythers:ancient_copper_beech_forest": [
+    "timm:forest"
+  ],
+  "wythers:ancient_emerald_beech_forest": [
+    "timm:dark_forest"
+  ],
+  "wythers:ancient_golden_beech_forest": [
+    "timm:dark_forest"
+  ],
+  "wythers:ancient_moss_forest": [
+    "timm:dark_forest"
+  ],
+  "wythers:ancient_mossy_swamp": [
+    "timm:dark_forest",
+    "timm:swamp"
+  ],
+  "wythers:ancient_oak_swamp": [
+    "timm:forest",
+    "timm:swamp"
+  ],
+  "wythers:ancient_taiga": [
+    "timm:taiga"
+  ],
+  "wythers:andesite_crags": [
+    "minecraft:music.game"
+  ],
+  "wythers:aspen_crags": [
+    "timm:birch_forest"
+  ],
+  "wythers:autumnal_birch_forest": [
+    "timm:birch_forest"
+  ],
+  "wythers:autumnal_crags": [
+    "timm:birch_forest"
+  ],
+  "wythers:autumnal_flower_forest": [
+    "timm:flower_forest"
+  ],
+  "wythers:autumnal_forest": [
+    "timm:forest"
+  ],
+  "wythers:autumnal_forest_edge": [
+    "timm:forest"
+  ],
+  "wythers:autumnal_plains": [
+    "timm:plains"
+  ],
+  "wythers:autumnal_swamp": [
+    "timm:swamp"
+  ],
+  "wythers:ayers_rock": [
+    "timm:badlands"
+  ],
+  "wythers:badlands_canyon": [
+    "timm:badlands"
+  ],
+  "wythers:badlands_desert": [
+    "timm:badlands"
+  ],
+  "wythers:badlands_river": [
+    "timm:badlands"
+  ],
+  "wythers:bamboo_jungle_canyon": [
+    "timm:bamboo_jungle"
+  ],
+  "wythers:bamboo_jungle_highlands": [
+    "timm:bamboo_jungle"
+  ],
+  "wythers:bamboo_jungle_swamp": [
+    "timm:bamboo_jungle",
+    "timm:swamp"
+  ],
+  "wythers:bayou": [
+    "timm:swamp"
+  ],
+  "wythers:berry_bog": [
+    "timm:swamp"
+  ],
+  "wythers:billabong": [
+    "timm:river"
+  ],
+  "wythers:birch_swamp": [
+    "timm:swamp",
+    "timm:birch_forest"
+  ],
+  "wythers:birch_taiga": [
+    "timm:birch_forest"
+  ],
+  "wythers:black_beach": [
+    "timm:ocean"
+  ],
+  "wythers:black_river": [
+    "timm:river"
+  ],
+  "wythers:boreal_forest_red": [
+    "timm:forest",
+    "timm:taiga"
+  ],
+  "wythers:boreal_forest_yellow": [
+    "timm:forest",
+    "timm:taiga"
+  ],
+  "wythers:cactus_desert": [
+    "timm:desert"
+  ],
+  "wythers:calcite_caverns": [
+    "timm:dripstone_caves"
+  ],
+  "wythers:calcite_coast": [
+    "timm:warm_ocean"
+  ],
+  "wythers:chaparral": [
+    "timm:desert"
+  ],
+  "wythers:coastal_mangroves": [
+    "timm:swamp",
+    "timm:warm_ocean"
+  ],
+  "wythers:cold_island": [
+    "timm:taiga"
+  ],
+  "wythers:cold_plains": [
+    "timm:plains"
+  ],
+  "wythers:cold_stony_shore": [
+    "timm:warm_ocean"
+  ],
+  "wythers:cool_forest": [
+    "timm:forest"
+  ],
+  "wythers:cool_forest_edge": [
+    "timm:forest"
+  ],
+  "wythers:cool_plains": [
+    "timm:plains"
+  ],
+  "wythers:cool_stony_canyons": [
+    "timm:river"
+  ],
+  "wythers:cool_stony_peaks": [
+    "timm:mountains"
+  ],
+  "wythers:crimson_tundra": [
+    "timm:snow_plains"
+  ],
+  "wythers:danakil_desert": [
+    "timm:desert"
+  ],
+  "wythers:deep_dark_forest": [
+    "timm:deep_dark"
+  ],
+  "wythers:deep_dark_incursion": [
+    "timm:deep_dark"
+  ],
+  "wythers:deep_desert": [
+    "timm:desert"
+  ],
+  "wythers:deep_desert_river": [
+    "timm:river"
+  ],
+  "wythers:deep_icy_ocean": [
+    "timm:cold_ocean"
+  ],
+  "wythers:deep_snowy_taiga": [
+    "timm:snow_plains",
+    "timm:taiga"
+  ],
+  "wythers:deep_underground": [
+    "minecraft:music.game"
+  ],
+  "wythers:deepslate_shore": [
+    "timm:warm_ocean"
+  ],
+  "wythers:desert_beach": [
+    "timm:warm_ocean"
+  ],
+  "wythers:desert_island": [
+    "timm:warm_ocean",
+    "timm:desert"
+  ],
+  "wythers:desert_lakes": [
+    "timm:desert"
+  ],
+  "wythers:desert_pinnacles": [
+    "timm:desert"
+  ],
+  "wythers:desert_river": [
+    "timm:desert",
+    "timm:river"
+  ],
+  "wythers:dripleaf_swamp": [
+    "timm:swamp"
+  ],
+  "wythers:dry_savanna": [
+    "timm:savanna"
+  ],
+  "wythers:dry_tropical_forest": [
+    "timm:savanna"
+  ],
+  "wythers:dry_tropical_grassland": [
+    "timm:plains"
+  ],
+  "wythers:eucalyptus_deanei_forest": [
+    "timm:birch_forest"
+  ],
+  "wythers:eucalyptus_jungle": [
+    "timm:jungle"
+  ],
+  "wythers:eucalyptus_jungle_canyon": [
+    "timm:jungle"
+  ],
+  "wythers:eucalyptus_salubris_woodland": [
+    "timm:savanna"
+  ],
+  "wythers:eucalyptus_woodland": [
+    "timm:birch_forest"
+  ],
+  "wythers:fen": [
+    "timm:swamp"
+  ],
+  "wythers:flooded_jungle": [
+    "timm:jungle"
+  ],
+  "wythers:flooded_rainforest": [
+    "timm:jungle"
+  ],
+  "wythers:flooded_savanna": [
+    "timm:savanna"
+  ],
+  "wythers:flooded_temperate_rainforest": [
+    "timm:jungle",
+    "timm:taiga"
+  ],
+  "wythers:flowering_pantanal": [
+    "minecraft:music.game"
+  ],
+  "wythers:forbidden_forest": [
+    "timm:dark_forest"
+  ],
+  "wythers:forest_edge": [
+    "timm:forest"
+  ],
+  "wythers:forested_highlands": [
+    "timm:forest"
+  ],
+  "wythers:frigid_island": [
+    "timm:plains"
+  ],
+  "wythers:frozen_island": [
+    "timm:snow_plains"
+  ],
+  "wythers:giant_sequoia_forest": [
+    "timm:taiga"
+  ],
+  "wythers:glacial_cliff": [
+    "timm:cold_ocean"
+  ],
+  "wythers:granite_canyon": [
+    "timm:mountains"
+  ],
+  "wythers:gravelly_beach": [
+    "timm:warm_ocean"
+  ],
+  "wythers:gravelly_river": [
+    "timm:river"
+  ],
+  "wythers:guelta": [
+    "timm:river"
+  ],
+  "wythers:harvest_fields": [
+    "timm:flower_forest"
+  ],
+  "wythers:highland_plains": [
+    "timm:plains"
+  ],
+  "wythers:highland_tropical_rainforest": [
+    "timm:jungle"
+  ],
+  "wythers:highlands": [
+    "timm:meadow"
+  ],
+  "wythers:huangshan_highands": [
+    "timm:mountains",
+    "timm:cherry_grove"
+  ],
+  "wythers:humid_tropical_grassland": [
+    "timm:plains",
+    "timm:jungle"
+  ],
+  "wythers:ice_cap": [
+    "timm:mountains"
+  ],
+  "wythers:icy_crags": [
+    "timm:snow_plains"
+  ],
+  "wythers:icy_ocean": [
+    "timm:cold_ocean"
+  ],
+  "wythers:icy_river": [
+    "timm:river"
+  ],
+  "wythers:icy_shore": [
+    "timm:snow_plains"
+  ],
+  "wythers:icy_volcano": [
+    "timm:basalt_deltas"
+  ],
+  "wythers:jacaranda_savanna": [
+    "timm:forest"
+  ],
+  "wythers:jade_highlands": [
+    "timm:taiga",
+    "timm:bamboo_jungle"
+  ],
+  "wythers:jungle_canyon": [
+    "timm:jungle"
+  ],
+  "wythers:jungle_island": [
+    "timm:jungle"
+  ],
+  "wythers:jungle_river": [
+    "timm:jungle",
+    "timm:river"
+  ],
+  "wythers:kwongan_heath": [
+    "timm:badlands"
+  ],
+  "wythers:lantern_river": [
+    "timm:cherry_grove"
+  ],
+  "wythers:lapacho_plains": [
+    "timm:flower_forest"
+  ],
+  "wythers:larch_taiga": [
+    "timm:taiga"
+  ],
+  "wythers:lichenous_caves": [
+    "timm:lush_caves"
+  ],
+  "wythers:lichenous_dripstone_caves": [
+    "timm:dripstone_caves"
+  ],
+  "wythers:lush_dripstone_caves": [
+    "timm:dripstone_caves"
+  ],
+  "wythers:lush_fungous_dripstone_caves": [
+    "timm:dripstone_caves"
+  ],
+  "wythers:lush_shroom_caves": [
+    "timm:lush_caves"
+  ],
+  "wythers:maple_mountains": [
+    "timm:forest"
+  ],
+  "wythers:marsh": [
+    "timm:swamp"
+  ],
+  "wythers:mediterranean_island": [
+    "timm:warm_ocean",
+    "timm:warm_ocean"
+  ],
+  "wythers:mediterranean_island_thermal_springs": [
+    "timm:warm_ocean"
+  ],
+  "wythers:mossy_caves": [
+    "timm:lush_caves"
+  ],
+  "wythers:mossy_dripstone_caves": [
+    "timm:dripstone_caves"
+  ],
+  "wythers:mud_pools": [
+    "timm:swamp"
+  ],
+  "wythers:mushroom_caves": [
+    "timm:mushroom"
+  ],
+  "wythers:mushroom_island": [
+    "timm:mushroom"
+  ],
+  "wythers:old_growth_taiga_crags": [
+    "timm:taiga"
+  ],
+  "wythers:old_growth_taiga_swamp": [
+    "timm:taiga",
+    "timm:swamp"
+  ],
+  "wythers:outback": [
+    "timm:badlands",
+    "timm:desert"
+  ],
+  "wythers:outback_desert": [
+    "timm:badlands",
+    "timm:desert"
+  ],
+  "wythers:pantanal": [
+    "timm:lush_caves"
+  ],
+  "wythers:phantasmal_forest": [
+    "timm:dark_forest"
+  ],
+  "wythers:phantasmal_swamp": [
+    "timm:dark_forest"
+  ],
+  "wythers:pine_barrens": [
+    "timm:taiga"
+  ],
+  "wythers:red_desert": [
+    "timm:badlands"
+  ],
+  "wythers:red_rock_canyon": [
+    "timm:badlands"
+  ],
+  "wythers:sakura_forest": [
+    "timm:cherry_grove"
+  ],
+  "wythers:salt_lakes_pink": [
+    "timm:desert"
+  ],
+  "wythers:salt_lakes_turquoise": [
+    "timm:desert"
+  ],
+  "wythers:salt_lakes_white": [
+    "timm:desert"
+  ],
+  "wythers:sand_dunes": [
+    "timm:desert"
+  ],
+  "wythers:sandy_jungle": [
+    "timm:jungle"
+  ],
+  "wythers:savanna_badlands": [
+    "timm:savanna"
+  ],
+  "wythers:savanna_basaltic_incursions": [
+    "timm:basalt_deltas"
+  ],
+  "wythers:savanna_river": [
+    "timm:river"
+  ],
+  "wythers:scrub_forest": [
+    "timm:savanna"
+  ],
+  "wythers:scrubland": [
+    "timm:savanna"
+  ],
+  "wythers:snowy_bog": [
+    "timm:snow_plains"
+  ],
+  "wythers:snowy_canyon": [
+    "timm:snow_plains"
+  ],
+  "wythers:snowy_fen": [
+    "timm:snow_plains"
+  ],
+  "wythers:snowy_peaks": [
+    "timm:mountains"
+  ],
+  "wythers:snowy_thermal_taiga": [
+    "timm:snow_plains"
+  ],
+  "wythers:snowy_tundra": [
+    "timm:snow_plains"
+  ],
+  "wythers:sparse_bamboo_jungle": [
+    "timm:bamboo_jungle"
+  ],
+  "wythers:sparse_eucalyptus_jungle": [
+    "timm:jungle"
+  ],
+  "wythers:sparse_eucalyptus_woodland": [
+    "timm:savanna"
+  ],
+  "wythers:spring_flower_fields": [
+    "timm:flower_forest"
+  ],
+  "wythers:spring_flower_forest": [
+    "timm:flower_forest"
+  ],
+  "wythers:stony_canyon": [
+    "timm:warm_ocean"
+  ],
+  "wythers:subtropical_forest": [
+    "timm:forest"
+  ],
+  "wythers:subtropical_forest_edge": [
+    "timm:forest"
+  ],
+  "wythers:subtropical_grassland": [
+    "timm:plains"
+  ],
+  "wythers:taiga_crags": [
+    "timm:taiga"
+  ],
+  "wythers:tangled_forest": [
+    "timm:swamp"
+  ],
+  "wythers:temperate_island": [
+    "timm:warm_ocean",
+    "timm:warm_ocean"
+  ],
+  "wythers:temperate_rainforest": [
+    "timm:jungle"
+  ],
+  "wythers:temperate_rainforest_crags": [
+    "timm:jungle"
+  ],
+  "wythers:tepui": [
+    "timm:basalt_deltas"
+  ],
+  "wythers:thermal_taiga": [
+    "timm:bamboo_jungle"
+  ],
+  "wythers:thermal_taiga_crags": [
+    "timm:bamboo_jungle"
+  ],
+  "wythers:tibesti_mountains": [
+    "timm:basalt_deltas"
+  ],
+  "wythers:tropical_beach": [
+    "timm:warm_ocean"
+  ],
+  "wythers:tropical_forest": [
+    "timm:warm_ocean"
+  ],
+  "wythers:tropical_forest_canyon": [
+    "timm:warm_ocean"
+  ],
+  "wythers:tropical_forest_river": [
+    "timm:warm_ocean"
+  ],
+  "wythers:tropical_grassland": [
+    "timm:warm_ocean"
+  ],
+  "wythers:tropical_island": [
+    "timm:warm_ocean",
+    "timm:beach"
+  ],
+  "wythers:tropical_rainforest": [
+    "timm:jungle"
+  ],
+  "wythers:tropical_volcano": [
+    "timm:basalt_deltas"
+  ],
+  "wythers:tsingy_forest": [
+    "timm:jungle"
+  ],
+  "wythers:tundra": [
+    "timm:snow_plains"
+  ],
+  "wythers:underground": [
+    "minecraft:music.game"
+  ],
+  "wythers:volcanic_chamber": [
+    "timm:basalt_deltas"
+  ],
+  "wythers:volcanic_crater": [
+    "timm:basalt_deltas"
+  ],
+  "wythers:volcano": [
+    "timm:basalt_deltas"
+  ],
+  "wythers:warm_birch_forest": [
+    "timm:birch_forest"
+  ],
+  "wythers:warm_stony_shore": [
+    "timm:warm_ocean"
+  ],
+  "wythers:waterlily_swamp": [
+    "timm:swamp"
+  ],
+  "wythers:windswept_jungle": [
+    "timm:jungle"
+  ],
+  "wythers:wistman_woods": [
+    "timm:taiga"
+  ],
+  "wythers:wooded_desert": [
+    "timm:desert"
+  ],
+  "wythers:wooded_savanna": [
+    "timm:savanna"
+  ],
+  "betternether:bone_reef": [
+    "timm:soul_sand_valley"
+  ],
+  "betternether:crimson_glowing_woods": [
+    "timm:crimson_forest"
+  ],
+  "betternether:crimson_pinewood": [
+    "timm:crimson_forest"
+  ],
+  "betternether:flooded_deltas": [
+    "timm:basalt_deltas"
+  ],
+  "betternether:gravel_desert": [
+    "timm:nether_wastes"
+  ],
+  "betternether:magma_land": [
+    "timm:nether_wastes"
+  ],
+  "betternether:nether_grasslands": [
+    "timm:soul_sand_valleys"
+  ],
+  "betternether:nether_jungle": [
+    "minecraft:music.game"
+  ],
+  "betternether:nether_mushroom_forest": [
+    "timm:crimson_forest"
+  ],
+  "betternether:nether_swampland": [
+    "timm:soul_sand_valley"
+  ],
+  "betternether:nether_swampland_terraces": [
+    "timm:soul_sand_valley"
+  ],
+  "betternether:old_fungiwoods": [
+    "timm:crimson_forest"
+  ],
+  "betternether:old_swampland": [
+    "timm:soul_sand_valley"
+  ],
+  "betternether:old_warped_woods": [
+    "minecraft:music.game"
+  ],
+  "betternether:poor_nether_grasslands": [
+    "timm:soul_sand_valley"
+  ],
+  "betternether:soul_plain": [
+    "timm:soul_sand_valley"
+  ],
+  "betternether:sulfuric_bone_reef": [
+    "timm:soul_sand_valley"
+  ],
+  "betternether:upside_down_forest": [
+    "timm:soul_sand_valley"
+  ],
+  "betternether:upside_down_forest_cleared": [
+    "timm:soul_sand_valley"
+  ],
+  "betternether:wart_forest": [
+    "timm:nether_wastes"
+  ],
+  "betternether:wart_forest_edge": [
+    "timm:nether_wastes"
+  ]
+}

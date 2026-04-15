@@ -1,0 +1,4 @@
+#Client settings
+[client]
+	#Whether search phrase is remembered and shared between Sophisticated and non-Sophisticated container screens
+	rememberSearchPhrase = true

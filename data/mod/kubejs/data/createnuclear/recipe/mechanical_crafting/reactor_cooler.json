@@ -1,0 +1,30 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "createnuclear:reactor_casing"
+    },
+    "G": {
+      "item": "createnuclear:reinforced_glass"
+    },
+    "I": {
+      "item": "eternal_starlight:eternal_ice"
+    },
+    "S": {
+      "item": "eternal_starlight:frozen_tube"
+    }
+  },
+  "pattern": [
+    "CCCCC",
+    "CSGSC",
+    "CIGIC",
+    "CSGSC",
+    "CCCCC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "createnuclear:reactor_cooler"
+  }
+}

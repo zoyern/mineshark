@@ -1,0 +1,21 @@
+{
+  "xOffset": 0.0,
+  "yOffset": 0.0,
+  "uiScale": 0.75,
+  "panelWidth": 120,
+  "visibleRows": 4.5,
+  "globalAlpha": 0.9,
+  "showHotbarIndicator": true,
+  "customOverlayTitle": "Loot Detected",
+  "indicatorX": -1.0,
+  "indicatorY": -1.0,
+  "indicatorRotation": 0,
+  "activationMode": "ALWAYS",
+  "scrollMode": "ALWAYS",
+  "lookDownAngle": 45.0,
+  "scanRangeXZ": 1.0,
+  "scanRangeY": 0.5,
+  "enableSuperMerge": true,
+  "mergeRangeXZ": 5.0,
+  "mergeRangeY": 5.0
+}

@@ -1,0 +1,97 @@
+{
+  "type": "apotheosis:gem",
+  "min_purity": "normal",
+  "unique": true,
+  "weights": {
+    "weight": 5,
+    "quality": 2
+  },
+  "bonuses": [
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": {
+        "key": "magic_gear",
+        "types": [
+          "irons_apothic:staff",
+          "irons_apothic:spellbook"
+        ]
+      },
+      "attribute": "irons_spellbooks:holy_spell_power",
+      "operation": "ADD_MULTIPLIED_BASE",
+      "values": {
+        "normal": 0.05,
+        "flawless": 0.10,
+        "perfect": 0.15
+      }
+    },
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": {
+        "key": "melee_weapon",
+        "types": [
+          "apotheosis:melee_weapon"
+        ]
+      },
+      "attribute": "irons_spellbooks:holy_magic_resist",
+      "operation": "ADD_MULTIPLIED_BASE",
+      "values": {
+        "normal": 0.05,
+        "flawless": 0.075,
+        "perfect": 0.1
+      }
+    },
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": {
+        "key": "helmet",
+        "types": [
+          "apotheosis:helmet"
+        ]
+      },
+      "attribute": "apothic_attributes:healing_received",
+      "operation": "ADD_MULTIPLIED_BASE",
+      "values": {
+        "normal": 0.05,
+        "flawless": 0.075,
+        "perfect": 0.1
+      }
+    },
+    {
+      "type": "apotheosis:mob_effect",
+      "gem_class": {
+        "key": "core_armor",
+        "types": [
+          "apotheosis:chestplate",
+          "apotheosis:leggings"
+        ]
+      },
+      "mob_effect": "apothic_attributes:vitality",
+      "target": "hurt_self",
+      "operation": "ADD_VALUE",
+      "values": {
+        "normal": {
+          "duration": 80,
+          "amplifier": 1,
+          "cooldown": 200
+        },
+        "flawless": {
+          "duration": 100,
+          "amplifier": 1,
+          "cooldown": 200
+        },
+        "perfect": {
+          "duration": 140,
+          "amplifier": 1,
+          "cooldown": 200
+        }
+      }
+    },
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": { "key": "boots", "types": ["apotheosis:boots"] },
+      "attribute": "apothic_attributes:ghost_health",
+      "operation": "ADD_VALUE",
+      "values": { "normal": 1.0, "flawless": 1.5, "perfect": 2.0 }
+    }
+  ]
+}

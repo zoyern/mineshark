@@ -1,0 +1,54 @@
+{
+  "attributes": {
+    "attack_range": 2.9,
+    "category": "sword",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:cutlass_rl_hori",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_fire_attack_03",
+          "volume": 0.2,
+          "pitch": 2.5
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "angle": 90,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:axe_updown_lr",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_fire_attack_03",
+          "volume": 0.2,
+          "pitch": 2.0
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "angle": 90,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:axe_updown_rl",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_fire_attack_03",
+          "volume": 0.2,
+          "pitch": 2.2
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:cutlass_lr_hori",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_fire_attack_03",
+          "volume": 0.2,
+          "pitch": 1.7
+        }
+      }
+    ]
+  }
+}

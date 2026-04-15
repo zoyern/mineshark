@@ -1,0 +1,143 @@
+services:
+  # proxy first run 
+  proxy-velocity:
+    image: itzg/mc-proxy:latest
+    container_name: ms-proxy
+    environment:
+      TYPE: "VELOCITY"
+      # memory: 512M aprox 30 joueurs
+      MEMORY: 512M # Plugins auto-téléchargés au démarrage
+      # GeyserMC : traduit Bedrock (UDP/RakNet) → Java (TCP)
+      # Floodgate : auth Bedrock sans compte Java payé
+      PLUGINS: |
+        https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/velocity
+        https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/velocity
+        https://github.com/ViaVersion/ViaVersion/releases/download/5.8.0/ViaVersion-5.8.0.jar
+        https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar
+    ports:
+      # Java : port standard 25565 → Velocity écoute sur 25577
+      - "25565:25577"
+      # Bedrock : port standard 19132 (UDP)
+      - "19132:19132/udp"
+    volumes:
+      - ./data/velocity:/server
+    networks:
+      - mc-network
+    restart: unless-stopped
+    healthcheck:
+      test: mc-monitor status --host localhost --port 25577
+      interval: 5s
+      retries: 10
+      start_period: 10s
+
+  main-paper:
+    image: itzg/minecraft-server:latest
+    container_name: ms-main
+    depends_on:
+      proxy-velocity:
+        condition: service_healthy
+    environment:
+      TYPE: "PAPER"
+      VERSION: "1.21.4"
+      EULA: "TRUE"
+      MEMORY: "2G"
+      USE_AIKAR_FLAGS: "true"
+      ENABLE_RCON: "true"
+      RCON_PASSWORD: "${RCON_PASSWORD}"
+      # Auth déléguée au proxy Velocity
+      ONLINE_MODE: "FALSE"
+      MOTD: "§b§lMineShark §7- §emain"
+      MAX_PLAYERS: "50"
+      DIFFICULTY: "peaceful"
+      VIEW_DISTANCE: "8"
+      SIMULATION_DISTANCE: "6"
+      # Floodgate côté backend pour les skins Bedrock
+      PLUGINS: |
+        https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
+    volumes:
+      - ./data/main:/data
+    networks:
+      - mc-network
+    restart: unless-stopped
+    healthcheck:
+      test: mc-heath
+      start_period: 1m
+      interval: 10s
+      retries: 20
+      timeout: 10s
+
+  backup-main:
+    image: itzg/mc-backup
+    container_name: ms-backup-main
+    environment:
+      # Sauvegarde toutes les 2 heures
+      BACKUP_INTERVAL: "24h"
+      # Supprime les sauvegardes vieilles de plus de 7 jours
+      PRUNE_BACKUPS_DAYS: "7"
+      # RCON permet de suspendre la sauvegarde du monde en jeu pendant l'archive pour éviter la corruption
+      RCON_HOST: "ms-main"
+      RCON_PASSWORD: "${RCON_PASSWORD}"
+    volumes:
+      - ./data/main:/data:ro
+      - ./backups/main:/backups
+    networks:
+      - mc-network
+  #game 
+  #  game-paper:
+  #    image: itzg/minecraft-server:latest
+  #    container_name: ms-game
+  #    environment:
+  #      TYPE: "PAPER"
+  #      VERSION: "1.21.4"
+  #      EULA: "TRUE"
+  #      MEMORY: 2G
+  #      USE_AIKAR_FLAGS: "true"
+  #      ONLINE_MODE: "FALSE"
+  #      MOTD: "§b§lMineShark §7- §aJeux & Plugins"
+  #      MAX_PLAYERS: "50"
+  #      DIFFICULTY: "normal"
+  #      VIEW_DISTANCE: "10"
+  #      SIMULATION_DISTANCE: "8"
+  #    volumes:
+  #      - ./data/game:/data
+  #    networks:
+  #      - mc-network
+  #    restart: unless-stopped
+  #
+  #  #moded
+  #  mod-neoforge:
+  #    image: itzg/minecraft-server:latest
+  #    container_name: ms-mod
+  #    environment:
+  #      # AUTO_CURSEFORGE télécharge le modpack complet automatiquement
+  #      # Il détecte le mod loader (NeoForge) et la version MC depuis le manifest
+  #      TYPE: "AUTO_CURSEFORGE"
+  #      CF_SLUG: "moddedtogether"
+  #      CF_API_KEY: "${CF_API_KEY}"
+  #      EULA: "TRUE"
+  #      # 6 Go minimum pour un modpack 150+ mods
+  #      MEMORY: "2G"
+  #      USE_AIKAR_FLAGS: "true"
+  #      ONLINE_MODE: "FALSE"
+  #      MOTD: "§b§lMineShark §7- §cmod Modee"
+  #      MAX_PLAYERS: "30"
+  #      DIFFICULTY: "hard"
+  #      VIEW_DISTANCE: "8"
+  #      SIMULATION_DISTANCE: "6"
+  #    volumes:
+  #      - ./data/mod:/data
+  #    networks:
+  #      - mc-network
+  #    restart: unless-stopped
+  #    depends_on:
+  #      main-paper:
+  #        condition: service_healthy
+  #    healthcheck:
+  #      test: mc-heath
+  #      start_period: 3m
+  #      interval: 10s
+  #      retries: 20
+
+networks:
+  mc-network:
+    driver: bridge

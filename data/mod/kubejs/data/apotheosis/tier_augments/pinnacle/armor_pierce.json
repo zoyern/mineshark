@@ -1,0 +1,12 @@
+{
+    "type": "apotheosis:attribute",
+    "modifier": {
+        "attribute": "minecraft:generic.safe_fall_distance",
+        "operation": "add_value",
+        "value": 3.0
+    },
+    "modifier_id": "apotheosis:pinnacle/safe_fall_distance",
+    "sort_index": 100,
+    "target": "players",
+    "tier": "pinnacle"
+}

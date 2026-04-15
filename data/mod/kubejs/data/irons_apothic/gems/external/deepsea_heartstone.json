@@ -1,0 +1,96 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "cataclysm_spellbooks"
+    }
+  ],
+  "type": "apotheosis:gem",
+  "min_purity": "normal",
+  "unique": true,
+  "weights": {
+    "weight": 5,
+    "quality": 2
+  },
+  "bonuses": [
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": {
+        "key": "magic_gear",
+        "types": [
+          "irons_apothic:staff",
+          "irons_apothic:spellbook"
+        ]
+      },
+      "attribute": "cataclysm_spellbooks:abyssal_spell_power",
+      "operation": "ADD_MULTIPLIED_BASE",
+      "values": {
+        "normal": 0.05,
+        "flawless": 0.10,
+        "perfect": 0.15
+      }
+    },
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": {
+        "key": "core_armor",
+        "types": [
+          "apotheosis:chestplate",
+          "apotheosis:leggings"
+        ]
+      },
+      "attribute": "cataclysm_spellbooks:abyssal_magic_resist",
+      "operation": "ADD_MULTIPLIED_BASE",
+      "values": {
+        "normal": 0.05,
+        "flawless": 0.075,
+        "perfect": 0.1
+      }
+    },
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": {
+        "key": "helmet",
+        "types": [
+          "apotheosis:helmet"
+        ]
+      },
+      "attribute": "apothic_attributes:cold_damage",
+      "operation": "ADD_VALUE",
+      "values": {
+        "normal": 0.5,
+        "flawless": 0.75,
+        "perfect": 1.0
+      }
+    },
+    {
+      "type": "apotheosis:mob_effect",
+      "gem_class": {
+        "key": "chestplate",
+        "types": [
+          "apotheosis:chestplate"
+        ]
+      },
+      "mob_effect": "irons_spellbooks:chilled",
+      "target": "hurt_attacker",
+      "operation": "ADD_VALUE",
+      "values": {
+        "normal": {
+          "duration": 60,
+          "amplifier": 1,
+          "cooldown": 100
+        },
+        "flawless": {
+          "duration": 100,
+          "amplifier": 1,
+          "cooldown": 100
+        },
+        "perfect": {
+          "duration": 140,
+          "amplifier": 1,
+          "cooldown": 100
+        }
+      }
+    }
+  ]
+}

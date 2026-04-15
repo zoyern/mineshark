@@ -1,0 +1,20 @@
+{
+    "monoMusicDiscs": true,
+    "monoNoteBlocks": true,
+    "monoWeather": false,
+    "monoBlocks": false,
+    "monoHostile": false,
+    "monoNeutral": false,
+    "monoPlayers": false,
+    "monoAmbient": false,
+    "maxDistancePercentMusicDiscs": 100,
+    "fadeMusicWhenMusicDiscPlaying": true,
+    "fadeMusicWhenNoteBlockPlaying": true,
+    "musicFadeOutSeconds": 2,
+    "musicFadeInSeconds": 5,
+    "preventMusicRepeat": true,
+    "customMusicFrequency": false,
+    "musicFrequencyMinTicks": 20,
+    "musicFrequencyMaxTicks": 6000,
+    "musicFrequencyAffectMenu": false
+}

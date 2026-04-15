@@ -1,0 +1,37 @@
+[global]
+	#Additional block tag ids whose blocks should become pass-through, for example 'yourmod:soft_foliage'.
+	additionalBlockTags = []
+	#Prevent matching blocks from being pass-through. Format: 'minecraft:oak_leaves' or '#namespace:tag'.
+	blockPassThroughBlacklist = []
+	#Minimum ticks between rustling sounds for the same entity while moving through pass-through blocks.
+	# Default: 6
+	# Range: 1 ~ 200
+	passThroughSoundIntervalTicks = 6
+
+[player]
+	#Play a rustling placement sound while players move through pass-through blocks.
+	playerPlayPassThroughSound = true
+	#Allow players to climb pass-through leaves like a rough ladder.
+	allowClimbingLeaves = true
+	#Horizontal movement multiplier applied to players while inside leaves.
+	# Default: 0.5
+	# Range: 0.0 ~ 1.0
+	playerLeafSpeedMultiplier = 0.5
+	#Vertical movement multiplier applied to players while moving upward through pass-through leaves.
+	# Default: 0.8
+	# Range: 0.0 ~ 1.0
+	playerLeafAscendingSpeedMultiplier = 0.8
+
+[entity]
+	#Play a rustling placement sound while non-player entities move through pass-through blocks.
+	entityPlayPassThroughSound = true
+	#Horizontal movement multiplier applied to non-player entities while inside leaves.
+	# Default: 0.5
+	# Range: 0.0 ~ 1.0
+	entityLeafSpeedMultiplier = 0.5
+	#Prevent matching non-player entities from passing through leaves. Format: 'minecraft:zombie' or '#namespace:tag'.
+	entityPassThroughBlacklist = []
+	#Override non-player leaf slowdown for matching entity ids or entity type tags. Format: 'minecraft:husk=1.0' or '#namespace:tag=0.5'. First match wins.
+	entitySpeedTagOverrides = []
+	#Override non-player leaf rustle sounds for matching entity ids or entity type tags. Format: 'minecraft:husk=false' or '#namespace:tag=true'. First match wins.
+	entitySoundOverrides = []

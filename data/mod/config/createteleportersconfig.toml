@@ -1,0 +1,5 @@
+[Ranges]
+	#Max Range of Entity Teleporter
+	"Entity Teleporter Range" = 450.0
+	#Max Range of Item Teleporter
+	"Item Teleporter Range" = 500.0

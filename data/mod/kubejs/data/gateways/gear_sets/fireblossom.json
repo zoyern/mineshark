@@ -1,0 +1,50 @@
+{
+    "type": "placebo:gear_set",
+    "boots": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:fireblossom_boots"
+            },
+            "weight": 10
+        }
+    ],
+    "chestplates": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:fireblossom_chestplate"
+            },
+            "weight": 10
+        }
+    ],
+    "helmets": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:fireblossom_crown"
+            },
+            "weight": 8
+        },
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:fireblossom_helmet"
+            },
+            "weight": 8
+        }
+    ],
+    "leggings": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:fireblossom_leggings"
+            },
+            "weight": 10
+        }
+    ],
+    "tags": [
+        "fireblossom"
+    ],
+    "weight": 100
+}

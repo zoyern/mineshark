@@ -1,0 +1,40 @@
+#Patch Settings
+#Control which patches are enabled or disabled
+[patches]
+
+	#KubeJS Patches
+	#Patches for the KubeJS mod
+	[patches.kubejs]
+		#Enable KubeJS issue #972 patches
+		#Fixes assumptions about concrete builder types that could cause ClassCastException
+		#Includes ServerScriptManagerMixin and KubeJSModEventHandlerMixin
+		gh972_enabled = true
+
+	#PortableTanks Patches
+	#Patches for the PortableTanks mod
+	[patches.portabletanks]
+		#Enable PortableTanks issue #12 patches
+		#Fixes NullPointerException in PortableTankItem$ItemFluidHandler.getFluid()
+		#Prevents crashes when accessing fluid data from ItemStacks without proper NBT data
+		gh12_enabled = true
+
+	#Create Stuff 'N Additions Patches
+	#Patches for the Create Stuff 'N Additions mod
+	[patches.create_sa]
+		#Enable Create Stuff 'N Additions issue #59 capabilities
+		#Adds Neoforge fluid handler capabilities to enable e.g. Create spout filling
+		fluid_handler_capabilities_enabled = true
+
+	#Just Enough Resources Patches
+	#Patches for the Just Enough Resources mod
+	[patches.jeresources]
+		#Enable Just Enough Resources issue #547 patch
+		#Prevents missing JER tabs when using modded biomes
+		gh547_enabled = true
+
+	#Patchouli Patches
+	#Patches for the Patchouli mod
+	[patches.patchouli]
+		#Enable Patchouli issue #790 patch
+		#Prevents registry access issues
+		gh790_enabled = true

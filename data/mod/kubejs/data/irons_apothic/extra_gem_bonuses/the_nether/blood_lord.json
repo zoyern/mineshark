@@ -1,0 +1,23 @@
+{
+    "type": "apotheosis:extra_gem_bonus",
+    "gem": "apotheosis:the_nether/blood_lord",
+    "bonuses": [
+        {
+            "type": "apotheosis:attribute",
+            "attribute": "irons_spellbooks:blood_spell_power",
+            "gem_class": {
+                "key": "magic_gear",
+                "types": [
+                    "irons_apothic:staff",
+                    "irons_apothic:spellbook"
+                ]
+            },
+            "operation": "add_multiplied_base",
+            "values": {
+                "normal": 0.1,
+                "flawless": 0.15,
+                "perfect": 0.2
+            }
+        }
+    ]
+}

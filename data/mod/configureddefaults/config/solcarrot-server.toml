@@ -1,0 +1,67 @@
+[milestones]
+#Number of hearts you start out with.
+# Default: 10
+# Range: 0 ~ 1000
+baseHearts = 10
+#Number of hearts you gain for reaching a new milestone.
+# Default: 2
+# Range: 0 ~ 1000
+heartsPerMilestone = 2
+#A list of numbers of unique foods you need to eat to unlock each milestone, in ascending order. Naturally, adding more milestones lets you earn more hearts.
+milestones = [5, 10, 18, 25, 38]
+
+[filtering]
+#Foods in this list won't affect the player's health nor show up in the food book.
+blacklist = []
+#When this list contains anything, the blacklist is ignored and instead only foods from here count.
+whitelist = [
+	'ends_delight:ender_bamboo_rice',
+	'ends_delight:enderman_gristle_stew',
+	'ends_delight:stir_fried_shulker_meat',
+	'ends_delight:roasted_dragon_steak',
+	'ends_delight:dragon_leg_with_sauce',
+	'ends_delight:steamed_dragon_egg',
+	'ends_delight:dragon_meat_stew',
+	'ends_delight:grilled_shulker',
+	'farmersdelight:bacon_and_eggs',
+	'farmersdelight:pasta_with_meatballs',
+	'farmersdelight:pasta_with_mutton_chop',
+	'farmersdelight:mushroom_rice',
+	'farmersdelight:roasted_mutton_chops',
+	'farmersdelight:vegetable_noodles',
+	'farmersdelight:steak_and_potatoes',
+	'farmersdelight:ratatouille',
+	'farmersdelight:squid_ink_pasta',
+	'farmersdelight:grilled_salmon',
+	'farmersdelight:roast_chicken',
+	'farmersdelight:honey_glazed_ham',
+	'farmersdelight:shepherds_pie',
+	'mynethersdelight:breakfast_sampler',
+	'mynethersdelight:blue_tenderloin_steak',
+	'mynethersdelight:fried_hoglin_chop',
+	'mynethersdelight:plate_of_stuffed_hoglin_snout',
+	'mynethersdelight:plate_of_stuffed_hoglin_ham',
+	'mynethersdelight:plate_of_stuffed_hoglin',
+	'mynethersdelight:strider_egg',
+	'mynethersdelight:plate_of_ghasta_with_cream',
+	'mynethersdelight:enchanted_golden_egg',
+	'mynethersdelight:scotch_eggs',
+	'mynethersdelight:bleeding_tartar',
+	'mynethersdelight:strider_with_grilled_fungus',
+	'mynethersdelight:plate_of_striderloaf',
+	'mynethersdelight:plate_of_cold_striderloaf',
+	'mynethersdelight:twisted_ghasta',
+	'mynethersdelight:hot_wings',
+	'mynethersdelight:hot_wings_bucket',
+	'mynethersdelight:spicy_curry',
+]
+#The minimum hunger value foods need to provide in order to count for milestones, in half drumsticks.
+# Default: 1
+# Range: 0 ~ 1000
+minimumFoodValue = 1
+
+[miscellaneous]
+#Whether or not to reset the food list on death, effectively losing all bonus hearts.
+resetOnDeath = false
+#If true, eating foods outside of survival mode (e.g. creative/adventure) is not tracked and thus does not contribute towards progression.
+limitProgressionToSurvival = false

@@ -1,0 +1,73 @@
+{
+  "type": "apotheosis:gem",
+  "min_purity": "normal",
+  "unique": true,
+  "weights": {
+    "weight": 5,
+    "quality": 2
+  },
+  "bonuses": [
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": {
+        "key": "magic_gear",
+        "types": [
+          "irons_apothic:staff",
+          "irons_apothic:spellbook"
+        ]
+      },
+      "attribute": "irons_spellbooks:ender_spell_power",
+      "operation": "ADD_MULTIPLIED_BASE",
+      "values": {
+        "normal": 0.1,
+        "flawless": 0.15,
+        "perfect": 0.2
+      }
+    },
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": {
+        "key": "core_armor",
+        "types": [
+          "apotheosis:chestplate",
+          "apotheosis:leggings"
+        ]
+      },
+      "attribute": "irons_spellbooks:ender_magic_resist",
+      "operation": "ADD_MULTIPLIED_BASE",
+      "values": {
+        "normal": 0.05,
+        "flawless": 0.075,
+        "perfect": 0.1
+      }
+    },
+    {
+      "type": "apotheosis:attribute",
+      "gem_class": {
+        "key": "helmet",
+        "types": [
+          "apotheosis:helmet"
+        ]
+      },
+      "attribute": "irons_spellbooks:max_mana",
+      "operation": "ADD_MULTIPLIED_BASE",
+      "values": {
+        "normal": 0.1,
+        "flawless": 0.15,
+        "perfect": 0.2
+      }
+    },
+    {
+      "type": "apotheosis:mob_effect",
+      "gem_class": { "key": "boots", "types": ["apotheosis:boots"] },
+      "mob_effect": "irons_spellbooks:evasion",
+      "target": "hurt_self",
+      "operation": "ADD_VALUE",
+      "values": {
+        "normal":   { "duration": 10, "amplifier": 0, "cooldown": 600 },
+        "flawless": { "duration": 10, "amplifier": 0, "cooldown": 500 },
+        "perfect":  { "duration": 10, "amplifier": 1, "cooldown": 400 }
+       }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "individualOverrides": {
+    "allowElytraFlight": false,
+    "allowEnderTeleportation": false,
+    "canBreakBlocks": false,
+    "allowEnderPearls": false,
+    "allowCreativeFlight": false,
+    "canPlaceBlocks": false
+  },
+  "note": "Only properties that differ from global config are saved here. See global.json for defaults."
+}

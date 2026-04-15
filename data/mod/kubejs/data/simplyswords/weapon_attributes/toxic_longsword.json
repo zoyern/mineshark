@@ -1,0 +1,56 @@
+{
+  "attributes": {
+    "attack_range": 2.9,
+    "category": "sword",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_lr",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.3,
+          "pitch": 1.4
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_heavy_up_rl",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.3,
+          "pitch": 1.45
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_heavy_up_lr",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.3,
+          "pitch": 1.5
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:one_handed_swipe_horizontal_rl_hori",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.3,
+          "pitch": 1.55
+        }
+      }
+    ]
+  }
+}

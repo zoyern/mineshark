@@ -1,0 +1,75 @@
+{
+  "attributes" : {
+    "attack_range": 3.6,
+    "pose": "malfu_combat_animation:pose_greataxe",
+    "category": "greataxe",
+    "two_handed": true,
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:halberd_rl",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "pitch": 1.4,
+          "volume": 0.2
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:halberd_lr",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "pitch": 1.4,
+          "volume": 0.23
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:greataxe_rl",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "pitch": 1.4,
+          "volume": 0.26
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:greataxe_lr",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "pitch": 1.4,
+          "volume": 0.3
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 360,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_spin",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "pitch": 1.0,
+          "volume": 0.3
+        }
+      }
+    ]
+  }
+}
+
+
+
+
+

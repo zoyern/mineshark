@@ -1,0 +1,7 @@
+{
+  "parent": "malfu_combat_animation:er_sword",
+  "attributes": {
+    "attack_range": 2.9,
+    "category": "sword"
+  }
+}

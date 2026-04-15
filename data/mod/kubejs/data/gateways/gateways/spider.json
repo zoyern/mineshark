@@ -1,0 +1,588 @@
+{
+  "size": "large",
+  "color": "#2E5A2E",
+  "name": "Spider Gate",
+  "waves": [
+    {
+      "entities": [
+        {
+          "entity": "minecraft:cave_spider",
+          "count": 12
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 1.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 3.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_multiplied_total",
+          "value": 0.5
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 4.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor_toughness",
+          "operation": "add_value",
+          "value": 4.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.30
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 600,
+          "orb_size": 20
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:string",
+            "count": 8
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:spider_eye",
+            "count": 2
+          }
+        }
+      ],
+      "max_wave_time": 3000,
+      "setup_time": 200
+    },
+    {
+      "entities": [
+        {
+          "entity": "minecraft:spider",
+          "count": 15
+        },
+        {
+          "entity": "minecraft:cave_spider",
+          "count": 8
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 1.1
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 4.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_multiplied_total",
+          "value": 0.6
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 5.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor_toughness",
+          "operation": "add_value",
+          "value": 5.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.33
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 900,
+          "orb_size": 25
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:string",
+            "count": 12
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:spider_eye",
+            "count": 4
+          }
+        }
+      ],
+      "max_wave_time": 3500,
+      "setup_time": 200
+    },
+    {
+      "entities": [
+        {
+          "entity": "minecraft:spider",
+          "count": 20
+        },
+        {
+          "entity": "minecraft:cave_spider",
+          "count": 10
+        },
+        {
+          "entity": "irons_spellbooks:ice_spider",
+          "count": 2,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Glacial Stalker\",\"color\":\"aqua\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 50
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.1
+            }
+          ]
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 1.2
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 5.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_multiplied_total",
+          "value": 0.7
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 6.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor_toughness",
+          "operation": "add_value",
+          "value": 6.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.36
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 1300,
+          "orb_size": 30
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "apotheosis:rare_material",
+            "count": 1
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:string",
+            "count": 16
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:spider_eye",
+            "count": 6
+          }
+        }
+      ],
+      "max_wave_time": 4000,
+      "setup_time": 200
+    },
+    {
+      "entities": [
+        {
+          "entity": "minecraft:spider",
+          "count": 25
+        },
+        {
+          "entity": "minecraft:cave_spider",
+          "count": 12
+        },
+        {
+          "entity": "minecraft:pig",
+          "count": 8,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Sacrificial Pig\",\"color\":\"pink\",\"bold\":true}"
+          }
+        },
+        {
+          "entity": "mutantmonsters:spider_pig",
+          "count": 1,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"The Abomination\",\"color\":\"dark_red\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 150
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.3
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.attack_damage",
+              "operation": "add_value",
+              "value": 5
+            }
+          ]
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 1.3
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 6.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_multiplied_total",
+          "value": 0.8
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 7.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor_toughness",
+          "operation": "add_value",
+          "value": 7.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.40
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 1800,
+          "orb_size": 35
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "apotheosis:epic_material",
+            "count": 1
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:string",
+            "count": 20
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:spider_eye",
+            "count": 8
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:porkchop",
+            "count": 8
+          }
+        }
+      ],
+      "max_wave_time": 4500,
+      "setup_time": 200
+    },
+    {
+      "entities": [
+        {
+          "entity": "minecraft:spider",
+          "count": 30
+        },
+        {
+          "entity": "minecraft:cave_spider",
+          "count": 15
+        },
+        {
+          "entity": "minecraft:pig",
+          "count": 12,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"Sacrificial Pig\",\"color\":\"pink\",\"bold\":true}"
+          }
+        },
+        {
+          "entity": "mutantmonsters:spider_pig",
+          "count": 2,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"The Abomination\",\"color\":\"dark_red\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 150
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.3
+            }
+          ]
+        },
+        {
+          "entity": "mutantmonsters:spider_pig",
+          "count": 1,
+          "nbt": {
+            "CustomNameVisible": 1,
+            "CustomName": "{\"text\":\"The Abomination - Alpha\",\"color\":\"dark_purple\",\"bold\":true}"
+          },
+          "modifiers": [
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.max_health",
+              "operation": "add_value",
+              "value": 200
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.scale",
+              "operation": "add_value",
+              "value": 0.5
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.attack_damage",
+              "operation": "add_value",
+              "value": 8
+            },
+            {
+              "type": "gateways:attribute",
+              "attribute": "minecraft:generic.knockback_resistance",
+              "operation": "add_value",
+              "value": 0.3
+            }
+          ]
+        }
+      ],
+      "modifiers": [
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.max_health",
+          "operation": "add_multiplied_total",
+          "value": 1.5
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_value",
+          "value": 7.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "add_multiplied_total",
+          "value": 1.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_value",
+          "value": 8.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "minecraft:generic.armor_toughness",
+          "operation": "add_value",
+          "value": 8.0
+        },
+        {
+          "type": "gateways:attribute",
+          "attribute": "irons_spellbooks:spell_resist",
+          "operation": "add_value",
+          "value": 0.45
+        }
+      ],
+      "rewards": [
+        {
+          "type": "gateways:experience",
+          "experience": 3000,
+          "orb_size": 45
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "apotheosis:mythic_material",
+            "count": 2
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "apotheosis:epic_material",
+            "count": 4
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:string",
+            "count": 30
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:spider_eye",
+            "count": 12
+          }
+        },
+        {
+          "type": "gateways:stack",
+          "stack": {
+            "id": "minecraft:porkchop",
+            "count": 20
+          }
+        }
+      ],
+      "max_wave_time": 6000,
+      "setup_time": 200
+    }
+  ],
+  "rewards": [
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "apotheosis:mythic_material",
+        "count": 4
+      }
+    },
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "apotheosis:sigil_of_socketing",
+        "count": 3
+      }
+    },
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "minecraft:porkchop",
+        "count": 64
+      }
+    },
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "minecraft:string",
+        "count": 32
+      }
+    },
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "minecraft:spider_eye",
+        "count": 24
+      }
+    },
+    {
+      "type": "gateways:stack",
+      "stack": {
+        "id": "mutantmonsters:spider_pig_spawn_egg",
+        "count": 1
+      }
+    }
+  ],
+  "failures": [
+    {
+      "type": "gateways:explosion",
+      "strength": 3,
+      "fire": false,
+      "block_damage": true
+    }
+  ],
+  "rules": {
+    "lives": 3,
+    "requires_nearby_player": true
+  }
+}

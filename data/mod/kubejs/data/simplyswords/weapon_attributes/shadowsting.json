@@ -1,0 +1,68 @@
+{
+  "attributes": {
+    "attack_range": 3,
+    "category": "rapier",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.9,
+        "angle": 60,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:rapier_rl",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.3,
+          "pitch": 1.65
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.9,
+        "angle": 60,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:rapier_lr",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.3,
+          "pitch": 1.6
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.9,
+        "angle": 60,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:rapier_rl_down",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.3,
+          "pitch": 1.7
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.2,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:rapier_lr_stab",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
+          "volume": 0.3,
+          "pitch": 1.8
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.2,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:rapier_lr_stab",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
+          "volume": 0.3,
+          "pitch": 1.8
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "type": "apotheosis:gem",
+  "min_purity": "normal",
+  "constraints": {
+    "dimensions": [
+      "minecraft:overworld"
+    ]
+  },
+  "unique": true,
+  "weights": {
+    "frontier": {
+      "quality": 2.0,
+      "weight": 50
+    },
+    "ascent": {
+      "quality": 2.0,
+      "weight": 50
+    },
+    "summit": {
+      "quality": 2.0,
+      "weight": 50
+    },
+    "pinnacle": {
+      "quality": 2.0,
+      "weight": 50
+    }
+  },
+  "bonuses": [
+    {
+      "type": "apotheosis:multi_attribute",
+      "desc": "bonus.apotheosis:multi_attr.desc.and",
+      "gem_class": {
+        "key": "weapons",
+        "types": [
+          "apotheosis:melee_weapon",
+          "apotheosis:trident",
+          "apotheosis:bow"
+        ]
+      },
+      "modifiers": [
+        {
+          "attribute": "apothic_attributes:armor_shred",
+          "operation": "add_value",
+          "values": {
+            "normal": 0.05,
+            "flawless": 0.075,
+            "perfect": 0.1
+          }
+        },
+        {
+          "attribute": "minecraft:generic.armor",
+          "operation": "add_multiplied_total",
+          "values": {
+            "normal": -0.0125,
+            "flawless": -0.025,
+            "perfect": -0.03
+          }
+        }
+      ]
+    },
+    {
+      "type": "apotheosis:damage_reduction",
+      "damage_type": "magic",
+      "gem_class": "apotheosis:chestplate",
+      "values": {
+        "normal": 0.05,
+        "flawless": 0.075,
+        "perfect": 0.1
+      }
+    },
+    {
+      "type": "apotheosis:multi_attribute",
+      "desc": "bonus.apotheosis:multi_attr.desc.and",
+      "gem_class": "apotheosis:boots",
+      "modifiers": [
+        {
+          "attribute": "minecraft:generic.knockback_resistance",
+          "operation": "add_multiplied_total",
+          "values": {
+            "normal": 0.025,
+            "flawless": 0.05,
+            "perfect": 0.1
+          }
+        },
+        {
+          "attribute": "minecraft:generic.attack_knockback",
+          "operation": "add_multiplied_total",
+          "values": {
+            "normal": -0.025,
+            "flawless": -0.05,
+            "perfect": -0.1
+          }
+        }
+      ]
+    },
+    {
+      "type": "apotheosis:radial",
+      "gem_class": "apotheosis:breaker",
+      "values": {
+        "normal": {
+          "x": 3,
+          "xOff": 0,
+          "y": 2,
+          "yOff": 1
+        },
+        "flawless": {
+          "x": 3,
+          "xOff": 0,
+          "y": 3,
+          "yOff": 0
+        },
+        "perfect": {
+          "x": 5,
+          "xOff": 0,
+          "y": 3,
+          "yOff": 0
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "durability": {
+    "multiply": 1,
+    "divide": 1
+  },
+  "speed": {
+    "multiply": 1,
+    "divide": 1
+  }
+}

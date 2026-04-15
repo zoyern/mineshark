@@ -1,0 +1,16 @@
+{
+  "cmd.help": "Liste des commandes de TIMM :",
+  "cmd.help.cfg": "Ouvre les paramètres du mod",
+  "cmd.help.nowPlaying": "Affiche la musique courante",
+  "cmd.help.skip": "Passe la musique / Joue une nouvelle",
+  "cmd.help.stop": "Arrête la musique courante",
+  "cmd.nowPlaying.none": "Pas de musique en cours",
+  "cmd.stop": "Musique courante arrêtée",
+  "cmd.stop.none": "Pas de musique à arrêter",
+
+  "text.autoconfig.timm.title": "The Immersive Music Mod - Configuration",
+  "text.autoconfig.timm.option.general.minDelay": "Délai minimum entre deux musiques",
+  "text.autoconfig.timm.option.general.maxDelay": "Délai maximum entre deux musiques",
+  "text.autoconfig.timm.option.general.printOnSkip": "Afficher la musique quand on passe",
+  "text.autoconfig.timm.option.general.structureFadeOut": "Les structures doivent s'atténuer"
+}

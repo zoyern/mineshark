@@ -1,0 +1,39 @@
+# ---------------------------------------------------
+# Fichiers d'environnement et Secrets
+# ---------------------------------------------------
+.env
+*.secret
+forwarding.secret
+
+# ---------------------------------------------------
+# Données des serveurs Minecraft (Mondes, Logs, Jars)
+# ---------------------------------------------------
+
+# Fichiers binaires, exécutables et archives
+*.jar
+*.tar.gz
+*.zip
+
+# Dossiers lourds générés par Minecraft (Mondes, Logs, Caches)
+data/**/world/
+data/**/world_nether/
+data/**/world_the_end/
+data/**/logs/
+data/**/cache/
+data/**/libraries/
+data/**/versions/
+data/**/crash-reports/
+
+# Bases de données locales et fichiers de terrain qui changent en permanence
+*.db
+*.sqlite
+*.mca
+
+# ---------------------------------------------------
+# Fichiers générés par le système et les éditeurs
+# ---------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

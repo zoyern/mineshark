@@ -1,0 +1,81 @@
+{
+  "attributes": {
+    "attack_range": 3.25,
+    "pose": "malfu_combat_animation:leftside_polearm_pose",
+    "two_handed": true,
+    "category": "glaive",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:glaive_lr",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_quick"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:glaive_rl",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_quick"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:glaive_lr",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_quick"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:glaive_downup_rl",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_slow"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 160,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:glaive_downup_lr",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_slow"
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.4,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:glaive_updown",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_slow"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:halberd_rl_stab",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_quick",
+          "pitch" : 1.2
+        }
+      }
+    ]
+  }
+}

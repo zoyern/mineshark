@@ -1,0 +1,236 @@
+# Goggles
+[goggles]
+	# Enhanced Info Display
+	# Display more information with goggles
+	enhancedInfo = true
+	# Hide Static Kinetic Info
+	# Hide kinetic information for static blocks in goggles
+	hideStaticKineticInfo = false
+	# Better Store Info
+	# Optimize table cloth store info display and interaction logic
+	betterStoreInfo = true
+	# Render Kinetic Particles
+	# Render rotation particle effects for target blocks
+	enableKineticEffect = true
+	# Precise Numbers
+	# Display more precise numerical values
+	preciseNumber = true
+	# Disable In-Screen Goggles
+	# Disable goggles display when any screen is open
+	disableScreenGoggles = true
+	# Render with Value Box
+	# Allow goggle tooltip rendering when value box is visible
+	canRenderOnValueBox = false
+
+# Tooltip
+[tooltip]
+	# Extra Item Tooltip
+	# Display extra information in item tooltip
+	extraItemTooltip = true
+	# Container
+	# Show container content
+	container = true
+	# Fluid Container
+	# Show fluid container content
+	fluidContainer = true
+	# Toolbox
+	# Show toolbox content
+	toolbox = true
+	# Ender Chest
+	# Show ender chest content
+	enderChest = true
+	# Goggles
+	# Show extra tooltip info for goggles
+	goggles = true
+	# Backtank
+	# Show extra tooltip info for backtank
+	backtank = true
+	# Diving Boots
+	# Show extra tooltip info for diving boots
+	divingBoots = true
+	# Wrench
+	# Show extra tooltip info for wrench
+	wrench = true
+	# Linked Controller
+	# Show frequency slots for linked controller
+	linkedController = true
+	# List Filter
+	# Show list filter content
+	listFilter = true
+	# Attribute Filter
+	# Show attribute filter details
+	attributeFilter = true
+	# Package Item
+	# Show package item content
+	packageItem = true
+	# Package Entity
+	# Show package entity content
+	packageEntity = true
+	# Item Entity
+	# Show carried item info
+	itemEntity = true
+	# Deployer
+	# Show deployer overflow items
+	deployer = true
+	# Depot
+	# Show depot content
+	depot = true
+	# Redstone Requester
+	# Show redstone requester content
+	redstoneRequester = true
+	# Crushing Controller
+	# Show crushing controller outputs and progress
+	crushingController = true
+	# Millstone
+	# Show extra tooltip info for millstone
+	millstone = true
+
+# Game Mode
+[gameMode]
+	# Enable Goggles
+	# Master switch for goggles
+	enableGoggles = true
+	# Enable in Survival
+	# Always enable goggles in Survival mode
+	enableInSurvival = true
+	# Enable in Creative
+	# Always enable goggles in Creative mode
+	enableInCreative = true
+	# Enable in Spectator
+	# Always enable goggles in Spectator mode
+	enableInSpectator = true
+	# Enable in Adventure
+	# Always enable goggles in Adventure mode
+	enableInAdventure = true
+
+# Overlay
+[overlay]
+	# Render Item Overlay
+	# Allow rendering item info overlay on blocks
+	renderItemOverlay = true
+	# Overlay Horizontal Offset
+	# Horizontal offset of item info overlay
+	# Positive: right, Negative: left
+	overlayOffsetX = 0
+	# Overlay Vertical Offset
+	# Vertical offset of item info overlay
+	# Positive: down, Negative: up
+	overlayOffsetY = 0
+	# Tooltip Flag Type
+	# Select the tooltip display type
+	tooltipFlagType = "Default"
+	# Tooltip Theme
+	# Select the tooltip theme style
+	tooltipTheme = "Default"
+	# Use Custom Color
+	# Enable custom colors for item info overlay
+	useCustomColor = false
+	# Background Color
+	# Custom background color
+	backgroundColor = 0
+	# Border Top Color
+	# Custom border top color
+	borderTopColor = 0
+	# Border Bottom Color
+	# Custom border bottom color
+	borderBottomColor = 0
+
+# Outliner
+[outliner]
+	# Render Analog Box
+	# Render analog boxes displayed by various blocks
+	renderAnalogBox = true
+	# Better Lines
+	# Optimize some rendered connection lines
+	betterLine = true
+	# Delay Render Duration
+	# Duration for analog box to continue rendering [Ticks]
+	delayRenderDuration = 60
+	# Outward Color
+	# Color displayed when analog box faces outward
+	outColor = 14532966
+	# Inward Color
+	# Color displayed when analog box faces inward
+	inColor = 8375776
+	# Rainbow Debug
+	# Enable rainbow debug mode
+	rainbowDebug = false
+
+# Chain Conveyor
+[chainConveyor]
+	# Always Allow Riding
+	# Hang on chain conveyors without needing a wrench
+	alwaysAllowRiding = false
+	# Prevent Auto Detach
+	# Prevent automatic detachment from chain conveyors due to obstacles
+	preventFalling = false
+	# Enhanced Connection
+	# Remove minimum distance and maximum angle limits for chain conveyors
+	enhancedConnection = true
+	# Auto Cardboard Yourself
+	# Automatically become a cardboard box when hanging on chains
+	cardBoardedYourself = false
+
+# Wrench
+[wrench]
+	# Better Encased Cogwheel
+	# Allow right-click to toggle encased cogwheel state with empty hand
+	betterEncasedCogwheel = true
+	# Better Encased Pipe
+	# Allow right-click to toggle encased pipe state with empty hand
+	betterEncasedPipe = true
+	# Better Chassis
+	# Allow right-click to toggle chassis sticky state with empty hand
+	betterChassis = true
+	# Always Show Scroll Value
+	# Always display scroll values on blocks
+	alwaysShowScrollValue = true
+	# Always Allow Rotating
+	# Rotate blocks with hotkey without needing a wrench
+	alwaysAllowRotating = true
+	# Left Click Fast Dismantle
+	# Instantly dismantle components with left click
+	leftClickFastDismantle = true
+	# Remove Cooldown
+	# Remove cooldown for block rotation menu
+	removeCooldown = true
+	# Enhanced Rotation Menu
+	# Allow rotation menu to modify more block properties
+	# §cWarning: May be considered cheating on servers
+	enchancedRotationMenu = false
+
+# Misc
+[misc]
+	# Remove Mechanical Arm Limit
+	# Remove distance limit for mechanical arms
+	removeMechanicalArmLimit = false
+	# Remove Request Limit
+	# Remove request quantity limit for factory panels and redstone requesters, optimize fast scrolling
+	removeRequestLimit = true
+	# Prevent Selection Discard
+	# Prevent discarding selection when switching items
+	preventSelectionDiscard = true
+	# Infinite Edit Box Length
+	# Infinite edit box length (actually 2^31 - 1)
+	infEditBoxLength = false
+	# Remove Cardboard Overlay
+	# Remove cardboard box vision obstruction when sneaking
+	removeCardboardOverlay = true
+	# Remove Netherite Backtank First Person
+	# Remove netherite backtank first person rendering effect
+	removeNetheriteFirstPerson = false
+	# Allow Diving Boots
+	# Diving boots functionality, disable to make them act like normal boots
+	allowDivingBoot = true
+	# Fix Schematic Name
+	# Allow non-ASCII characters when saving schematics
+	fixSchematicName = true
+	# Force Flywheel Backend
+	# Force enable Flywheel rendering backend (conflicts with shaders, unless you know what you're doing)
+	forcedBackend = false
+	# NBT Fix
+	# Fix crashes caused by NBT being too long, may cause lag
+	nbtFix = false
+	# Show Scrap Content
+	# Show specific contents of random scrap in sequenced assembly
+	showScrapContent = true

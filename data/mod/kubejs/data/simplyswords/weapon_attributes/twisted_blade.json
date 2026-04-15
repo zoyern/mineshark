@@ -1,0 +1,64 @@
+{
+  "parent": "bettercombat:claymore",
+  "attributes" : {
+    "pose": "simplyswords:pose_greatsword",
+    "attack_range": 3.5,
+    "category": "claymore",
+    "two_handed": true,
+    "attacks": [
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.0,
+        "angle": 60,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:two_handed_downup_rl",
+        "swing_sound": {
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.3,
+          "pitch": 1.4
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 170,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:claymore_lrl",
+        "swing_sound": {
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.3,
+          "pitch": 1.45
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:two_handed_up_lr",
+        "swing_sound": {
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.3,
+          "pitch": 1.5
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 170,
+        "upswing": 0.5,
+        "animation": "malfu_combat_animation:claymore_rlr",
+        "swing_sound": {
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.3,
+          "pitch": 1.55
+        }
+      }
+    ]
+  }
+}
+
+
+
+
+

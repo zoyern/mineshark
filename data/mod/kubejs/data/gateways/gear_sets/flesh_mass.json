@@ -1,0 +1,43 @@
+{
+    "type": "placebo:gear_set",
+    "boots": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:flesh_mass_boots"
+            },
+            "weight": 10
+        }
+    ],
+    "chestplates": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:flesh_mass_chestplate"
+            },
+            "weight": 10
+        }
+    ],
+    "helmets": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:flesh_mass_helmet"
+            },
+            "weight": 10
+        }
+    ],
+    "leggings": [
+        {
+            "stack": {
+                "count": 1,
+                "id": "hazennstuff:flesh_mass_leggings"
+            },
+            "weight": 10
+        }
+    ],
+    "tags": [
+        "flesh_mass"
+    ],
+    "weight": 100
+}
