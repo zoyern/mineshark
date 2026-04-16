@@ -6,18 +6,13 @@ metadata:
   labels:
     app: velocity
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: velocity
   ports:
-    - name: minecraft-java
-      port: 25577
-      targetPort: 25577
-      # k3d loadbalancer mappe 25565 (hôte) → 30565 (node) → 25577 (pod)
-      nodePort: 30565
+    - containerPort: 25577
+      hostPort: 25565 # Joueurs se connectent sur :25565
       protocol: TCP
-    - name: minecraft-bedrock
-      port: 19132
-      targetPort: 19132
-      nodePort: 30132
+    - containerPort: 19132
+      hostPort: 19132 # Bedrock direct
       protocol: UDP

@@ -1,108 +1,62 @@
 # ═══════════════════════════════════════════════════════
-#  MineShark — K3s / k3d (orchestration Kubernetes)
-#  Inclus dans le Makefile principal : include k8s.mk
+#  MineShark — K3s (Orchestration Kubernetes)
 # ═══════════════════════════════════════════════════════
 
-CLUSTER   ?= mineshark
-NAMESPACE ?= mineshark
-K8S_DIR   := k8s
+NAMESPACE = mineshark
+K8S_DIR = k8s
 
-.PHONY: setup secrets up down status logs logs-proxy logs-main logs-mod \
-        mod-on mod-off restart-proxy restart-main clean re \
-        k3d-create k3d-stop k3d-start k3d-delete
-
-# ══════════════════════════════════════════════════════
-#  Cluster k3d (local uniquement)
-# ══════════════════════════════════════════════════════
-
-k3d-create:
-	@echo "⏳ Création du cluster k3d '$(CLUSTER)'..."
-	@k3d cluster list 2>/dev/null | grep -q $(CLUSTER) \
-		&& echo "✓ Cluster '$(CLUSTER)' existe déjà" \
-		|| k3d cluster create $(CLUSTER) \
-			--port "25565:30565@loadbalancer" \
-			--port "19132:30132/udp@loadbalancer" \
-			--k3s-arg "--disable=traefik@server:0"
-	@echo "✓ Cluster prêt"
-
-k3d-stop:
-	@k3d cluster stop $(CLUSTER)
-	@echo "✓ Cluster arrêté (données préservées)"
-
-k3d-start:
-	@k3d cluster start $(CLUSTER)
-	@echo "✓ Cluster redémarré"
-
-k3d-delete:
-	@k3d cluster delete $(CLUSTER) 2>/dev/null || true
-	@echo "✓ Cluster supprimé"
-
-# ══════════════════════════════════════════════════════
-#  Secrets
-# ══════════════════════════════════════════════════════
-
+# Ajout des guillemets "$$(...)" pour empêcher l'erreur "got 9"
 secrets:
-	@test -f .env || (echo "❌ .env manquant — copie .env.example" && exit 1)
+	@test -f.env |
+
+| (echo "❌.env manquant" && exit 1)
 	@kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	@kubectl -n $(NAMESPACE) create secret generic rcon-secret \
-		--from-literal=rcon-password=$$(grep RCON_PASSWORD .env | cut -d= -f2) \
+		--from-literal=rcon-password="$$(grep RCON_PASSWORD.env | cut -d= -f2-)" \
 		--dry-run=client -o yaml | kubectl apply -f -
 	@kubectl -n $(NAMESPACE) create secret generic curseforge-api-key \
-		--from-literal=api-key=$$(grep CF_API_KEY .env | cut -d= -f2) \
+		--from-literal=api-key="$$(grep CF_API_KEY.env | cut -d= -f2-)" \
 		--dry-run=client -o yaml | kubectl apply -f -
 	@kubectl -n $(NAMESPACE) create secret generic velocity-forwarding-secret \
-		--from-literal=forwarding-secret=$$(cat data/velocity/forwarding.secret 2>/dev/null || echo "CHANGE_ME") \
+		--from-literal=forwarding-secret="$$(cat data/velocity/forwarding.secret 2>/dev/null |
+
+| openssl rand -hex 16)" \
 		--dry-run=client -o yaml | kubectl apply -f -
-	@echo "✓ Secrets OK"
+	@echo "✓ Secrets générés et injectés."
 
-# ══════════════════════════════════════════════════════
-#  Deploy / Teardown
-# ══════════════════════════════════════════════════════
+setup: secrets up
 
-# setup = créer cluster k3d + secrets + deploy (one-shot)
-setup: k3d-create secrets up
-
-# up = applique les manifests (idempotent)
 up: secrets
 	@kubectl apply -f $(K8S_DIR)/base/
 	@kubectl apply -f $(K8S_DIR)/velocity/
 	@kubectl apply -f $(K8S_DIR)/main/
 	@kubectl apply -f $(K8S_DIR)/mod/
-	@echo ""
-	@echo "  ✓ MineShark déployé dans K3s !"
-	@echo "    make status     voir l'état"
-	@echo "    make mod-on     allumer le moddé"
-	@echo ""
+	@echo "✓ MineShark déployé dans K3s!"
 
 down:
-	@kubectl delete namespace $(NAMESPACE) --ignore-not-found
-	@echo "✓ Namespace $(NAMESPACE) supprimé"
+	@kubectl -n $(NAMESPACE) delete deployment --all
+	@kubectl -n $(NAMESPACE) delete svc --all
+	@echo "✓ Pods et Services arrêtés. (TES VOLUMES SONT INTACTS)"
 
-# clean = supprime cluster k3d entier
-clean: k3d-delete
+clean: down
 
-# re = from scratch
-re: clean setup
+fclean: clean
+	@kubectl -n $(NAMESPACE) delete configmap --all
+	@kubectl -n $(NAMESPACE) delete secret --all
+	@echo "✓ Configuration et Secrets purgés. (TES VOLUMES SONT INTACTS)"
 
-# ══════════════════════════════════════════════════════
-#  Monitoring
-# ══════════════════════════════════════════════════════
+re: fclean up
 
 status:
 	@echo "=== Pods ==="
-	@kubectl -n $(NAMESPACE) get pods -o wide 2>/dev/null || echo "Aucun pod"
-	@echo ""
-	@echo "=== Services ==="
-	@kubectl -n $(NAMESPACE) get svc 2>/dev/null || echo "Aucun service"
-	@echo ""
-	@echo "=== PVC ==="
-	@kubectl -n $(NAMESPACE) get pvc 2>/dev/null || echo "Aucun PVC"
-	@echo ""
-	@echo "=== Nodes ==="
-	@kubectl get nodes -o wide 2>/dev/null || echo "Pas de nodes"
+	@kubectl -n $(NAMESPACE) get pods -o wide
+	@echo "\n=== Services ==="
+	@kubectl -n $(NAMESPACE) get svc
+	@echo "\n=== Disques (PVC) ==="
+	@kubectl -n $(NAMESPACE) get pvc
 
 logs:
-	kubectl -n $(NAMESPACE) logs -f --all-containers --max-log-requests=10 --prefix -l component
+	kubectl -n $(NAMESPACE) logs -f -l app=mineshark --all-containers --max-log-requests=10
 
 logs-proxy:
 	kubectl -n $(NAMESPACE) logs -f deployment/velocity -c velocity
@@ -113,26 +67,16 @@ logs-main:
 logs-mod:
 	kubectl -n $(NAMESPACE) logs -f deployment/mc-mod -c minecraft
 
-# ══════════════════════════════════════════════════════
-#  Serveur moddé (on/off)
-# ══════════════════════════════════════════════════════
-
 mod-on:
 	@kubectl -n $(NAMESPACE) scale deployment mc-mod --replicas=1
-	@echo "✓ Serveur moddé lancé (3-5 min de démarrage)"
+	@echo "✓ Serveur moddé en cours d'allumage..."
 
 mod-off:
 	@kubectl -n $(NAMESPACE) scale deployment mc-mod --replicas=0
-	@echo "✓ Serveur moddé éteint"
-
-# ══════════════════════════════════════════════════════
-#  Restart rapide (sans recréer le PVC)
-# ══════════════════════════════════════════════════════
+	@echo "✓ Serveur moddé éteint."
 
 restart-proxy:
 	@kubectl -n $(NAMESPACE) rollout restart deployment/velocity
-	@echo "✓ Velocity redémarré"
 
 restart-main:
 	@kubectl -n $(NAMESPACE) rollout restart deployment/mc-main
-	@echo "✓ Paper Main redémarré"
