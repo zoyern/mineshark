@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mc-mod
+  namespace: mineshark
+  labels:
+    app: mc-mod
+    component: server
+spec:
+  # 0 par défaut — make mod-on pour lancer
+  replicas: 0
+  selector:
+    matchLabels:
+      app: mc-mod
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mc-mod
+        component: server
+    spec:
+      initContainers:
+        # Télécharge les mods de performance server-side dans /data/mods/
+        # Ces mods s'ajoutent au modpack sans conflit (server-side only)
+        - name: download-perf-mods
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "=== Téléchargement mods performance ==="
+              mkdir -p /data/perf-mods
+
+              # Lithium — optimise physique, IA mobs, ticking (+30-50% perf)
+              wget -O /data/perf-mods/lithium.jar \
+                "https://cdn.modrinth.com/data/gvQqBUqZ/versions/ZSNsJrPI/lithium-neoforge-mc1.21.1-0.14.3.jar" 2>&1 || \
+              echo "⚠️ Lithium download failed, skipping"
+
+              # ServerCore — caps breeding, login async, view distance dynamique
+              wget -O /data/perf-mods/servercore.jar \
+                "https://cdn.modrinth.com/data/4WWQxlQP/versions/vMbpLobR/servercore-neoforge-1.5.7+1.21.1.jar" 2>&1 || \
+              echo "⚠️ ServerCore download failed, skipping"
+
+              echo "=== Mods performance téléchargés ==="
+              ls -la /data/perf-mods/
+          volumeMounts:
+            - name: data
+              mountPath: /data
+
+      containers:
+        - name: minecraft
+          image: itzg/minecraft-server:latest
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: TYPE
+              value: "AUTO_CURSEFORGE"
+            - name: CF_SLUG
+              value: "moddedtogether"
+            - name: CF_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: curseforge-api-key
+                  key: api-key
+            # 6 Go heap — nécessaire pour 150+ mods NeoForge
+            - name: MEMORY
+              value: "6G"
+            - name: USE_AIKAR_FLAGS
+              value: "true"
+            - name: ONLINE_MODE
+              value: "FALSE"
+            - name: MOTD
+              value: "§b§lMineShark §7- §cModdé"
+            - name: MAX_PLAYERS
+              value: "30"
+            - name: DIFFICULTY
+              value: "hard"
+            # Réduit pour modpack lourd — évite les lag spikes
+            - name: VIEW_DISTANCE
+              value: "8"
+            - name: SIMULATION_DISTANCE
+              value: "5"
+            - name: ENABLE_RCON
+              value: "TRUE"
+            - name: RCON_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rcon-secret
+                  key: rcon-password
+          ports:
+            - containerPort: 25565
+              name: minecraft
+            - containerPort: 25575
+              name: rcon
+          resources:
+            requests:
+              memory: "6Gi"
+              cpu: "1000m"
+            limits:
+              memory: "7Gi"
+              cpu: "4000m"
+          # Modpack = 3-5 min de démarrage, timeouts longs
+          readinessProbe:
+            exec:
+              command: ["mc-health"]
+            initialDelaySeconds: 180
+            periodSeconds: 15
+          livenessProbe:
+            exec:
+              command: ["mc-health"]
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            failureThreshold: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: server-mod-pvc

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mc-main
+  namespace: mineshark
+spec:
+  type: ClusterIP
+  selector:
+    app: mc-main
+  ports:
+    - name: minecraft
+      port: 25565
+      targetPort: 25565
+    - name: rcon
+      port: 25575
+      targetPort: 25575

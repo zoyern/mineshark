@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: velocity
+  namespace: mineshark
+  labels:
+    app: velocity
+    component: proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: velocity
+  template:
+    metadata:
+      labels:
+        app: velocity
+        component: proxy
+    spec:
+      initContainers:
+        # 1. Télécharge les plugins dans le PVC
+        - name: download-plugins
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "=== Downloading Velocity plugins ==="
+              mkdir -p /server/plugins
+
+              wget -O /server/plugins/Geyser-Velocity.jar \
+                "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/velocity"
+
+              wget -O /server/plugins/Floodgate-Velocity.jar \
+                "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/velocity"
+
+              wget -O /server/plugins/ViaVersion.jar \
+                "https://github.com/ViaVersion/ViaVersion/releases/download/5.8.0/ViaVersion-5.8.0.jar"
+
+              wget -O /server/plugins/ViaBackwards.jar \
+                "https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar"
+
+              echo "=== Plugins downloaded ==="
+              ls -la /server/plugins/
+          volumeMounts:
+            - name: velocity-data
+              mountPath: /server
+
+        # 2. Copie velocity.toml du ConfigMap vers le PVC (writable)
+        - name: copy-config
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "=== Copie velocity.toml ==="
+              cp /config/velocity.toml /server/velocity.toml
+              echo "✓ Config copiée"
+          volumeMounts:
+            - name: velocity-config
+              mountPath: /config
+            - name: velocity-data
+              mountPath: /server
+
+      containers:
+        - name: velocity
+          image: itzg/mc-proxy:latest
+          env:
+            - name: TYPE
+              value: "VELOCITY"
+            - name: MEMORY
+              value: "512m"
+            - name: SERVER_PORT
+              value: "25577"
+          ports:
+            - containerPort: 25577
+              name: mc-java
+              protocol: TCP
+            - containerPort: 19132
+              name: mc-bedrock
+              protocol: UDP
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "600Mi"
+              cpu: "500m"
+          readinessProbe:
+            tcpSocket:
+              port: 25577
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 25577
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          volumeMounts:
+            # Uniquement le PVC — velocity.toml est déjà dedans grâce à l'initContainer
+            - name: velocity-data
+              mountPath: /server
+
+      volumes:
+        - name: velocity-config
+          configMap:
+            name: velocity-config
+        - name: velocity-data
+          persistentVolumeClaim:
+            claimName: server-proxy-pvc

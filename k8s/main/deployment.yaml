@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mc-main
+  namespace: mineshark
+  labels:
+    app: mc-main
+    component: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mc-main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mc-main
+        component: server
+    spec:
+      containers:
+        - name: minecraft
+          image: itzg/minecraft-server:latest
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: TYPE
+              value: "PAPER"
+            - name: VERSION
+              value: "1.21.1"
+            # RAM : 1G dev local / 3G prod (changer avant deploy VPS)
+            - name: MEMORY
+              value: "1G"
+            - name: USE_AIKAR_FLAGS
+              value: "true"
+            - name: ONLINE_MODE
+              value: "FALSE"
+            # Velocity modern forwarding — le proxy vérifie l'auth, pas le backend
+            - name: PAPER_VELOCITY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: velocity-forwarding-secret
+                  key: forwarding-secret
+            - name: MOTD
+              value: "§b§lMineShark §7- §aSurvie"
+            - name: MAX_PLAYERS
+              value: "50"
+            # Survie vanilla — normal pour les mobs
+            - name: DIFFICULTY
+              value: "normal"
+            - name: SPAWN_PROTECTION
+              value: "16"
+            # Optimisé : view 8, sim 5 (best practice 2026)
+            - name: VIEW_DISTANCE
+              value: "8"
+            - name: SIMULATION_DISTANCE
+              value: "5"
+            - name: ENABLE_RCON
+              value: "TRUE"
+            - name: RCON_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rcon-secret
+                  key: rcon-password
+            # Floodgate backend — skins Bedrock visibles côté serveur
+            - name: PLUGINS
+              value: "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot"
+            # Spawn limits réduits (défaut 70 = trop, 40 = fluide)
+            - name: SPAWN_LIMIT
+              value: "40"
+          ports:
+            - containerPort: 25565
+              name: minecraft
+            - containerPort: 25575
+              name: rcon
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1280Mi"
+              cpu: "1500m"
+          readinessProbe:
+            exec:
+              command: ["mc-health"]
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["mc-health"]
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            failureThreshold: 3
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: server-main-pvc

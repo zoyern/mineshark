@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: velocity-config
+  namespace: mineshark
+data:
+  velocity.toml: |
+    # ═══ MineShark — Velocity Proxy Config ═══
+    config-version = "2.7"
+    bind = "0.0.0.0:25577"
+    motd = "<bold><aqua>MineShark</aqua></bold> <gray>-</gray> <green>En ligne</green>"
+    show-max-players = 100
+    online-mode = true
+    force-key-authentication = true
+    player-info-forwarding-mode = "modern"
+
+    [servers]
+      main = "mc-main:25565"
+      mod  = "mc-mod:25565"
+      try = ["main"]
+
+    [forced-hosts]
+      # Phase 2 — avec domaine
+      # "play.mineshark.fr" = ["main"]
+      # "mod.mineshark.fr"  = ["mod"]
+
+    [advanced]
+      compression-threshold = 256
+      compression-level = -1
+      login-ratelimit = 3000
+      connection-timeout = 5000
+      read-timeout = 30000
+      haproxy-protocol = false
+      tcp-fast-open = false
+      bungee-plugin-message-channel = true
+      show-ping-requests = false
+      failover-on-unexpected-server-disconnect = true
+      announce-proxy-commands = true
+      log-command-executions = false
+      log-player-connections = true
+
+    [query]
+      enabled = false
+      port = 25577

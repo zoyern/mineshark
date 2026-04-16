@@ -297,7 +297,7 @@ services:
     environment:
       EULA: "TRUE"
       TYPE: PAPER
-      VERSION: "1.21.4"
+      VERSION: "1.21.1"
       MEMORY: 1G
       ONLINE_MODE: "FALSE"  # Velocity gère l'auth
     volumes:
