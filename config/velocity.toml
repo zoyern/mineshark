@@ -1,0 +1,73 @@
+# ═══════════════════════════════════════════════════════════════════
+#  MineShark — Velocity proxy
+# ═══════════════════════════════════════════════════════════════════
+#  Source unique pour les deux orchestrateurs :
+#    • Docker Compose monte ce fichier dans /server/velocity.toml
+#    • K8s : généré en ConfigMap par `make secrets` (kubectl create
+#      configmap velocity-config --from-file=config/velocity.toml)
+#
+#  Documentation officielle des options :
+#    https://docs.papermc.io/velocity/configuration
+# ═══════════════════════════════════════════════════════════════════
+
+config-version = "2.7"
+
+# Bind sur toutes les interfaces, port interne 25577.
+# Le mapping public 25565 est fait par Docker (ports:) ou K8s (Service).
+bind = "0.0.0.0:25577"
+
+motd = "<bold><aqua>MineShark</aqua></bold> <gray>-</gray> <green>En ligne</green>"
+show-max-players = 100
+
+# Authentification Mojang : oui côté proxy (les backends font confiance via secret)
+online-mode = true
+force-key-authentication = true
+
+# Modern forwarding = transmet l'identité du joueur (UUID, skin) au backend.
+# Les serveurs Paper doivent avoir PAPER_VELOCITY_SECRET = même secret.
+player-info-forwarding-mode = "modern"
+
+
+# ─── Liste des serveurs backend ────────────────────────────────────
+# Les noms ci-dessous correspondent aux Services K8s (ClusterIP)
+# et aux containers Docker Compose (DNS interne).
+[servers]
+  main = "mc-main:25565"
+  mod  = "mc-mod:25565"
+  # Ordre de fallback si le serveur "try" demandé est down
+  try  = ["main"]
+
+
+# ─── Routage par sous-domaine (Phase 3, après TCPShield + DNS) ─────
+[forced-hosts]
+  # "play.mineshark.fr" = ["main"]
+  # "mod.mineshark.fr"  = ["mod"]
+
+
+# ─── Performance & robustesse ──────────────────────────────────────
+[advanced]
+  compression-threshold = 256
+  compression-level = -1
+  login-ratelimit = 3000
+  connection-timeout = 5000
+  read-timeout = 30000
+
+  # haproxy-protocol = true requis quand on passera derrière TCPShield
+  haproxy-protocol = false
+  tcp-fast-open = false
+
+  # Permet aux plugins type LuckPerms de partager des messages cross-server
+  bungee-plugin-message-channel = true
+
+  show-ping-requests = false
+  failover-on-unexpected-server-disconnect = true
+  announce-proxy-commands = true
+  log-command-executions = false
+  log-player-connections = true
+
+
+# ─── Query (status server-list externe) ─────────────────────────────
+# Désactivé par défaut, source de DDoS amplification connue.
+[query]
+  enabled = false
+  port = 25577

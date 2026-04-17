@@ -1,26 +1,43 @@
-# ═══════════════════════════════════════════════════════
-#  MineShark — Docker Compose (dev local)
-#  Utilisé pour tester sans K3s : make docker-up
-# ═══════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════
+#  MineShark — Docker Compose (environnement DEV local)
+# ═══════════════════════════════════════════════════════════════════
+#
+#  Source de vérité pour le développement local. Doit rester aligné
+#  avec les manifestes K8s (k8s/) — toute valeur configurable est
+#  dans .env, pas en dur ici.
+#
+#  Lancement : `make docker-up`
+#  Le fichier docker-compose.override.yml (s'il existe) est chargé
+#  automatiquement et permet d'ajuster la RAM en local.
+# ═══════════════════════════════════════════════════════════════════
 
 services:
-  # ── Proxy Velocity ─────────────────────────────────
+
+  # ─── Proxy Velocity (point d'entrée unique) ──────────────────────
   proxy-velocity:
-    image: itzg/mc-proxy:latest
+    image: ${IMG_PROXY:-itzg/mc-proxy:java21}
     container_name: ms-proxy
     environment:
-      TYPE: "VELOCITY"
-      MEMORY: "512M"
+      TYPE: VELOCITY
+      MEMORY: ${PROXY_MEMORY:-512M}
+      # Plugins téléchargés au boot par itzg/mc-proxy.
+      # On n'utilise pas MODRINTH_PROJECTS ici car certains (Geyser)
+      # ont besoin du build "velocity" spécifique non-Modrinth.
       PLUGINS: |
         https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/velocity
         https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/velocity
         https://github.com/ViaVersion/ViaVersion/releases/download/5.8.0/ViaVersion-5.8.0.jar
         https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar
     ports:
-      - "25565:25577"       # Java
-      - "19132:19132/udp"   # Bedrock
+      - "${PORT_JAVA:-25565}:25577"           # Java
+      - "${PORT_BEDROCK:-19132}:19132/udp"    # Bedrock (UDP impératif)
     volumes:
+      # Le conteneur a besoin du velocity.toml ET d'écrire son état
+      # (forwarding.secret, plugin data). On monte donc /server complet
+      # depuis data/velocity, et on copie velocity.toml depuis config/
+      # dans le entrypoint via la commande ci-dessous.
       - ./data/velocity:/server
+      - ./config/velocity.toml:/server/velocity.toml:ro
     networks:
       - mc-network
     restart: unless-stopped
@@ -30,32 +47,46 @@ services:
       retries: 10
       start_period: 10s
 
-  # ── Paper Main (Survie vanilla + lobby) ────────────
+
+  # ─── Serveur principal Paper (lobby + survie) ────────────────────
   main-paper:
-    image: itzg/minecraft-server:latest
+    image: ${IMG_SERVER:-itzg/minecraft-server:java21}
     container_name: ms-main
     depends_on:
       proxy-velocity:
         condition: service_healthy
     environment:
-      TYPE: "PAPER"
-      VERSION: "1.21.1"
       EULA: "TRUE"
-      MEMORY: "2G"
+      TYPE: PAPER
+      VERSION: ${PAPER_VERSION:-1.21.4}
+      MEMORY: ${MAIN_MEMORY:-3G}
       USE_AIKAR_FLAGS: "true"
+
+      # Velocity gère l'auth — le backend trust le proxy via secret
       ONLINE_MODE: "FALSE"
+      # Doit MATCHER le secret côté Velocity (data/velocity/forwarding.secret)
+      # Ici on lit le fichier directement via fichier monté.
+      PAPER_VELOCITY_SECRET_FILE: /run/secrets/forwarding-secret
+
+      MOTD: "${MAIN_MOTD}"
+      MAX_PLAYERS: ${MAIN_MAX_PLAYERS:-50}
+      DIFFICULTY: ${DIFFICULTY_MAIN:-normal}
+      VIEW_DISTANCE: ${VIEW_DISTANCE:-8}
+      SIMULATION_DISTANCE: ${SIMULATION_DISTANCE:-5}
+      SPAWN_LIMIT: 40
+
+      # RCON pour administration distante (backups, console)
       ENABLE_RCON: "true"
-      RCON_PASSWORD: "${RCON_PASSWORD}"
-      MOTD: "§b§lMineShark §7- §aSurvie"
-      MAX_PLAYERS: "50"
-      DIFFICULTY: "normal"
-      VIEW_DISTANCE: "8"
-      SIMULATION_DISTANCE: "5"
-      SPAWN_LIMIT: "40"
+      RCON_PASSWORD: ${RCON_PASSWORD}
+
+      # Plugins via Modrinth (téléchargement auto, versions résolues)
+      MODRINTH_PROJECTS: ${PLUGINS_MODRINTH}
+      # Floodgate spécifique : pas sur Modrinth (build officiel GeyserMC)
       PLUGINS: |
         https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
     volumes:
       - ./data/main:/data
+      - ./data/velocity/forwarding.secret:/run/secrets/forwarding-secret:ro
     networks:
       - mc-network
     restart: unless-stopped
@@ -66,47 +97,51 @@ services:
       retries: 20
       timeout: 10s
 
-  # ── Backup automatique ─────────────────────────────
+
+  # ─── Backup automatique du serveur principal ─────────────────────
   backup-main:
-    image: itzg/mc-backup
+    image: ${IMG_BACKUP:-itzg/mc-backup:latest}
     container_name: ms-backup-main
     depends_on:
       main-paper:
         condition: service_healthy
     environment:
-      BACKUP_INTERVAL: "24h"
-      PRUNE_BACKUPS_DAYS: "7"
-      RCON_HOST: "ms-main"
-      RCON_PASSWORD: "${RCON_PASSWORD}"
+      BACKUP_INTERVAL: 24h
+      PRUNE_BACKUPS_DAYS: 7
+      RCON_HOST: ms-main
+      RCON_PASSWORD: ${RCON_PASSWORD}
     volumes:
       - ./data/main:/data:ro
       - ./backups/main:/backups
     networks:
       - mc-network
+    restart: unless-stopped
 
-  # ── NeoForge Moddé (profil docker-compose --profile mod) ──
+
+  # ─── Serveur moddé NeoForge (profile mod, opt-in) ────────────────
+  # Activation : `make docker-mod-up` (ne démarre pas par défaut)
   mod-neoforge:
-    image: itzg/minecraft-server:latest
+    image: ${IMG_SERVER:-itzg/minecraft-server:java21}
     container_name: ms-mod
     profiles: ["mod"]
     depends_on:
       main-paper:
         condition: service_healthy
     environment:
-      TYPE: "AUTO_CURSEFORGE"
-      CF_SLUG: "moddedtogether"
-      CF_API_KEY: "${CF_API_KEY}"
       EULA: "TRUE"
-      MEMORY: "6G"
+      TYPE: ${MODPACK_TYPE:-AUTO_CURSEFORGE}
+      CF_SLUG: ${MODPACK_SLUG:-moddedtogether}
+      CF_API_KEY: ${CF_API_KEY}
+      MEMORY: ${MOD_MEMORY:-8G}
       USE_AIKAR_FLAGS: "true"
       ONLINE_MODE: "FALSE"
-      MOTD: "§b§lMineShark §7- §cModdé"
-      MAX_PLAYERS: "30"
-      DIFFICULTY: "hard"
-      VIEW_DISTANCE: "8"
-      SIMULATION_DISTANCE: "5"
+      MOTD: "${MOD_MOTD}"
+      MAX_PLAYERS: ${MOD_MAX_PLAYERS:-30}
+      DIFFICULTY: ${DIFFICULTY_MOD:-hard}
+      VIEW_DISTANCE: ${VIEW_DISTANCE:-8}
+      SIMULATION_DISTANCE: ${SIMULATION_DISTANCE:-5}
       ENABLE_RCON: "true"
-      RCON_PASSWORD: "${RCON_PASSWORD}"
+      RCON_PASSWORD: ${RCON_PASSWORD}
     volumes:
       - ./data/mod:/data
     networks:
@@ -114,10 +149,12 @@ services:
     restart: unless-stopped
     healthcheck:
       test: mc-health
-      start_period: 3m
+      start_period: 3m       # Modpack lourd = boot lent
       interval: 10s
-      retries: 20
+      retries: 30
+
 
 networks:
   mc-network:
     driver: bridge
+    name: mineshark

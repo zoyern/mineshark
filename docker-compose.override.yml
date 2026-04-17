@@ -1,7 +1,14 @@
-# docker-compose.override.yml
-# AUTO-CHARGÉ par docker compose (à condition d'être nommé exactement comme ça).
-# But : réduire la RAM en local (WSL ~6 Go) sans toucher au compose principal.
-# Ce fichier peut rester gitignored ou être commité — utile pour les contribs.
+# ═══════════════════════════════════════════════════════════════════
+#  MineShark — Overrides Docker Compose pour le DEV local
+# ═══════════════════════════════════════════════════════════════════
+#  AUTO-CHARGÉ par `docker compose` (nom exact requis : override).
+#
+#  But : adapter les ressources pour une machine de dev (~6 Go RAM
+#  WSL/laptop) sans toucher au compose principal qui reste calé
+#  sur les valeurs de prod (.env).
+#
+#  Si tu n'en veux pas : supprime ce fichier ou ajoute-le à .gitignore.
+# ═══════════════════════════════════════════════════════════════════
 
 services:
   proxy-velocity:
@@ -11,9 +18,9 @@ services:
   main-paper:
     environment:
       MEMORY: "1G"
-      VIEW_DISTANCE: "6"        # baisse pour éco RAM en dev
+      VIEW_DISTANCE: "6"        # baisse pour économiser la RAM
       SIMULATION_DISTANCE: "4"
 
   mod-neoforge:
     environment:
-      MEMORY: "3G"              # absolu minimum pour Modded Together en dev
+      MEMORY: "3G"              # plancher pour Modded Together en dev
