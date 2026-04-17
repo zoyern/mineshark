@@ -1,11 +1,30 @@
+# ═══════════════════════════════════════════════════════════════════
+#  ConfigMap velocity-config
+# ═══════════════════════════════════════════════════════════════════
+#  Ce fichier est une COPIE de config/velocity.toml.
+#
+#  Pour synchroniser après modif de config/velocity.toml :
+#    make sync-velocity-config
+#
+#  Cette commande lance :
+#    kubectl create configmap velocity-config \
+#      --from-file=velocity.toml=config/velocity.toml \
+#      --namespace=mineshark --dry-run=client -o yaml | kubectl apply -f -
+#
+#  Le YAML committé ci-dessous est la version de référence pour le clone
+#  initial (avant que `make secrets` ne le régénère).
+# ═══════════════════════════════════════════════════════════════════
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: velocity-config
   namespace: mineshark
+  labels:
+    app: velocity
 data:
   velocity.toml: |
-    # ═══ MineShark — Velocity Proxy Config ═══
+    # Voir config/velocity.toml — fichier source.
+    # Sera écrasé par `make sync-velocity-config`.
     config-version = "2.7"
     bind = "0.0.0.0:25577"
     motd = "<bold><aqua>MineShark</aqua></bold> <gray>-</gray> <green>En ligne</green>"
@@ -13,17 +32,11 @@ data:
     online-mode = true
     force-key-authentication = true
     player-info-forwarding-mode = "modern"
-
     [servers]
       main = "mc-main:25565"
       mod  = "mc-mod:25565"
       try = ["main"]
-
     [forced-hosts]
-      # Phase 2 — avec domaine
-      # "play.mineshark.fr" = ["main"]
-      # "mod.mineshark.fr"  = ["mod"]
-
     [advanced]
       compression-threshold = 256
       compression-level = -1
@@ -38,7 +51,6 @@ data:
       announce-proxy-commands = true
       log-command-executions = false
       log-player-connections = true
-
     [query]
       enabled = false
       port = 25577

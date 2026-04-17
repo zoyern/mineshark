@@ -1,3 +1,10 @@
+# ═══════════════════════════════════════════════════════════════════
+#  Deployment mc-main (serveur Paper — lobby + survie)
+# ═══════════════════════════════════════════════════════════════════
+#  Aligné avec docker-compose.yml service `main-paper`.
+#  Toute valeur en dur ici est marquée « synced with .env <VAR> ».
+#  Si tu changes la VAR dans .env, change ici aussi.
+# ═══════════════════════════════════════════════════════════════════
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,11 +15,11 @@ metadata:
     component: server
 spec:
   replicas: 1
+  strategy:
+    type: Recreate          # PVC RWO + Minecraft monothread → pas de rolling
   selector:
     matchLabels:
       app: mc-main
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
@@ -21,41 +28,44 @@ spec:
     spec:
       containers:
         - name: minecraft
-          image: itzg/minecraft-server:latest
+          image: itzg/minecraft-server:java21    # synced with .env IMG_SERVER
           env:
             - name: EULA
               value: "TRUE"
             - name: TYPE
-              value: "PAPER"
+              value: PAPER
             - name: VERSION
-              value: "1.21.1"
-            # RAM : 1G dev local / 3G prod (changer avant deploy VPS)
+              value: "1.21.4"                    # synced with .env PAPER_VERSION
             - name: MEMORY
-              value: "1G"
+              value: "3G"                        # synced with .env MAIN_MEMORY
             - name: USE_AIKAR_FLAGS
               value: "true"
+
+            # Velocity authentifie ; ce backend trust le proxy via secret
             - name: ONLINE_MODE
               value: "FALSE"
-            # Velocity modern forwarding — le proxy vérifie l'auth, pas le backend
             - name: PAPER_VELOCITY_SECRET
               valueFrom:
                 secretKeyRef:
                   name: velocity-forwarding-secret
                   key: forwarding-secret
+
             - name: MOTD
-              value: "§b§lMineShark §7- §aSurvie"
+              value: "§b§lMineShark §7- §aSurvie & Lobby"   # synced with .env MAIN_MOTD
             - name: MAX_PLAYERS
-              value: "50"
-            # Survie vanilla — normal pour les mobs
+              value: "50"                                   # synced with .env MAIN_MAX_PLAYERS
             - name: DIFFICULTY
-              value: "normal"
+              value: "normal"                               # synced with .env DIFFICULTY_MAIN
             - name: SPAWN_PROTECTION
               value: "16"
-            # Optimisé : view 8, sim 5 (best practice 2026)
+
             - name: VIEW_DISTANCE
-              value: "8"
+              value: "8"                                    # synced with .env VIEW_DISTANCE
             - name: SIMULATION_DISTANCE
-              value: "5"
+              value: "5"                                    # synced with .env SIMULATION_DISTANCE
+            - name: SPAWN_LIMIT
+              value: "40"
+
             - name: ENABLE_RCON
               value: "TRUE"
             - name: RCON_PASSWORD
@@ -63,12 +73,14 @@ spec:
                 secretKeyRef:
                   name: rcon-secret
                   key: rcon-password
-            # Floodgate backend — skins Bedrock visibles côté serveur
+
+            # Plugins via Modrinth — résolution automatique des versions
+            - name: MODRINTH_PROJECTS
+              value: "floodgate,luckperms,worldedit,worldguard,coreprotect,multiverse-core,placeholderapi,spark,chunky,decent-holograms"   # synced with .env PLUGINS_MODRINTH
+            # Floodgate : pas sur Modrinth → URL directe GeyserMC
             - name: PLUGINS
               value: "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot"
-            # Spawn limits réduits (défaut 70 = trop, 40 = fluide)
-            - name: SPAWN_LIMIT
-              value: "40"
+
           ports:
             - containerPort: 25565
               name: minecraft
@@ -76,19 +88,17 @@ spec:
               name: rcon
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "250m"
+              memory: "1500Mi"
+              cpu: "500m"
             limits:
-              memory: "1280Mi"
-              cpu: "1500m"
+              memory: "4Gi"      # = MAIN_MEMORY (3G) + 30% marge JVM
+              cpu: "2000m"
           readinessProbe:
-            exec:
-              command: ["mc-health"]
+            exec: { command: ["mc-health"] }
             initialDelaySeconds: 60
             periodSeconds: 10
           livenessProbe:
-            exec:
-              command: ["mc-health"]
+            exec: { command: ["mc-health"] }
             initialDelaySeconds: 120
             periodSeconds: 30
             failureThreshold: 3
