@@ -1,0 +1,19 @@
+# docker-compose.override.yml
+# AUTO-CHARGÉ par docker compose (à condition d'être nommé exactement comme ça).
+# But : réduire la RAM en local (WSL ~6 Go) sans toucher au compose principal.
+# Ce fichier peut rester gitignored ou être commité — utile pour les contribs.
+
+services:
+  proxy-velocity:
+    environment:
+      MEMORY: "256M"
+
+  main-paper:
+    environment:
+      MEMORY: "1G"
+      VIEW_DISTANCE: "6"        # baisse pour éco RAM en dev
+      SIMULATION_DISTANCE: "4"
+
+  mod-neoforge:
+    environment:
+      MEMORY: "3G"              # absolu minimum pour Modded Together en dev

@@ -1,8 +1,0 @@
-{
-  "showRemovalMessage": false,
-  "removeItemsFromCreativeTabs": true,
-  "removeItemsFromEmi": true,
-  "removeItemsFromInventories": true,
-  "removeDroppedItems": true,
-  "removeItemsFromLootChests": true
-}

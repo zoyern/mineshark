@@ -1,9 +1,0 @@
-#List of slots to create or modify.
-#See documentation for syntax: https://docs.illusivesoulworks.com/curios/configuration#slot-configuration
-#
-slots = [
-    "id=rings;size=0;operation=SET",
-    "id=sheath;size=0;operation=SET",
-    "id=crystal;size=0;operation=SET",
-    "id=wing;size=0;operation=SET",
-]

@@ -6,13 +6,18 @@ metadata:
   labels:
     app: velocity
 spec:
-  type: ClusterIP
+  # LoadBalancer = K3s ServiceLB ouvre 25565/TCP et 19132/UDP sur l'IP publique du VPS.
+  # En local (k3d/WSL), si pas de LoadBalancer dispo, l'IP externe restera "pending"
+  # mais le service reste joignable via kubectl port-forward.
+  type: LoadBalancer
   selector:
     app: velocity
   ports:
-    - containerPort: 25577
-      hostPort: 25565 # Joueurs se connectent sur :25565
+    - name: mc-java
+      port: 25565        # port public visible par les joueurs Java
+      targetPort: 25577  # port interne du conteneur Velocity (cf. SERVER_PORT)
       protocol: TCP
-    - containerPort: 19132
-      hostPort: 19132 # Bedrock direct
+    - name: mc-bedrock
+      port: 19132        # port public Bedrock
+      targetPort: 19132  # même port côté Geyser
       protocol: UDP

@@ -1,49 +1,89 @@
-# ═══════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════
 #  MineShark — .gitignore
-# ═══════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════
+#  Règle d'or : on ne versionne QUE le code & la config "source".
+#  Tout ce qui est généré, téléchargé, ou propre à une instance reste
+#  local. Cela évite le repo qui gonfle et les conflits inutiles.
+#
+#  Pour vérifier ce qui est tracké : `git ls-files | wc -l`
+#  Pour purger ce qui ne devrait plus l'être :
+#      git rm -r --cached <chemin> && git commit -m "chore: untrack <chemin>"
+# ═══════════════════════════════════════════════════════════════════
 
-# ---------------------------------------------------
-# Secrets & environnement
-# ---------------------------------------------------
+
+# ─── Secrets & environnement (CRITIQUE) ────────────────────────────
 .env
+.env.local
 *.secret
 forwarding.secret
+**/credentials.json
+**/*.pem
+**/*.key
 
-# ---------------------------------------------------
-# Données serveurs MC — ON IGNORE TOUT data/
-# Seuls les fichiers de CONFIG qu'on veut versionner
-# seront ajoutés en force avec : git add -f data/velocity/velocity.toml
-# ---------------------------------------------------
+
+# ─── Données runtime serveurs Minecraft ────────────────────────────
+# Mondes, plugins téléchargés, cache, sessions joueurs : tout local.
+# Pour partager une map : exporter à part puis import via les outils MC.
 data/
+backups/
 
-# ---------------------------------------------------
-# Ancien serveur Spigot (SkulyCube)
-# ---------------------------------------------------
+
+# ─── Ancien serveur Spigot (archive massive 4.8 Go) ────────────────
+# Conservée localement pour récupérer les maps historiques (lobby,
+# SkyWars, Spawn). À NE JAMAIS committer.
 mc-server-old/
 
-# ---------------------------------------------------
-# Binaires, archives, DB
-# ---------------------------------------------------
+
+# ─── Binaires & archives ────────────────────────────────────────────
 *.jar
 *.tar.gz
+*.tar
 *.zip
+*.gz
+*.7z
+*.rar
+
+
+# ─── Bases de données locales ──────────────────────────────────────
 *.db
 *.sqlite
+*.sqlite3
 
-# ---------------------------------------------------
-# OS / Éditeurs
-# ---------------------------------------------------
+
+# ─── Logs ──────────────────────────────────────────────────────────
+*.log
+logs/
+crash-reports/
+
+
+# ─── Manifestes K8s générés (templates → finaux) ───────────────────
+# Si on introduit envsubst plus tard, les fichiers générés vont ici.
+k8s/**/*.generated.yaml
+
+
+# ─── OS & éditeurs ─────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 .vscode/
 .idea/
 *.swp
+*.swo
 *~
 
-# ---------------------------------------------------
-# Node / Web (pour le futur site)
-# ---------------------------------------------------
+
+# ─── Web (futur site MineShark — Phase 3) ──────────────────────────
 node_modules/
 dist/
+build/
 .next/
 .nuxt/
+.cache/
+coverage/
+
+
+# ─── Exception : on garde la structure des dossiers gitignored ────
+# Pour que `data/`, `backups/`, etc. existent au clone, on commit un
+# .gitkeep dedans. La règle ! force l'inclusion malgré le pattern parent.
+!data/.gitkeep
+!backups/.gitkeep
