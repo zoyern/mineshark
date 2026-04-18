@@ -93,7 +93,7 @@ spec:
             # Plugins via Modrinth — résolution automatique des versions
             # (synced avec .env PLUGINS_MODRINTH)
             - name: MODRINTH_PROJECTS
-              value: "luckperms,essentialsx,worldedit,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,spark,chunky"
+              value: "luckperms,essentialsx,worldedit,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky"
             # Plugins SpigotMC (pas dispos sur Modrinth) : Vault (34315),
             # ProtocolLib (1997). Synced avec .env PLUGINS_SPIGET.
             - name: SPIGET_RESOURCES
