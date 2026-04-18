@@ -1,0 +1,101 @@
+# ═══════════════════════════════════════════════════════════════════
+#  CI — Lint rapide (< 2 min)
+# ═══════════════════════════════════════════════════════════════════
+#  Ce workflow attrape les erreurs évidentes AVANT un push qui casse
+#  le déploiement. Il ne teste PAS le comportement runtime (serveur
+#  qui boot, plugins qui s'installent) — juste la syntaxe et la
+#  cohérence des manifestes.
+#
+#  Déclencheurs :
+#    • push sur n'importe quelle branche
+#    • pull_request vers main
+#
+#  Exécution locale équivalente : `make doctor` + `make ci-lint`
+# ═══════════════════════════════════════════════════════════════════
+
+name: lint
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+jobs:
+  yaml-lint:
+    name: YAML syntaxe
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: yamllint
+        run: |
+          pip install yamllint
+          # relaxed : tolère les lignes longues et la 1ère ligne sans ---
+          # On inclut config/ pour attraper les coquilles dans paper/purpur.yml
+          # (ils sont critiques — une faute plante le serveur au boot).
+          yamllint -d relaxed \
+            docker-compose.yml \
+            docker-compose.override.yml \
+            k8s/ \
+            .github/ \
+            config/
+
+  compose-config:
+    name: docker-compose valide
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Créer un .env factice pour la validation
+        run: |
+          cp .env.example .env
+          # La CI n'a pas de secret auto-généré, on met des placeholders
+          # pour que l'interpolation ${VAR} ne casse pas `compose config`.
+          echo 'RCON_PASSWORD=ci-placeholder' >> .env
+      - name: docker compose config -q
+        run: docker compose config -q
+
+  k8s-dry-run:
+    name: kubectl dry-run côté client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: "latest"
+      - name: Valide tous les manifestes
+        run: |
+          for dir in k8s/base k8s/velocity k8s/main k8s/mod; do
+            echo "▶ dry-run $dir"
+            kubectl apply --dry-run=client -f "$dir/" || exit 1
+          done
+
+  shellcheck:
+    name: Shell scripts (shellcheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+      - name: Lint scripts/
+        run: |
+          # -S warning : on ignore les nits purement stylistiques mais on
+          # flag les bugs potentiels (quoting cassé, unset vars, etc.).
+          shellcheck -S warning scripts/*.sh
+
+  secrets-check:
+    name: Pas de secrets committés
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifie que .env et secrets sont gitignorés
+        run: |
+          # Garde-fou : si .env ou data/secrets/ apparaissent dans le tree,
+          # c'est qu'on a perdu le contrôle du .gitignore.
+          if git ls-files --error-unmatch .env 2>/dev/null; then
+            echo "::error::.env est tracké — RETIRE-le du repo !"
+            exit 1
+          fi
+          if git ls-files data/secrets/ 2>/dev/null | grep -q .; then
+            echo "::error::data/secrets/ est tracké — RETIRE-le du repo !"
+            exit 1
+          fi
+          echo "✓ Pas de secrets tracké."

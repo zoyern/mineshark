@@ -31,9 +31,13 @@ player-info-forwarding-mode = "modern"
 # ─── Liste des serveurs backend ────────────────────────────────────
 # Les noms ci-dessous correspondent aux Services K8s (ClusterIP)
 # et aux containers Docker Compose (DNS interne).
+#
+# Le serveur moddé (mc-mod) n'est PAS listé ici : Velocity force un
+# protocole Minecraft compatible vanilla/Paper qui casse NeoForge.
+# Le moddé est donc exposé sur son propre port public (PORT_MOD,
+# par défaut 25566) via son propre Service LoadBalancer K8s.
 [servers]
   main = "mc-main:25565"
-  mod  = "mc-mod:25565"
   # Ordre de fallback si le serveur "try" demandé est down
   try  = ["main"]
 
@@ -41,7 +45,7 @@ player-info-forwarding-mode = "modern"
 # ─── Routage par sous-domaine (Phase 3, après TCPShield + DNS) ─────
 [forced-hosts]
   # "play.mineshark.fr" = ["main"]
-  # "mod.mineshark.fr"  = ["mod"]
+  # Le moddé utilise une connexion directe sur l'IP:PORT_MOD
 
 
 # ─── Performance & robustesse ──────────────────────────────────────

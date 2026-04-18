@@ -21,10 +21,12 @@ export
 # Cible par défaut (tapée quand on lance juste `make`)
 .DEFAULT_GOAL := help
 
-# Sous-makefiles
+# Sous-makefiles — admin d'abord : définit les variables communes
+# (RCON_SECRET_FILE, FWD_SECRET_FILE) et les cibles gen-secrets / init
+# utilisées par k8s.mk et docker.mk.
+include make/admin.mk
 include make/k8s.mk
 include make/docker.mk
-include make/admin.mk
 
 
 # ─── help auto-généré (parse les commentaires ##) ──────────────────

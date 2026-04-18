@@ -1,0 +1,161 @@
+# ═══════════════════════════════════════════════════════════════════
+#  MineShark — paper-world-defaults.yml
+# ═══════════════════════════════════════════════════════════════════
+#  Defaults appliqués à TOUS les mondes (lobby, survie, mini-games).
+#  Chaque monde peut override via /data/<world>/paper-world.yml
+#  (auto-créé par Paper au boot si absent).
+#
+#  Doc : https://docs.papermc.io/paper/reference/world-configuration
+#
+#  Philosophie : on optimise pour la fluidité (lobby + survie),
+#  on ne sacrifie PAS le gameplay (pas de désactivation de raids
+#  ou d'animaux qui casseraient un serveur survie).
+# ═══════════════════════════════════════════════════════════════════
+
+_version: 31
+
+# ─── Sauvegardes auto ──────────────────────────────────────────────
+# Paper sauve les chunks "dirty" en continu via auto-save. Avec ces
+# valeurs, on garde le risque de perte à <1 minute en cas de crash.
+# rate: ticks entre deux passes (6000 ticks = 5 min, défaut Minecraft)
+# max-auto-save-chunks-per-tick: 24 = bon compromis entre IO disque et lag.
+chunks:
+  auto-save-interval: default              # = 6000 ticks (5 min)
+  delay-chunk-unloads-by: 10s
+  entity-per-chunk-save-limit:             # cap pour éviter chunk save lent
+    experience_orb: 16
+    snowball: 8
+    ender_pearl: 8
+    arrow: 16
+    fireball: 8
+    small_fireball: 8
+    item: 32                               # drops empilés : protège du lag
+  flush-regions-on-save: false             # IO async = pas de stall sync
+  max-auto-save-chunks-per-tick: 24
+  prevent-moving-into-unloaded-chunks: true
+  fixed-chunk-inhabited-time: -1
+
+# ─── Entities : caps anti-lag (CRITIQUE pour serveur survie) ──────
+# Sans ces caps, un farm à mob ou un trou avec 500 zombies fait
+# tomber le TPS à 5. Avec, on cap proprement et on jette les
+# entities en surplus. Valeurs équilibrées pour éviter de casser
+# les farms vanilla légitimes.
+entities:
+  spawning:
+    despawn-ranges:
+      ambient:
+        hard: 128
+        soft: 32
+      axolotls:
+        hard: 128
+        soft: 32
+      creature:
+        hard: 128
+        soft: 32
+      misc:
+        hard: 128
+        soft: 32
+      monster:
+        hard: 128
+        soft: 32
+      underground_water_creature:
+        hard: 128
+        soft: 32
+      water_ambient:
+        hard: 64
+        soft: 32
+      water_creature:
+        hard: 128
+        soft: 32
+    per-player-mob-spawns: true            # mobs par joueur, pas global
+    creative-arrow-despawn-rate: 60        # 3 sec (au lieu de jamais)
+    non-player-arrow-despawn-rate: 60
+    monster-spawn-max-light-level: -1
+    spawn-limits:
+      ambient: 15
+      axolotls: 5
+      creature: 10
+      monster: 70
+      underground_water_creature: 5
+      water_ambient: 20
+      water_creature: 5
+    wandering-trader:
+      spawn-chance-failure-increment: 25
+      spawn-chance-max: 75
+      spawn-chance-min: 25
+      spawn-day-length: 24000
+      spawn-minute-length: 1200
+
+  behavior:
+    disable-chest-cat-detection: true      # PERF : évite scan voisinage chest
+    disable-creeper-lingering-effect: false
+    disable-player-crits: false
+    door-breaking-difficulties:
+      husk: [HARD]
+      vindicator: [NORMAL, HARD]
+      zombie: [HARD]
+      zombie_villager: [HARD]
+    experience-merge-max-value: -1
+    parrots-are-unaffected-by-player-movement: false
+    pillager-patrols:
+      disable: false
+      spawn-chance: 0.2
+      spawn-delay:
+        per-player: false
+        ticks: 12000
+      start:
+        day: 5
+        per-player: false
+    phantoms-do-not-spawn-on-creative-players: true
+    phantoms-only-attack-insomniacs: true
+    spawner-nerfed-mobs-should-jump: false
+    zombie-villager-infection-chance: -1.0
+
+  tracking-range-y:
+    enabled: false                         # désactivé = comportement vanilla
+
+# ─── Hopper : coût IO le plus important (à throttle pour TPS) ──────
+hopper:
+  cooldown-when-full: true
+  disable-move-event: false                # NE PAS désactiver : casse certains plugins
+  ignore-occluding-blocks: false
+
+# ─── Misc PERF : éviter les calculs inutiles ───────────────────────
+misc:
+  alternate-current-update-order: HORIZONTAL_FIRST_OUTWARD
+  disable-end-credits: false               # garde les crédits pour le 1er kill
+  disable-relative-projectile-velocity: false
+  disable-sprint-interruption-on-attack: false
+  light-queue-size: 20
+  max-leash-distance: 10.0
+  redstone-implementation: ALTERNATE_CURRENT  # x10 sur la perf redstone
+  shield-blocking-delay: 5
+  show-sign-click-command-failure-msgs-to-player: true
+  update-pathfinding-on-block-update: true
+
+# ─── Lag compensation ──────────────────────────────────────────────
+# Compense le lag réseau côté serveur pour que les blocs cassés
+# pendant un freeze de tick soient validés rétroactivement.
+lag:
+  max-tick-time:
+    entity: 50
+    tile: 50
+
+# ─── Anti-grief minimal (zone de spawn) ────────────────────────────
+spawn:
+  allow-using-signs-inside-spawn-protection: false
+  keep-spawn-loaded: true                  # garde spawn chargé (lobby)
+  keep-spawn-loaded-range: 8               # 8 chunks = 128 blocs autour du spawn
+
+# ─── Maps ─────────────────────────────────────────────────────────
+maps:
+  item-frame-cursor-limit: 128
+  item-frame-cursor-update-interval: 10
+
+# ─── Gameplay tweaks (facultatifs, OK par défaut) ─────────────────
+unsupported-settings:
+  allow-headless-pistons: false
+  allow-permanent-block-break-exploits: false
+  allow-piston-duplication: false
+  allow-tripwire-disarming-exploits: false
+  perform-username-validation: true

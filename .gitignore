@@ -14,6 +14,7 @@
 # ─── Secrets & environnement (CRITIQUE) ────────────────────────────
 .env
 .env.local
+.env.ci                                # résidu obsolète (cf. fichier)
 *.secret
 forwarding.secret
 **/credentials.json

@@ -13,15 +13,16 @@ Pré-requis : Docker installé, ~6 Go RAM disponibles.
 git clone <url-repo> mineshark
 cd mineshark
 
-# 2. Initialise la structure et la config
+# 2. Initialise la structure, la config et les secrets auto-générés
 make init
-# → ça crée .env, data/, backups/
+# → ça crée .env, data/, backups/, data/secrets/rcon.secret
+#   et data/velocity/forwarding.secret (openssl rand -hex 16 chacun)
 
-# 3. Édite .env (au minimum)
+# 3. Édite .env si besoin (une seule clé à remplir à la main) :
 $EDITOR .env
-#   - RCON_PASSWORD : un mot de passe au hasard
-#   - CF_API_KEY    : ta clé CurseForge si tu veux le moddé
-#                     (https://console.curseforge.com/?#/api-keys)
+#   - CF_API_KEY  : ta clé CurseForge si tu veux le moddé
+#                   (https://console.curseforge.com/?#/api-keys)
+#                   Laisse "change-me" pour désactiver le moddé.
 
 # 4. Vérifie que tout est en place
 make doctor
@@ -33,9 +34,18 @@ make docker-up
 make docker-logs
 ```
 
-Connexion : adresse `localhost`, port `25565` (Java) ou `19132` (Bedrock).
+Pour voir les secrets auto-générés (utile pour un outil RCON externe) :
 
-Pour le serveur moddé optionnel (lourd, 3 Go RAM minimum) :
+```bash
+make show-secrets
+```
+
+Connexion :
+- **Java** : `localhost:25565`
+- **Bedrock** : `localhost:19132`
+- **Moddé** (si activé) : `localhost:25566` — serveur standalone, ne passe pas par le proxy
+
+Pour le serveur moddé optionnel (lourd, 3 Go RAM minimum en dev) :
 
 ```bash
 make docker-mod-up
@@ -104,5 +114,7 @@ Tu dois voir :
 
 - **`make up` plante** → lance `kubectl describe pod <nom-pod> -n mineshark` pour la cause exacte
 - **Pas d'IP externe sur Velocity** → le firewall du VPS bloque 25565/19132 (UDP). Voir `vps-setup.md`
+- **Pas d'IP externe sur mc-mod** → même chose, ouvre le port 25566 TCP sur le VPS
 - **Le proxy démarre mais le serveur principal ne peut pas joindre** → vérifier que `velocity-forwarding-secret` est synchronisé entre proxy et backends (`make secrets` puis `make re`)
 - **Modpack ne télécharge pas** → vérifier `CF_API_KEY` valide + `MODPACK_SLUG` existe sur curseforge.com
+- **Port 19132 déjà alloué** → c'est souvent un cluster k3d encore vivant : `docker ps | grep k3d-` puis `k3d cluster delete <nom>` ou `docker stop k3d-<nom>-serverlb`

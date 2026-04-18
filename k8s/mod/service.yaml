@@ -1,16 +1,29 @@
+# ═══════════════════════════════════════════════════════════════════
+#  Service mc-mod
+# ═══════════════════════════════════════════════════════════════════
+#  Exposé publiquement en LoadBalancer : le serveur moddé est
+#  standalone (pas derrière Velocity, cf. docs/architecture.md).
+#
+#  Sur K3s, le provider LoadBalancer par défaut est ServiceLB
+#  (klipper-lb) : il alloue directement le port sur le nœud, donc
+#  le PORT_MOD doit être ouvert côté firewall VPS.
+#
+#  Port RCON (25575) reste en ClusterIP interne — accessible
+#  uniquement via `kubectl exec`, jamais exposé au Net.
+# ═══════════════════════════════════════════════════════════════════
 apiVersion: v1
 kind: Service
 metadata:
   name: mc-mod
   namespace: mineshark
+  labels:
+    app: mc-mod
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: mc-mod
   ports:
     - name: minecraft
-      port: 25565
-      targetPort: 25565
-    - name: rcon
-      port: 25575
-      targetPort: 25575
+      port: 25566          # synced with .env PORT_MOD
+      targetPort: 25565    # port interne Paper/NeoForge standard
+      protocol: TCP

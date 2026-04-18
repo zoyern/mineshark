@@ -33,6 +33,12 @@ spec:
         app: velocity
         component: proxy
     spec:
+      # Sécurité pod-level : non-root (initContainers + container inclus)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       initContainers:
 
         # 1. Télécharge les plugins (idempotent : skip si déjà présent)
@@ -67,23 +73,37 @@ spec:
             - name: velocity-data
               mountPath: /server
 
-        # 2. Copie velocity.toml depuis la ConfigMap dans le PVC writable
+        # 2. Copie velocity.toml depuis la ConfigMap + écrit le forwarding
+        #    secret dans le PVC (pour que le proxy et les backends partagent
+        #    LE MÊME secret — critique pour l'auth en mode "modern").
         - name: copy-config
           image: busybox:1.36.1
           command: ["sh", "-c"]
           args:
             - |
+              set -e
               cp /config/velocity.toml /server/velocity.toml
-              echo "✓ velocity.toml synchronisé"
+              # Velocity lit le secret depuis /server/forwarding.secret.
+              # On écrase toujours pour garantir la cohérence avec les backends.
+              cp /secret/forwarding-secret /server/forwarding.secret
+              chmod 600 /server/forwarding.secret
+              echo "✓ velocity.toml + forwarding.secret synchronisés"
           volumeMounts:
             - name: velocity-config
               mountPath: /config
+            - name: velocity-forwarding
+              mountPath: /secret
+              readOnly: true
             - name: velocity-data
               mountPath: /server
 
       containers:
         - name: velocity
           image: itzg/mc-proxy:java21      # synced with .env IMG_PROXY
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           env:
             - name: TYPE
               value: VELOCITY
@@ -122,6 +142,10 @@ spec:
         - name: velocity-config
           configMap:
             name: velocity-config
+        - name: velocity-forwarding
+          secret:
+            secretName: velocity-forwarding-secret
+            defaultMode: 0400
         - name: velocity-data
           persistentVolumeClaim:
             claimName: server-proxy-pvc

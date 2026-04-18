@@ -1,0 +1,130 @@
+# ═══════════════════════════════════════════════════════════════════
+#  MineShark — purpur.yml (features Purpur globales)
+# ═══════════════════════════════════════════════════════════════════
+#  Purpur ajoute ~250 toggles vs Paper. On active ici ceux qui
+#  apportent du gameplay sympa (lobby + survie) sans casser la
+#  vanilla feel pour les joueurs survie.
+#
+#  Doc complète : https://purpurmc.org/docs/Configuration/
+#
+#  Les overrides PAR MONDE vont dans /data/<world>/purpur-world.yml
+#  (utile : double-jump uniquement sur le lobby, etc.).
+# ═══════════════════════════════════════════════════════════════════
+
+settings:
+  # Save user-cache à chaque arrêt + autoadd vanilla quand un joueur
+  # rejoint pour la première fois. Évite de perdre les UUID au crash.
+  save-user-cache-on-stop-only: false
+
+  # Tab-list : hauteur max des sections (utile avec Multiverse)
+  player-list:
+    rgb-tab-list-name: false
+    use-display-name: false
+
+  # AFK : Purpur peut auto-kick les joueurs AFK pour libérer un slot
+  afk:
+    tick-nearby-entities: false            # AFK = ne tick rien autour (PERF)
+    time: 600                              # 10 min avant marqué AFK
+    kick:
+      enabled: false                       # ne kick pas auto (préf perso)
+      time: 1800                           # si activé : 30 min
+      message: <yellow>Vous avez été kick pour AFK
+    broadcast:
+      enabled: true
+      afk: <yellow>%s est maintenant AFK
+      back: <yellow>%s est de retour
+
+  # Anchor : explosion partout, pas que dans le Nether (vanilla)
+  blocks:
+    respawn_anchor:
+      explode: true
+      explode-power: 5.0
+      explode-fire: true
+      explode-effect-radius: 0
+      enabled-in:
+      - minecraft:the_nether                # vanilla
+      - minecraft:the_end                   # bonus Purpur
+
+  # Persistent dimension storage : permet à Multiverse de restaurer
+  # les seeds custom au reboot sans regénérer les chunks.
+  use-alternate-keepalive: false
+  use-flying-fall-damage: false
+
+# ─── World-defaults : appliqué à tous les mondes ──────────────────
+world-settings:
+  default:
+    # Gameplay & QoL
+    gameplay-mechanics:
+      arrow-movement-resets-despawn-counter: false
+      boats:
+        do-fall-damage: false
+        eject-passengers-on-land: false
+      disable-give-dropping: false
+      disable-mob-spawner-spawn-egg-transformation: false
+      disable-observer-clocks: false
+      disable-poi-update-on-block-update: false
+      drops-from-feeding-dolphin: true
+      no-tick-view-distance: -1
+      persistent-tileentity-display-names: true
+      persistent-tileentity-lore: true
+      player:
+        breath-multiplier: 1.0
+        burp-when-full: false
+        eat-cake-without-being-hungry: false
+        feed-saturation: 1.0
+        idle-timeout-rotate-yaw: false
+        idle-timeout-target-player: false
+        idle-timeout-tick-nearby-entities: false
+        infinite-tools:
+          enabled: false
+        sleep-near-monsters:
+          enabled: false                    # gameplay survie classique
+          distance: 8.0
+        teleport-if-outside-border: true
+        totem-of-undying:
+          works-in-inventory: false
+        utility-belt:
+          enabled: false                    # purpur feature optionnelle
+      shovel-turns-block-into-grass-path: true
+      use-better-double-tall-grass-drops: true
+
+    # Mob caps stricts (perf)
+    mobs:
+      villager:
+        bypass-mob-griefing: false
+        clerics-farm-warts: false
+        lobotomize:
+          enabled: true                    # PERF : villagers immobiles = pas de pathfinding
+          check-interval: 100              # tous les 5s
+        spawn-iron-golem:
+          radius: 0
+          limit: 0
+
+    # PvP & combat (laisse vanilla feel)
+    pvp:
+      damage-absorbed-by-shields:
+        affects-durability: true
+        percent: 100.0
+      disable-knockback: false
+
+    # Lobby specific (override per-world via lobby/purpur-world.yml)
+    movement:
+      double-jump:
+        enabled: false                     # désactivé global, ON sur lobby
+        add-velocity: 0.5
+      strider-step-down: false
+
+    # Timings + sécurité
+    seed:
+      structure-seed: -1
+      slime-seed: -1
+
+# ─── Commandes Purpur custom (toutes désactivées par défaut) ──────
+# /uptime /credits etc. À activer si on en veut côté admin.
+command:
+  fixedtime:
+    enabled: false
+  ping:
+    enabled: true
+  uptime:
+    enabled: true

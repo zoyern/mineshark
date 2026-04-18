@@ -1,0 +1,43 @@
+# ═══════════════════════════════════════════════════════════════════
+#  ConfigMap mineshark-paper-config
+# ═══════════════════════════════════════════════════════════════════
+#  Porte les YAML de tuning Paper/Purpur (config/*.yml) jusque dans
+#  /config du container minecraft. itzg les copie ensuite dans /data
+#  au 1er boot via la variable d'env COPY_CONFIG_DEST.
+#
+#  Cette version committée est un SQUELETTE minimal pour que le
+#  Deployment n'échoue pas au clone initial. Les vraies valeurs sont
+#  dans config/*.yml et sont poussées au cluster via :
+#
+#      make sync-paper-config
+#
+#  qui fait : kubectl create configmap mineshark-paper-config \
+#               --from-file=paper-global.yml=config/paper-global.yml \
+#               --from-file=paper-world-defaults.yml=config/paper-world-defaults.yml \
+#               --from-file=purpur.yml=config/purpur.yml \
+#               --namespace=mineshark --dry-run=client -o yaml \
+#             | kubectl apply -f -
+#
+#  Le Deployment monte cette ConfigMap en `optional: true` pour que
+#  `kubectl apply -f k8s/main/` fonctionne même avant le 1er sync.
+# ═══════════════════════════════════════════════════════════════════
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mineshark-paper-config
+  namespace: mineshark
+  labels:
+    app: mc-main
+    component: config
+data:
+  # Placeholder — remplacé par `make sync-paper-config`.
+  # Le vrai contenu est dans config/paper-global.yml.
+  paper-global.yml: |
+    # Bootstrap placeholder. Run `make sync-paper-config` to populate.
+    _version: 31
+  paper-world-defaults.yml: |
+    # Bootstrap placeholder. Run `make sync-paper-config` to populate.
+    _version: 31
+  purpur.yml: |
+    # Bootstrap placeholder. Run `make sync-paper-config` to populate.
+    settings: {}

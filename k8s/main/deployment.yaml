@@ -1,9 +1,13 @@
 # ═══════════════════════════════════════════════════════════════════
-#  Deployment mc-main (serveur Paper — lobby + survie)
+#  Deployment mc-main (serveur Purpur — lobby + survie)
 # ═══════════════════════════════════════════════════════════════════
 #  Aligné avec docker-compose.yml service `main-paper`.
 #  Toute valeur en dur ici est marquée « synced with .env <VAR> ».
 #  Si tu changes la VAR dans .env, change ici aussi.
+#
+#  Purpur = fork Pufferfish ⊂ Paper. 100% compat plugins Paper.
+#  Features ajoutées : double-jump lobby, mobs rideables, AFK, etc.
+#  (voir docs/forks-comparison.md pour la liste exhaustive).
 # ═══════════════════════════════════════════════════════════════════
 apiVersion: apps/v1
 kind: Deployment
@@ -26,14 +30,24 @@ spec:
         app: mc-main
         component: server
     spec:
+      # Sécurité pod-level : non-root, FS cohérent avec PVC (1000:1000)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: minecraft
           image: itzg/minecraft-server:java21    # synced with .env IMG_SERVER
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           env:
             - name: EULA
               value: "TRUE"
             - name: TYPE
-              value: PAPER
+              value: PURPUR                      # synced with .env SERVER_TYPE
             - name: VERSION
               value: "1.21.4"                    # synced with .env PAPER_VERSION
             - name: MEMORY
@@ -56,8 +70,10 @@ spec:
               value: "50"                                   # synced with .env MAIN_MAX_PLAYERS
             - name: DIFFICULTY
               value: "normal"                               # synced with .env DIFFICULTY_MAIN
+            # 0 = désactivé (utile en lobby : WorldGuard fera la protection
+            # de façon plus fine via régions).
             - name: SPAWN_PROTECTION
-              value: "16"
+              value: "0"
 
             - name: VIEW_DISTANCE
               value: "8"                                    # synced with .env VIEW_DISTANCE
@@ -76,10 +92,14 @@ spec:
 
             # Plugins via Modrinth — résolution automatique des versions
             - name: MODRINTH_PROJECTS
-              value: "floodgate,luckperms,worldedit,worldguard,coreprotect,multiverse-core,placeholderapi,spark,chunky,decent-holograms"   # synced with .env PLUGINS_MODRINTH
-            # Floodgate : pas sur Modrinth → URL directe GeyserMC
+              value: "floodgate,luckperms,worldedit,worldguard,coreprotect,multiverse-core,placeholderapi,spark,chunky,decent-holograms,essentialsx,vault,protocollib,hibernation"   # synced with .env PLUGINS_MODRINTH
+            # Hors-Modrinth : Floodgate (GeyserMC) + ViaVersion/ViaBackwards
+            # (laisse les clients 1.8 → 1.21 tous se connecter sur un 1.21).
             - name: PLUGINS
-              value: "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot"
+              value: |-
+                https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
+                https://github.com/ViaVersion/ViaVersion/releases/download/5.8.0/ViaVersion-5.8.0.jar
+                https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar
 
           ports:
             - containerPort: 25565
@@ -93,19 +113,31 @@ spec:
             limits:
               memory: "4Gi"      # = MAIN_MEMORY (3G) + 30% marge JVM
               cpu: "2000m"
+          # Probes — Purpur 1.21 + plugins = 90-120s au 1er boot.
+          # On tolère jusqu'à 180s + 3 échecs avant liveness kill.
           readinessProbe:
             exec: { command: ["mc-health"] }
-            initialDelaySeconds: 60
+            initialDelaySeconds: 90
             periodSeconds: 10
+            failureThreshold: 3
           livenessProbe:
             exec: { command: ["mc-health"] }
-            initialDelaySeconds: 120
+            initialDelaySeconds: 180
             periodSeconds: 30
             failureThreshold: 3
           volumeMounts:
             - name: data
               mountPath: /data
+            # ConfigMap mineshark-paper-config (généré par `make secrets`)
+            # monte les YAML de tuning au 1er boot — itzg les copie dans /data.
+            - name: server-config
+              mountPath: /config
+              readOnly: true
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: server-main-pvc
+        - name: server-config
+          configMap:
+            name: mineshark-paper-config
+            optional: true          # tolère l'absence en dev, utile en CI dry-run

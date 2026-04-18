@@ -15,8 +15,16 @@ Tout passe par `make`. Aucune commande Docker ou kubectl à taper à la main.
 ```bash
 git clone <url-repo> mineshark
 cd mineshark
-cp .env.example .env
-# Édite .env (au minimum : RCON_PASSWORD et CF_API_KEY si tu veux le moddé)
+
+# 1. Init : crée data/, backups/, .env, et génère les secrets auto
+#    (RCON + Velocity forwarding, tous dans data/secrets/)
+make init
+
+# 2. Édite .env — seule clé à remplir à la main : CF_API_KEY (modpack)
+#    Tout le reste a des valeurs par défaut qui marchent.
+
+# 3. Vérifie que tout est en place
+make doctor
 
 # En local (Docker Compose) :
 make docker-up
@@ -35,10 +43,14 @@ C'est tout. Voir `make help` pour la liste des commandes.
                       ┌─────────────────────┐
    Joueur Java ───►   │                     │  ───► mc-main  (Paper, lobby+survie)
                       │   Velocity Proxy    │
-   Joueur Bedrock ──► │   :25565 / :19132   │  ───► mc-mod   (NeoForge, optionnel)
+   Joueur Bedrock ──► │   :25565 / :19132   │
                       │                     │
                       └─────────────────────┘
+
+   Joueur moddé ─────────────────────────────► mc-mod  (NeoForge, :25566, standalone)
 ```
+
+Le serveur moddé est volontairement **hors Velocity** : le proxy force un protocole vanilla incompatible NeoForge. Il s'accède donc directement via l'IP du VPS sur le port `25566`.
 
 Le proxy Velocity est le **seul** point d'entrée public. Les serveurs MC backend ne sont jamais joints directement par les joueurs (sécurité + fluidité).
 
@@ -54,6 +66,7 @@ Détails complets : voir [`docs/architecture.md`](docs/architecture.md).
 | [`docs/architecture.md`](docs/architecture.md) | Comprendre la stack en profondeur |
 | [`docs/vps-setup.md`](docs/vps-setup.md) | Préparer un VPS Netcup avec K3s |
 | [`docs/plugins.md`](docs/plugins.md) | Liste des plugins + comment en ajouter |
+| [`docs/maps-migration.md`](docs/maps-migration.md) | Récupérer les maps 1.8 de l'ancien serveur vers 1.21 |
 
 ---
 
@@ -82,9 +95,11 @@ make docker-down
 make docker-re
 
 # Administration
+make init           # init complète : dossiers + .env + secrets
 make ssh            # SSH au VPS (cf. .env)
 make backup         # backup manuel des données
 make doctor         # vérifie env + cohérence config
+make show-secrets   # affiche les secrets auto-générés (RCON, forwarding)
 ```
 
 ---
@@ -103,20 +118,22 @@ make doctor         # vérifie env + cohérence config
 
 ## Sécurité
 
-- Aucun secret n'est commité (`.env`, RCON password, CurseForge key, Velocity forwarding secret).
-- L'IP du VPS est dans `.env` (gitignored) — repo publiable sans fuite.
-- Les serveurs backend (`mc-main`, `mc-mod`) ne sont accessibles qu'au proxy via le réseau interne K8s (`ClusterIP`).
-- Le proxy authentifie les joueurs (`online-mode = true` côté Velocity), les backends font confiance via le forwarding secret.
+- Aucun secret n'est commité. Les deux secrets auto-générés (`rcon.secret`, `forwarding.secret`) vivent dans `data/secrets/` et `data/velocity/` — les deux gitignored.
+- La seule clé à remplir à la main est `CF_API_KEY` (CurseForge) dans `.env`, gitignored lui aussi.
+- L'IP du VPS est dans `.env` — repo publiable sans fuite.
+- Le serveur principal `mc-main` est joignable uniquement par Velocity (Service K8s `ClusterIP`).
+- Le serveur moddé `mc-mod` est publiquement joignable sur son propre port (`PORT_MOD=25566`) : Velocity ne peut pas proxy NeoForge. Ça reste sans risque car la sécurité repose sur `online-mode = true` + RCON isolé en ClusterIP.
+- Le forwarding secret Velocity est **partagé** entre le proxy et les backends via un seul fichier (`data/velocity/forwarding.secret`) monté en K8s Secret et en volume Docker.
 
 ---
 
 ## Statut & feuille de route
 
 - [x] Phase 0 — Cross-play Java + Bedrock fonctionnel
-- [x] Phase 1 — Repo propre, config centralisée, K3s + Docker alignés
-- [ ] Phase 2 — Lobby Skywars (récupérer les maps de l'ancien serveur)
-- [ ] Phase 3 — Domaine + TCPShield + Let's Encrypt
-- [ ] Phase 4 — Site web + CMS custom relié au serveur
+- [x] Phase 1 — Repo propre, config centralisée, K3s + Docker alignés, CI lint
+- [ ] Phase 2 — Lobby + Skywars (récupérer les maps de l'ancien serveur — cf. `docs/maps-migration.md`)
+- [ ] Phase 3 — Domaine + TCPShield + anti-cheat Grim
+- [ ] Phase 4 — Site Next.js + API NestJS + Postgres (cf. `web/`, `api/`, `k8s/postgres/`)
 
 ---
 

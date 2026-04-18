@@ -1,0 +1,111 @@
+# ═══════════════════════════════════════════════════════════════════
+#  MineShark — paper-global.yml (configuration globale Paper/Purpur)
+# ═══════════════════════════════════════════════════════════════════
+#  Ce fichier ne contient QUE les overrides importants. Paper merge
+#  avec ses defaults au boot, donc inutile de redéfinir toutes les
+#  centaines d'options vanilla. Pour les explorer : doc officielle
+#  → https://docs.papermc.io/paper/reference/global-configuration
+#
+#  Au premier boot, itzg copie ce fichier dans /data/config/ via
+#  la variable d'environnement COPY_CONFIG_DEST=/data. Ensuite tu
+#  peux l'éditer en place côté hôte (./data/main/config/paper-global.yml).
+#
+#  Règle MineShark : on touche le moins possible aux defaults vanilla
+#  et on garde les optims côté Purpur (qui est plus orienté gameplay).
+# ═══════════════════════════════════════════════════════════════════
+
+_version: 29
+
+# ─── Sécurité : anti-xray (CRITIQUE pour serveur public) ───────────
+# Paper masque les blocs minerais aux clients qui n'ont pas la
+# ligne de vue → les xray clients voient de la pierre partout.
+# Coût perf négligeable, gain anti-cheat énorme.
+anticheat:
+  obfuscation:
+    items:
+      all-models:
+        also-obfuscate: []
+        dont-obfuscate:
+        - minecraft:lodestone_tracker
+        sanitize-count: true
+      enable-item-obfuscation: true       # ← activé (était false)
+      model-overrides:
+        minecraft:elytra:
+          also-obfuscate: []
+          dont-obfuscate:
+          - minecraft:damage
+          sanitize-count: true
+
+# ─── Chunks : tuning IO + threads (perf serveur) ───────────────────
+# -1 = auto (Paper choisit selon le nombre de cœurs CPU disponibles).
+# Sur VPS Netcup KVM 4 vCPU partagés, laisser auto donne le meilleur
+# compromis. Forcer 2/2 si on observe du throttling CPU avec `spark`.
+chunk-system:
+  gen-parallelism: default
+  io-threads: -1
+  worker-threads: -1
+
+chunk-loading-basic:
+  player-max-chunk-generate-rate: -1.0    # pas de cap (CPU dispo en idle)
+  player-max-chunk-load-rate: 100.0
+  player-max-chunk-send-rate: 75.0
+
+# ─── Logs ──────────────────────────────────────────────────────────
+logging:
+  deobfuscate-stacktraces: true            # stacks lisibles si Paper crash
+
+# ─── Anti-flood paquets (déjà bon par défaut, on le rappelle) ──────
+packet-limiter:
+  all-packets:
+    action: KICK
+    interval: 7.0
+    max-packet-rate: 500.0
+  kick-message: <red><lang:disconnect.exceeded_packet_rate>
+
+# ─── Misc : détails qui économisent de la RAM ──────────────────────
+misc:
+  fix-entity-position-desync: true         # corrige des bugs de position
+  load-permissions-yml-before-plugins: true
+  max-joins-per-tick: 5                    # évite le lag massif au reboot
+  region-file-cache-size: 256              # 256 = défaut, OK pour 8 Go RAM
+
+# ─── Velocity (modern forwarding) ──────────────────────────────────
+# Le secret est injecté via PAPER_VELOCITY_SECRET / PAPER_VELOCITY_SECRET_FILE
+# (cf. docker-compose.yml + k8s/main/deployment.yaml). Cette section dit
+# juste à Paper d'attendre Velocity en upstream et de refuser tout
+# client qui n'arrive pas via ce proxy.
+proxies:
+  bungee-cord:
+    online-mode: true
+  proxy-protocol: false                    # haproxy n'est pas devant ici
+  velocity:
+    enabled: true
+    online-mode: true
+    secret: ''                             # rempli par le secret monté
+
+# ─── Spam-limites (bonnes valeurs serveur public) ──────────────────
+spam-limiter:
+  incoming-packet-threshold: 300
+  recipe-spam-increment: 1
+  recipe-spam-limit: 20
+  tab-spam-increment: 1
+  tab-spam-limit: 500
+  use-alternative-keepalive: false
+
+# ─── Watchdog ──────────────────────────────────────────────────────
+# Paper kill le serveur si un tick prend > X sec (évite serveur zombie).
+# 60s = défaut, OK. Baisser à 30s donne un restart plus rapide en cas de
+# freeze, mais peut tuer un /chunky run lourd. Reste à 60s pour tolérance.
+watchdog:
+  early-warning-delay: 10000
+  early-warning-every: 5000
+
+# ─── Item entities (drops) ─────────────────────────────────────────
+item-validation:
+  book:
+    author: 8192
+    page: 16384
+    title: 8192
+  display-name: 8192
+  lore-line: 8192
+  resolve-selectors-in-books: false

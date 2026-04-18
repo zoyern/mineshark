@@ -1,7 +1,13 @@
 # ═══════════════════════════════════════════════════════════════════
-#  Deployment mc-mod (serveur moddé NeoForge — opt-in)
+#  Deployment mc-mod (serveur moddé NeoForge — opt-in, STANDALONE)
 # ═══════════════════════════════════════════════════════════════════
 #  Démarré à replicas=0 par défaut. Activation : `make mod-on`.
+#
+#  Standalone = pas derrière Velocity :
+#    • ONLINE_MODE=TRUE (auth Mojang directe depuis le client)
+#    • Pas de PAPER_VELOCITY_SECRET
+#    • Port public propre via Service LoadBalancer (PORT_MOD, défaut 25566)
+#  Raison : Velocity force un protocole qui casse NeoForge.
 #
 #  Pour CHANGER de modpack :
 #    1. Modifier MODPACK_SLUG dans .env
@@ -32,6 +38,12 @@ spec:
         app: mc-mod
         component: server
     spec:
+      # Sécurité pod-level : non-root partout
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       initContainers:
         # Mods de performance server-side (ajoutés au modpack au boot)
         - name: download-perf-mods
@@ -65,6 +77,10 @@ spec:
       containers:
         - name: minecraft
           image: itzg/minecraft-server:java21      # synced with .env IMG_SERVER
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           env:
             - name: EULA
               value: "TRUE"
@@ -82,8 +98,9 @@ spec:
               value: "8G"                          # synced with .env MOD_MEMORY
             - name: USE_AIKAR_FLAGS
               value: "true"
+            # Standalone : le client s'authentifie directement auprès de Mojang
             - name: ONLINE_MODE
-              value: "FALSE"
+              value: "TRUE"
 
             - name: MOTD
               value: "§b§lMineShark §7- §cModdé"   # synced with .env MOD_MOTD

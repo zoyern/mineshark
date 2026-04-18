@@ -32,10 +32,11 @@ data:
     online-mode = true
     force-key-authentication = true
     player-info-forwarding-mode = "modern"
+    # Le moddé n'est pas derrière Velocity (NeoForce ≠ protocole vanilla).
+    # Il est exposé directement sur son propre Service LoadBalancer.
     [servers]
       main = "mc-main:25565"
-      mod  = "mc-mod:25565"
-      try = ["main"]
+      try  = ["main"]
     [forced-hosts]
     [advanced]
       compression-threshold = 256
