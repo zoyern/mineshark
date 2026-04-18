@@ -64,7 +64,7 @@ spec:
 
               fetch Geyser-Velocity.jar     "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/velocity"
               fetch Floodgate-Velocity.jar  "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/velocity"
-              fetch ViaVersion.jar          "https://github.com/ViaVersion/ViaVersion/releases/download/5.8.0/ViaVersion-5.8.0.jar"
+              fetch ViaVersion.jar          "https://github.com/ViaVersion/ViaVersion/releases/download/5.8.1/ViaVersion-5.8.1.jar"
               fetch ViaBackwards.jar        "https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar"
 
               echo "── Plugins prêts :"

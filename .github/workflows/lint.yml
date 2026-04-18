@@ -55,24 +55,28 @@ jobs:
       - name: docker compose config -q
         run: docker compose config -q
 
-  k8s-dry-run:
-    name: kubectl dry-run côté client
+  k8s-validate:
+    name: Manifestes k8s (kubeconform)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: azure/setup-kubectl@v4
-        with:
-          version: "latest"
+      - name: Install kubeconform
+        run: |
+          # kubeconform = validation offline des manifestes k8s (schémas OpenAPI
+          # embarqués). Contrairement à kubectl apply --dry-run=client qui
+          # exige un cluster joignable, kubeconform marche sans cluster.
+          curl -sSL -o /tmp/kc.tar.gz \
+            https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf /tmp/kc.tar.gz -C /tmp kubeconform
+          sudo mv /tmp/kubeconform /usr/local/bin/
       - name: Valide tous les manifestes
         run: |
-          # --validate=false : en CI y'a pas de cluster joignable, donc
-          # kubectl ne peut pas télécharger l'OpenAPI. On valide juste le
-          # parsing YAML/structure. Pour une vraie validation de schéma,
-          # passer à kubeconform plus tard (offline + schémas CRD).
-          for dir in k8s/base k8s/velocity k8s/main k8s/mod; do
-            echo "▶ dry-run $dir"
-            kubectl apply --dry-run=client --validate=false -f "$dir/" || exit 1
-          done
+          # -strict : refuse les champs inconnus (= coquilles)
+          # -ignore-missing-schemas : tolère les CRDs tiers non reconnus
+          #   (ex : Traefik IngressRoute si on en ajoute un jour)
+          kubeconform -strict -ignore-missing-schemas \
+            -summary \
+            k8s/base/ k8s/velocity/ k8s/main/ k8s/mod/
 
   shellcheck:
     name: Shell scripts (shellcheck)

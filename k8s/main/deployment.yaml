@@ -1,13 +1,13 @@
 # ═══════════════════════════════════════════════════════════════════
-#  Deployment mc-main (serveur Purpur — lobby + survie)
+#  Deployment mc-main (serveur Paper — lobby + survie)
 # ═══════════════════════════════════════════════════════════════════
 #  Aligné avec docker-compose.yml service `main-paper`.
 #  Toute valeur en dur ici est marquée « synced with .env <VAR> ».
 #  Si tu changes la VAR dans .env, change ici aussi.
 #
-#  Purpur = fork Pufferfish ⊂ Paper. 100% compat plugins Paper.
-#  Features ajoutées : double-jump lobby, mobs rideables, AFK, etc.
-#  (voir docs/forks-comparison.md pour la liste exhaustive).
+#  Paper = standard de facto, meilleure matrice plugins Modrinth.
+#  Pour rebasculer vers Purpur : change TYPE ici + .env + remount
+#  config/purpur.yml (voir docs/forks-comparison.md).
 # ═══════════════════════════════════════════════════════════════════
 apiVersion: apps/v1
 kind: Deployment
@@ -47,7 +47,7 @@ spec:
             - name: EULA
               value: "TRUE"
             - name: TYPE
-              value: PURPUR                      # synced with .env SERVER_TYPE
+              value: PAPER                       # synced with .env SERVER_TYPE
             - name: VERSION
               value: "1.21.4"                    # synced with .env PAPER_VERSION
             - name: MEMORY
@@ -93,10 +93,7 @@ spec:
             # Plugins via Modrinth — résolution automatique des versions
             # (synced avec .env PLUGINS_MODRINTH)
             - name: MODRINTH_PROJECTS
-              value: >-
-                luckperms,essentialsx,worldedit,worldguard,coreprotect,
-                multiverse-core,decentholograms,placeholderapi,spark,
-                chunky,floodgate
+              value: "luckperms,essentialsx,worldedit,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,spark,chunky"
             # Plugins SpigotMC (pas dispos sur Modrinth) : Vault (34315),
             # ProtocolLib (1997). Synced avec .env PLUGINS_SPIGET.
             - name: SPIGET_RESOURCES
@@ -106,7 +103,7 @@ spec:
             - name: PLUGINS
               value: |-
                 https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
-                https://github.com/ViaVersion/ViaVersion/releases/download/5.8.0/ViaVersion-5.8.0.jar
+                https://github.com/ViaVersion/ViaVersion/releases/download/5.8.1/ViaVersion-5.8.1.jar
                 https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar
 
           ports:

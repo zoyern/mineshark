@@ -39,7 +39,7 @@ services:
       PLUGINS: |
         https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/velocity
         https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/velocity
-        https://github.com/ViaVersion/ViaVersion/releases/download/5.8.0/ViaVersion-5.8.0.jar
+        https://github.com/ViaVersion/ViaVersion/releases/download/5.8.1/ViaVersion-5.8.1.jar
         https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar
     ports:
       - "${PORT_JAVA:-25565}:25577"           # Java
@@ -58,11 +58,12 @@ services:
       start_period: 10s
 
 
-  # ─── Serveur principal Purpur (lobby + survie, derrière Velocity) ─
-  # Purpur = fork de Pufferfish (lui-même fork de Paper). Hérite des
-  # optimisations de perf de Pufferfish + ajoute des features gameplay
-  # (double-jump, lobby AFK, ride mobs, recettes custom, etc.).
-  # 100% compatible plugins Paper, aucune bascule code nécessaire.
+  # ─── Serveur principal Paper (lobby + survie, derrière Velocity) ─
+  # Paper = standard de facto de l'écosystème, maintenu par PaperMC.
+  # Meilleure matrice de compatibilité plugins sur Modrinth (certains
+  # plugins ne publient pas pour loader purpur). Peut être re-basculé
+  # vers PURPUR dans .env quand on aura besoin des features gameplay
+  # (double-jump lobby, ride mobs, AFK custom).
   main-paper:
     image: ${IMG_SERVER:-itzg/minecraft-server:java21}
     container_name: ms-main
@@ -74,7 +75,7 @@ services:
         condition: service_healthy
     environment:
       EULA: "TRUE"
-      TYPE: PURPUR                # synced with .env SERVER_TYPE
+      TYPE: ${SERVER_TYPE:-PAPER}    # PAPER par défaut, cf .env
       VERSION: ${PAPER_VERSION:-1.21.4}
       MEMORY: ${MAIN_MEMORY:-3G}
       USE_AIKAR_FLAGS: "true"
@@ -106,7 +107,7 @@ services:
       # (permet aux clients MC 1.8 → 1.21 de se connecter sur un serveur 1.21).
       PLUGINS: |
         https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
-        https://github.com/ViaVersion/ViaVersion/releases/download/5.8.0/ViaVersion-5.8.0.jar
+        https://github.com/ViaVersion/ViaVersion/releases/download/5.8.1/ViaVersion-5.8.1.jar
         https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar
 
       # Pre-pull des configs Paper/Purpur optimisées au 1er boot.
