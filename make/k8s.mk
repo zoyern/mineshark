@@ -16,9 +16,12 @@ up: gen-secrets secrets sync-velocity-config sync-paper-config _apply ## Déploi
 _apply:
 	@echo "▶ Apply manifestes K8s …"
 	@kubectl apply -f $(K8S_DIR)/base/
-	@kubectl apply -f $(K8S_DIR)/velocity/
-	@kubectl apply -f $(K8S_DIR)/main/
-	@kubectl apply -f $(K8S_DIR)/mod/
+	@# On exclut les configmap.yaml (placeholders) pour ne pas écraser le
+	@# contenu poussé par sync-velocity-config / sync-paper-config.
+	@# Les ConfigMaps réelles sont produites par les cibles sync-*.
+	@find $(K8S_DIR)/velocity $(K8S_DIR)/main $(K8S_DIR)/mod \
+	    -maxdepth 1 -name '*.yaml' -not -name 'configmap.yaml' \
+	    -exec kubectl apply -f {} \;
 	@echo "✓ MineShark déployé. Voir l'état : make status"
 
 
