@@ -29,10 +29,12 @@ jobs:
       - name: yamllint
         run: |
           pip install yamllint
-          # relaxed : tolère les lignes longues et la 1ère ligne sans ---
+          # relaxed + line-length bumpée à 160 (nos manifestes k8s ont des
+          # args + env inline qui dépassent 80 chars — normal et lisible).
           # On inclut config/ pour attraper les coquilles dans paper/purpur.yml
           # (ils sont critiques — une faute plante le serveur au boot).
-          yamllint -d relaxed \
+          yamllint \
+            -d "{extends: relaxed, rules: {line-length: {max: 160}}}" \
             docker-compose.yml \
             docker-compose.override.yml \
             k8s/ \

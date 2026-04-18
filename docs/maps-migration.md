@@ -131,7 +131,11 @@ Un seul warning est une **vraie** erreur dans tes logs actuels :
 
 Connecte-toi en OP sur le serveur 1.8 (normalement ton pseudo est déjà dans `ops.json` ou `ops.txt`).
 
-Pour chaque zone à sauver (lobby, hub SkyWars, chaque map SkyWars, spawn…) :
+> ⚠️ **Syntaxe WorldEdit 6.1 (Spigot 1.8.7) — piège important** : la commande est `//schem save <format> <nom>` (format **avant** nom), pas l'inverse. Le format à utiliser est `mce` (MCEdit legacy `.schematic`). Le flag `fast` **n'existe pas** en WE 6.1 — il a été introduit dans WE 7.x/FAWE. Si tu tapes `//schem save hub-skywars fast` sur ton vieux serveur, tu obtiens `Unknown schematic format: hub-skywars` parce que WE interprète `hub-skywars` comme un nom de format.
+>
+> **Règle mnémo pour ce serveur 1.8** : `//schem save mce <nom>` — et seulement ça.
+
+Pour chaque zone à sauver (hub SkyWars, chaque map SkyWars, spawn, lobby, salon de jeux, survival games…) :
 
 ```
 # Place-toi au coin 1 de la zone
@@ -141,19 +145,29 @@ Pour chaque zone à sauver (lobby, hub SkyWars, chaque map SkyWars, spawn…) :
 //pos2
 
 # Enregistre (le fichier part dans plugins/WorldEdit/schematics/)
-//schematic save <nom> fast
+//schem save mce <nom>
 
-# Exemple
-//schematic save lobby-hub fast
-//schematic save skywars-desert fast
-//schematic save skywars-jungle fast
+# Exemple — on préfixe par destination future sur le nouveau serveur :
+//schem save mce hub-skywars          # le hub d'attente SkyWars → deviendra un coin du hub principal
+//schem save mce sw-desert            # map SkyWars "desert"
+//schem save mce sw-jungle            # map SkyWars "jungle"
+//schem save mce sg-spawn             # spawn Survival Games
+//schem save mce lobby-old            # l'ancien lobby 1.8 (pour référence / nostalgie)
 ```
+
+Convention de nommage conseillée (elle nous sert ensuite au moment de l'import) :
+
+- `hub-<zone>` → blocs destinés au nouveau `hub` (le lobby principal sur le serveur Purpur).
+- `sw-<nom>` → map SkyWars individuelle.
+- `sg-<nom>` → map Survival Games.
+- `mg-<nom>` → mini-game générique (1v1, parkour, etc.).
+- `old-<nom>` → archive brute, « tel quel en 2016 », qu'on ne retouchera pas.
 
 **Option A — sélection par WorldGuard** : si tu avais des régions WorldGuard qui délimitent tes maps, tu peux cibler la région directement :
 
 ```
 //rg lobby
-//schematic save lobby-hub fast
+//schem save mce hub-old
 ```
 
 **Option B — sélection large** (si tu connais juste un block central) :
@@ -166,8 +180,10 @@ Pour chaque zone à sauver (lobby, hub SkyWars, chaque map SkyWars, spawn…) :
 //expand 200 south
 //expand 200 east
 //expand 200 west
-//schematic save zone-large fast
+//schem save mce zone-large
 ```
+
+> 💡 `//schem` est l'alias de `//schematic` sur WE 6.1 — les deux marchent tant que la syntaxe `<format> <nom>` est respectée.
 
 ### Étape 3 — Copier les schematics hors du serveur 1.8
 

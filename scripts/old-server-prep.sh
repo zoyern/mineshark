@@ -20,12 +20,14 @@ set -euo pipefail
 OLD_DIR="mc-server-old"
 WORLDS_YML="$OLD_DIR/plugins/Multiverse-Core/worlds.yml"
 SPIGOT_YML="$OLD_DIR/spigot.yml"
+SERVER_PROPS="$OLD_DIR/server.properties"
 KEEP_WORLD="${KEEP_WORLD:-swr}"   # map principale (synced with server.properties level-name)
 
 # ─── Garde-fous ────────────────────────────────────────────────────
-[[ -d "$OLD_DIR" ]]    || { echo "❌ $OLD_DIR introuvable. Lance depuis la racine du repo."; exit 1; }
-[[ -f "$WORLDS_YML" ]] || { echo "❌ $WORLDS_YML introuvable."; exit 1; }
-[[ -f "$SPIGOT_YML" ]] || { echo "❌ $SPIGOT_YML introuvable."; exit 1; }
+[[ -d "$OLD_DIR" ]]     || { echo "❌ $OLD_DIR introuvable. Lance depuis la racine du repo."; exit 1; }
+[[ -f "$WORLDS_YML" ]]  || { echo "❌ $WORLDS_YML introuvable."; exit 1; }
+[[ -f "$SPIGOT_YML" ]]  || { echo "❌ $SPIGOT_YML introuvable."; exit 1; }
+[[ -f "$SERVER_PROPS" ]] || { echo "❌ $SERVER_PROPS introuvable."; exit 1; }
 
 # ─── 1. Cold backup (une seule fois) ───────────────────────────────
 mkdir -p backups
@@ -94,6 +96,28 @@ if n:
     print(f"  → bungeecord: true → false ({n} remplacement)")
 else:
     print("  ✓ bungeecord déjà à false (rien à faire)")
+PYEOF
+
+# ─── 4. Patch server.properties : vide server-ip ──────────────────
+#
+# L'ancien serveur tournait sur un VPS dédié avec IP publique fixe
+# (62.210.62.193 en 2016). Cette IP est écrite dans server-ip= et
+# sur WSL/ta machine elle n'existe pas → « Cannot assign requested
+# address ». On vide le champ : le serveur binde alors sur 0.0.0.0
+# (toutes les interfaces locales), ce qui marche partout.
+echo "▶ Patch server.properties : server-ip=<vide> (bind 0.0.0.0)…"
+python3 - "$SERVER_PROPS" <<'PYEOF'
+import sys, re, pathlib
+p = pathlib.Path(sys.argv[1])
+text = p.read_text()
+new, n = re.subn(r"^server-ip=.*$", "server-ip=", text, flags=re.MULTILINE)
+if n:
+    p.write_text(new)
+    print(f"  → server-ip vidé ({n} remplacement)")
+else:
+    # Pas de ligne server-ip → on l'ajoute vide pour cohérence.
+    p.write_text(text.rstrip() + "\nserver-ip=\n")
+    print("  → server-ip ajouté (vide)")
 PYEOF
 
 echo ""
