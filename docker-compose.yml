@@ -100,7 +100,9 @@ services:
 
       # Plugins via Modrinth (résolution auto des versions)
       MODRINTH_PROJECTS: ${PLUGINS_MODRINTH}
-      # Plugins hors-Modrinth : Floodgate (GeyserMC) + ViaVersion/ViaBackwards
+      # Plugins SpigotMC (Vault, ProtocolLib — pas dispos sur Modrinth)
+      SPIGET_RESOURCES: ${PLUGINS_SPIGET}
+      # Plugins hors-Modrinth/Spiget : Floodgate (GeyserMC) + ViaVersion/ViaBackwards
       # (permet aux clients MC 1.8 → 1.21 de se connecter sur un serveur 1.21).
       PLUGINS: |
         https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot

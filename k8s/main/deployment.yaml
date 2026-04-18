@@ -91,9 +91,17 @@ spec:
                   key: rcon-password
 
             # Plugins via Modrinth — résolution automatique des versions
+            # (synced avec .env PLUGINS_MODRINTH)
             - name: MODRINTH_PROJECTS
-              value: "floodgate,luckperms,worldedit,worldguard,coreprotect,multiverse-core,placeholderapi,spark,chunky,decent-holograms,essentialsx,vault,protocollib,hibernation"   # synced with .env PLUGINS_MODRINTH
-            # Hors-Modrinth : Floodgate (GeyserMC) + ViaVersion/ViaBackwards
+              value: >-
+                luckperms,essentialsx,worldedit,worldguard,coreprotect,
+                multiverse-core,decentholograms,placeholderapi,spark,
+                chunky,floodgate
+            # Plugins SpigotMC (pas dispos sur Modrinth) : Vault (34315),
+            # ProtocolLib (1997). Synced avec .env PLUGINS_SPIGET.
+            - name: SPIGET_RESOURCES
+              value: "34315,1997"
+            # Hors-Modrinth/Spiget : Floodgate (GeyserMC) + ViaVersion/ViaBackwards
             # (laisse les clients 1.8 → 1.21 tous se connecter sur un 1.21).
             - name: PLUGINS
               value: |-
