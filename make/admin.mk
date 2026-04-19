@@ -184,6 +184,60 @@ deploy: ## Push git puis pull + make re sur le VPS
 	    'cd ~/mineshark && git pull && make re'
 
 
+# ─── Sync des plugins déposés à la main (plugins/manual/ → VPS) ─────
+# Workflow complet documenté dans plugins/manual/README.md.
+#
+# 1) rsync plugins/manual/*.jar → /var/lib/mineshark/manual-plugins/ (VPS)
+#    On utilise --delete pour que supprimer un jar localement le retire
+#    aussi sur le VPS. Protège par --include='*.jar' --exclude='*' pour
+#    éviter de copier README.md ou .gitkeep.
+# 2) kubectl rollout restart deploy/mc-main pour que l'initContainer
+#    copy-manual-plugins recopie les jars vers /data/plugins/.
+#
+# Prérequis : le répertoire /var/lib/mineshark/manual-plugins/ doit
+# exister et être accessible au user VPS_USER (ou à root via sudo).
+# Le volume k8s hostPath type=DirectoryOrCreate crée le dir au 1er
+# boot du pod, mais il appartient à root → rsync écrit en tant que
+# VPS_USER peut échouer. Si c'est le cas, crée-le à la main :
+#
+#   make ssh
+#   sudo mkdir -p /var/lib/mineshark/manual-plugins
+#   sudo chown -R $(VPS_USER):$(VPS_USER) /var/lib/mineshark/manual-plugins
+#   exit
+#
+# Puis `make plugins-sync` fonctionnera en SSH user normal.
+MANUAL_PLUGINS_DIR      ?= plugins/manual
+MANUAL_PLUGINS_VPS_PATH ?= /var/lib/mineshark/manual-plugins
+
+plugins-sync: ## Synchronise plugins/manual/*.jar vers le VPS et redémarre mc-main
+	@test -d $(MANUAL_PLUGINS_DIR) \
+	    || (echo "❌ $(MANUAL_PLUGINS_DIR)/ inexistant. Voir plugins/manual/README.md"; exit 1)
+	@count=$$(ls $(MANUAL_PLUGINS_DIR)/*.jar 2>/dev/null | wc -l); \
+	 if [ "$$count" = "0" ]; then \
+	     echo "ℹ️  Aucun jar dans $(MANUAL_PLUGINS_DIR)/. On sync quand même"; \
+	     echo "   (utile pour purger les jars qui auraient été retirés)."; \
+	 else \
+	     echo "▶ $$count jar(s) à synchroniser :"; \
+	     ls -1 $(MANUAL_PLUGINS_DIR)/*.jar | sed 's|^|    |'; \
+	 fi
+	@echo "▶ rsync vers $(VPS_USER)@$(VPS_IP):$(MANUAL_PLUGINS_VPS_PATH)/ …"
+	@rsync -avz --delete \
+	    --include='*.jar' --exclude='*' \
+	    -e "ssh -p $(VPS_SSH_PORT)" \
+	    $(MANUAL_PLUGINS_DIR)/ \
+	    "$(VPS_USER)@$(VPS_IP):$(MANUAL_PLUGINS_VPS_PATH)/" \
+	    || (echo "❌ rsync a échoué. Le dossier existe-t-il sur le VPS ?"; \
+	        echo "   Fix : make ssh puis :"; \
+	        echo "     sudo mkdir -p $(MANUAL_PLUGINS_VPS_PATH)"; \
+	        echo "     sudo chown -R $(VPS_USER):$(VPS_USER) $(MANUAL_PLUGINS_VPS_PATH)"; \
+	        exit 1)
+	@echo "▶ Rollout restart du pod mc-main (pour recharger les jars)…"
+	@kubectl rollout restart deploy/mc-main -n $(NAMESPACE)
+	@echo "✓ Sync terminée. L'initContainer copy-manual-plugins va recopier"
+	@echo "  les jars dans /data/plugins/ au prochain boot (~90s)."
+	@echo "  Suivi : make logs-main  |  Vérif : make cmd ARGS=plugins"
+
+
 # ─── Migration ancien serveur 1.8 ──────────────────────────────────
 OLD_BACKUP_ZIP ?= mc-server-old-backup.zip
 
@@ -328,4 +382,4 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
 	@echo "✓ Lint OK."
 
 
-.PHONY: ssh vps-get vps-put deploy backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds update-plugins
+.PHONY: ssh vps-get vps-put deploy plugins-sync backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds update-plugins

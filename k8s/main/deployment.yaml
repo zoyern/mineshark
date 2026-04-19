@@ -59,6 +59,43 @@ spec:
             - name: server-config
               mountPath: /config
               readOnly: true
+        # ─── Sync des jars "plugins/manual/" → /data/plugins/ ────────────
+        # Workflow "drop le jar" pour les plugins qu'on ne peut PAS tirer
+        # via MODRINTH_PROJECTS/SPIGET_RESOURCES/PLUGINS (URL) :
+        #   - BuiltByBit payants (distribué avec licence, pas d'URL publique)
+        #   - plugins disparus du marketplace (qu'on a sauvegardés)
+        #   - jars custom qu'on compile nous-mêmes
+        #
+        # Pipeline :
+        #   dev : `make plugins-sync` (rsync plugins/manual/*.jar → VPS)
+        #   VPS : /var/lib/mineshark/manual-plugins/*.jar (hostPath, persistent)
+        #   pod : initContainer copie /manual-plugins/*.jar → /data/plugins/
+        #   rollout restart → itzg charge les jars au prochain boot
+        #
+        # On copie AU-DESSUS de ce que MODRINTH/SPIGET ont téléchargé : les
+        # manuels gagnent (même nom de jar = on écrase). Permet de pinner
+        # une version précise en pinant le jar dans plugins/manual/.
+        - name: copy-manual-plugins
+          image: busybox:1.36.1
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              mkdir -p /data/plugins
+              if [ -d /manual-plugins ] && ls /manual-plugins/*.jar >/dev/null 2>&1; then
+                cp -f /manual-plugins/*.jar /data/plugins/
+                count=$(ls /manual-plugins/*.jar | wc -l)
+                echo "✓ $count plugin(s) manuel(s) copié(s) dans /data/plugins/"
+                ls -1 /manual-plugins/*.jar | sed 's|.*/|  → |'
+              else
+                echo "ℹ️  /manual-plugins vide ou absent — skip (normal si aucun plugin manuel)"
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: manual-plugins
+              mountPath: /manual-plugins
+              readOnly: true
       containers:
         - name: minecraft
           image: itzg/minecraft-server:java21    # synced with .env IMG_SERVER
@@ -152,10 +189,17 @@ spec:
             #     et fallback sur un adapter 1.21.6 (warning "not tested").
             - name: MODRINTH_PROJECTS
               value: "luckperms,worldedit:7.3.16,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky"
-            # Plugins SpigotMC (pas dispos sur Modrinth) : Vault (34315),
-            # ProtocolLib (1997). Synced avec .env PLUGINS_SPIGET.
+            # Plugins SpigotMC (pas dispos sur Modrinth) — synced avec .env PLUGINS_SPIGET :
+            #   34315 vault           — API économie (prérequis bcp plugins)
+            #   1997  protocollib     — lib paquets (dep WorldGuard/AuthMe/etc.)
+            #   53359 tntrun_reloaded — mini-game TntRun, compat 1.13 → 1.21
+            #   69436 skywarsreloaded — mini-game SkyWars (fork lukasvdgaag,
+            #                           compat 1.21.x, features modernes)
+            # Ajout/retrait : édite ici + .env PLUGINS_SPIGET (même liste).
+            # itzg retélécharge à chaque boot si la version Spiget est plus
+            # récente (contrôle via SPIGET_UPDATE_CHECK_INTERVAL = 72h).
             - name: SPIGET_RESOURCES
-              value: "34315,1997"
+              value: "34315,1997,53359,69436"
             # Hors-Modrinth/Spiget :
             #   • Floodgate (GeyserMC)
             #   • ViaVersion / ViaBackwards : compat clients 1.8 → 1.21
@@ -209,3 +253,16 @@ spec:
           configMap:
             name: mineshark-paper-config
             optional: true          # tolère l'absence en dev, utile en CI dry-run
+        # ─── Jars plugins "à la main" (workflow plugins/manual/) ────────
+        # hostPath (et pas ConfigMap) pour 3 raisons :
+        #   1) Limite ConfigMap = 1 MiB total → un seul jar peut dépasser.
+        #   2) K3s mono-noeud → pas de problème de scheduling multi-host.
+        #   3) Contenu géré hors git (jars payants), committer un
+        #      ConfigMap binaire serait moche.
+        # `make plugins-sync` rsync plugins/manual/*.jar → ce chemin sur VPS.
+        # Le initContainer `copy-manual-plugins` les copie dans /data/plugins/.
+        # type: DirectoryOrCreate → k3s crée le dir au 1er boot si absent.
+        - name: manual-plugins
+          hostPath:
+            path: /var/lib/mineshark/manual-plugins
+            type: DirectoryOrCreate

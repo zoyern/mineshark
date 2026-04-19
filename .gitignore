@@ -94,3 +94,15 @@ coverage/
 !data/.gitkeep
 !backups/.gitkeep
 !scratch/.gitkeep
+
+
+# ─── Exception : plugins déposés à la main (workflow plugins/manual/) ─
+# Contrairement au reste du repo où *.jar est banni, les jars du dossier
+# plugins/manual/ SONT versionnés exprès : c'est leur seul moyen d'exister
+# (BuiltByBit payants, plugins disparus, jars compilés en interne).
+# Voir plugins/manual/README.md pour le workflow complet.
+# ⚠️ Ne JAMAIS mettre de licence / clé d'activation dans ces jars.
+!plugins/manual/
+!plugins/manual/*.jar
+!plugins/manual/.gitkeep
+!plugins/manual/README.md

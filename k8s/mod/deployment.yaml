@@ -9,13 +9,35 @@
 #    • Port public propre via Service LoadBalancer (PORT_MOD, défaut 25566)
 #  Raison : Velocity force un protocole qui casse NeoForge.
 #
-#  Pour CHANGER de modpack :
-#    1. Modifier MODPACK_SLUG dans .env
-#    2. Mettre à jour la valeur CF_SLUG ci-dessous (synced with .env)
-#    3. `make mod-reset`  (efface le PVC, le pack se retéléchargera)
+#  MODPACK ACTUEL : "Modded Together" 1.2.4, 1.21.1 NeoForge
+#    • pack fantasy/exploration, prévu pour Mass Multiplayer + Co-Op
+#    • CurseForge : https://www.curseforge.com/minecraft/modpacks/moddedtogether
+#    • 8 Go RAM suffisent pour 5-10 joueurs
 #
-#  Démarrage attendu : 3 à 5 min (téléchargement modpack + génération
-#  monde initial). Probes calibrées en conséquence.
+#  PIÈGE VÉCU : CF_EXCLUDE_MODS attend des slugs CurseForge EXACTS
+#  (= la FIN de l'URL curseforge.com/minecraft/mc-mods/<slug>).
+#  itzg IGNORE SILENCIEUSEMENT les slugs inconnus. Bien vérifier sur CF.
+#  Cas particulier pour Modded Together (3 mods client-only à exclure) :
+#    • Substrate        → slug CF = `substrate-add-on` (pas `substrate` !)
+#    • Particle Core    → slug CF = `particle-core`
+#    • Pretty Rain      → slug CF = `pretty-rain`
+#  Le mod Modrinth s'appelle souvent différemment du slug CF — toujours
+#  prendre la version CF.
+#
+#  ALTERNATIVES TESTÉES (modifier MODPACK_SLUG + MOD_MEMORY dans .env) :
+#    • moddedtogether        → Modded Together, fantasy, 8 Go (actuel)
+#    • all-the-mods-10       → ATM10, kitchen-sink géant (~500 mods), 10 Go
+#    • cobblemon-neoforge    → Cobblemon officiel (Pokemon-like), 3 Go
+#    • medieval-mc-mmc5      → Medieval MC MMC5 (RPG médiéval), 6 Go
+#
+#  Pour CHANGER de modpack :
+#    1. Édite MODPACK_SLUG et MOD_MEMORY dans .env
+#    2. Mets à jour CF_SLUG + MEMORY ci-dessous (synced with .env)
+#    3. Revois CF_EXCLUDE_MODS (vider si pack propre type ATM10)
+#    4. `make mod-reset && make mod-on` (efface le PVC, retélécharge le pack)
+#
+#  Démarrage attendu : 3 à 5 min (download modpack + génération monde).
+#  Probes calibrées en conséquence.
 # ═══════════════════════════════════════════════════════════════════
 apiVersion: apps/v1
 kind: Deployment
@@ -44,36 +66,10 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
-      initContainers:
-        # Mods de performance server-side (ajoutés au modpack au boot)
-        - name: download-perf-mods
-          image: busybox:1.36.1                    # synced with .env IMG_BUSYBOX
-          command: ["sh", "-c"]
-          args:
-            - |
-              set -e
-              mkdir -p /data/perf-mods
-              cd /data/perf-mods
-
-              fetch() {
-                local out=$1 url=$2
-                if [ ! -f "$out" ]; then
-                  wget -q -O "$out" "$url" || echo "⚠️ Échec $out"
-                else
-                  echo "✓ $out déjà présent"
-                fi
-              }
-
-              # Lithium     : optimise physique, IA mobs, ticking (+30-50%)
-              fetch lithium.jar    "https://cdn.modrinth.com/data/gvQqBUqZ/versions/ZSNsJrPI/lithium-neoforge-mc1.21.1-0.14.3.jar"
-              # ServerCore  : caps breeding, login async, view distance dynamique
-              fetch servercore.jar "https://cdn.modrinth.com/data/4WWQxlQP/versions/vMbpLobR/servercore-neoforge-1.5.7+1.21.1.jar"
-
-              ls -la /data/perf-mods/
-          volumeMounts:
-            - name: data
-              mountPath: /data
-
+      # NB : pas d'initContainer perf-mods ici.
+      # Modded Together n'embarque pas de fork Lithium côté serveur, mais
+      # injecter Lithium/ServerCore ajoute des risques de conflit mixin
+      # avec Quark/Create. À ré-évaluer si les TPS souffrent en prod.
       containers:
         - name: minecraft
           image: itzg/minecraft-server:java21      # synced with .env IMG_SERVER
@@ -93,29 +89,36 @@ spec:
                 secretKeyRef:
                   name: curseforge-api-key
                   key: api-key
-            # ─── Mods client-only exclus du pack ────────────────────
-            # Modded Together embarque quelques mods dont les classes
-            # ne sont dispo que côté client (KeyMapping, Screen, etc.).
-            # Sur DEDICATED_SERVER elles font crasher NeoForge via
-            # RuntimeDistCleaner. On empêche donc itzg de les (ré)installer.
-            #
-            # Slugs = fin de l'URL CurseForge (curseforge.com/minecraft/mc-mods/<slug>).
-            # Pour ajouter un mod : identifier le slug puis lister ici, séparé par
-            # virgule. itzg vérifie le manifest à chaque boot et applique
-            # cette liste avant extraction.
-            #
-            # Historique :
-            #   • substrate     : dev.vesper.substrate.platform.neoforge → KeyMapping
-            #   • pretty-rain   : com.leclowndu93150.particlerain → Screen
+            # ─── Mods client-only exclus du pack (slugs CurseForge exacts) ──
+            # Vérification faite via les URLs officielles :
+            #   curseforge.com/minecraft/mc-mods/substrate-add-on
+            #   curseforge.com/minecraft/mc-mods/particle-core
+            #   curseforge.com/minecraft/mc-mods/pretty-rain
+            # Ces 3 mods référencent des classes client-only (KeyMapping,
+            # Screen, ParticleStatus) et crash le dedicated server au boot.
+            # Si un boot échoue encore sur un 4e mod client-only, ajouter
+            # son slug ici en respectant EXACTEMENT l'URL CurseForge.
             - name: CF_EXCLUDE_MODS
-              value: "substrate,pretty-rain"
-            # Si un boot échoue encore avec un 3e mod client-only, ajouter
-            # son slug ici puis `kubectl rollout restart deploy/mc-mod -n mineshark`.
+              value: "substrate-add-on,particle-core,pretty-rain"
+            # Défense en profondeur : même si CF_EXCLUDE_MODS rate un slug,
+            # REMOVE_OLD_MODS scanne /data/mods/ au boot et purge ces jars.
+            # Matche par nom de fichier (wildcards glob), profondeur 2 pour
+            # attraper aussi les JarJar extraits dans des sous-dossiers.
+            - name: REMOVE_OLD_MODS
+              value: "TRUE"
+            - name: REMOVE_OLD_MODS_INCLUDE
+              value: "substrate-*.jar,particle_core-*.jar,particle-core-*.jar,Pretty*Rain*.jar,pretty-rain-*.jar"
+            - name: REMOVE_OLD_MODS_DEPTH
+              value: "2"
 
             - name: MEMORY
               value: "8G"                          # synced with .env MOD_MEMORY
             - name: USE_AIKAR_FLAGS
               value: "true"
+            # Safety net : sans flight, la mort = ghost qui flotte puis kick.
+            # Les mods de mobilité (jetpacks, bottes élytres) en ont besoin.
+            - name: ALLOW_FLIGHT
+              value: "TRUE"
             # Standalone : le client s'authentifie directement auprès de Mojang
             - name: ONLINE_MODE
               value: "TRUE"
@@ -149,16 +152,18 @@ spec:
               memory: "6Gi"
               cpu: "1000m"
             limits:
-              memory: "10Gi"     # = MOD_MEMORY (8G) + 30% marge
+              memory: "10Gi"    # = MOD_MEMORY (8G) + 25% marge (metaspace + off-heap)
               cpu: "4000m"
-          # Modpack lourd : démarre lentement, on est tolérant
+          # Modded Together : 1er boot ~3-5 min (download ~500 Mo + gen monde).
+          # Boots suivants ~1-2 min. Probes tolérantes.
           readinessProbe:
             exec: { command: ["mc-health"] }
-            initialDelaySeconds: 180
+            initialDelaySeconds: 180      # 3 min avant 1re check
             periodSeconds: 15
+            failureThreshold: 8
           livenessProbe:
             exec: { command: ["mc-health"] }
-            initialDelaySeconds: 300
+            initialDelaySeconds: 300      # 5 min avant 1re check
             periodSeconds: 30
             failureThreshold: 5
           volumeMounts:
