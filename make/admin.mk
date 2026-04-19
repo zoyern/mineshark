@@ -199,8 +199,9 @@ deploy: ## Push git + pull + rollout sur VPS. FORCE=1 force retéléchargement p
 	@git push
 	@if [ "$(FORCE)" = "1" ]; then \
 	    echo "▶ FORCE=1 → pull + re + wipe plugins + rollout (retéléchargement complet)"; \
+	    echo "   ⚠️  1er boot après fclean : 3-5 min (download Paper+plugins+gen monde)"; \
 	    ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
-	        'cd /opt/mineshark && git pull && make re && kubectl -n $(NAMESPACE) rollout status deploy/mc-main --timeout=120s && make update-plugins'; \
+	        'cd /opt/mineshark && git pull && make re && kubectl -n $(NAMESPACE) rollout status deploy/mc-main --timeout=360s && make update-plugins'; \
 	 else \
 	    echo "▶ Soft deploy (plugins cached conservés — use FORCE=1 pour les rafraîchir)"; \
 	    ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \

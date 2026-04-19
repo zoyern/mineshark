@@ -202,8 +202,12 @@ spec:
             #   • worldedit:7.3.16 → dernière qui supporte officiellement 1.21.8.
             #     Sans pin, itzg prend 7.4.2 qui est dev build pour 1.21.9+
             #     et fallback sur un adapter 1.21.6 (warning "not tested").
+            # advanced-portals : MIGRÉ de Spiget (14356) vers Modrinth le
+            # 2026-04-20. api.spiget.org renvoyait HTTP 500 sur le download
+            # → crashloop init. Le slug Modrinth est exactement
+            # `advanced-portals` (même releases, maintainer `sekwah41`).
             - name: MODRINTH_PROJECTS
-              value: "luckperms,worldedit:7.3.16,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky"
+              value: "luckperms,worldedit:7.3.16,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky,advanced-portals"
             # Plugins SpigotMC (pas dispos sur Modrinth) — synced avec
             # .env PLUGINS_SPIGET et docs/plugins.md section 2 :
             #   ─ Core/libs ─
