@@ -21,12 +21,11 @@ export
 # Cible par défaut (tapée quand on lance juste `make`)
 .DEFAULT_GOAL := help
 
-op:
-	kubectl exec -n mineshark deploy/mc-main -- rcon-cli op Zoyern
-
 # Sous-makefiles — admin d'abord : définit les variables communes
 # (RCON_SECRET_FILE, FWD_SECRET_FILE) et les cibles gen-secrets / init
 # utilisées par k8s.mk et docker.mk.
+# NB : la cible `op` est définie dans make/admin.mk (version paramétrable
+#      via PLAYER=<pseudo>).
 include make/admin.mk
 include make/k8s.mk
 include make/docker.mk

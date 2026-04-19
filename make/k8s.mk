@@ -35,13 +35,11 @@ secrets: gen-secrets ## (Re)crée les Secrets K8s depuis data/secrets/ et .env
 	    --namespace=$(NAMESPACE) \
 	    --from-literal=rcon-password="$$(cat $(RCON_SECRET_FILE))" \
 	    --dry-run=client -o yaml | kubectl apply -f -
-	@# Quotes SIMPLES autour de la variable : les clés CurseForge sont au
-	@# format bcrypt `$2a$10$…`. Avec des quotes doubles, le shell expanserait
-	@# `$2`, `$10`, etc. comme paramètres positionnels → clé mutilée.
-	@# Côté .env : les `
-
- doivent être doublés en `$` pour que Make ne les
-	@# mange pas non plus (voir commentaire CF_API_KEY dans .env.example).
+	@# Quotes SIMPLES autour de la variable : les cles CurseForge ont le format
+	@# bcrypt $$2a$$10$$... (dollar-signe suivi de chiffres). Avec quotes doubles
+	@# le shell expanserait $$2, $$10, etc. comme parametres positionnels = vides
+	@# = cle tronquee. Cote .env il faut aussi doubler chaque $$ pour que Make
+	@# ne le mange pas lui-meme (voir commentaire CF_API_KEY dans .env.example).
 	@kubectl create secret generic curseforge-api-key \
 	    --namespace=$(NAMESPACE) \
 	    --from-literal=api-key='$(CF_API_KEY)' \
