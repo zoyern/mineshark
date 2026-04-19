@@ -61,6 +61,44 @@ push-schematics: ## Copie assets/schematics/*.schematic vers le pod mc-main
 	@echo "✓ Schematics poussés. En jeu : //schem list"
 
 
+# ─── Wipe des mondes parasites du PVC ──────────────────────────────
+# Supprime du PVC mc-main les mondes auto-générés ou hérités d'anciens
+# tests (world*, hub_the_end, hub_nether). Multiverse mémorise les
+# mondes connus dans worlds.yml — on l'efface aussi pour éviter qu'il
+# les ré-importe au prochain boot.
+#
+# ⚠️ NE TOUCHE PAS au monde `hub` (le seul qu'on garde).
+# Pour wipe AUSSI hub : ajoute INCLUDE_HUB=1.
+wipe-worlds: ## Supprime les mondes parasites du PVC mc-main (world*, *_the_end, *_nether)
+	@pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main \
+	    -o jsonpath='{.items[0].metadata.name}'); \
+	 test -n "$$pod" \
+	    || (echo "❌ Pas de pod mc-main trouvé. make status ?"; exit 1); \
+	 echo "▶ Pod cible : $$pod"; \
+	 echo "▶ Arrêt du serveur Minecraft (sauvegarde + stop propre)…"; \
+	 kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli save-all >/dev/null 2>&1 || true; \
+	 kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli stop >/dev/null 2>&1 || true; \
+	 echo "▶ Attente 5s pour flush des chunks…"; sleep 5; \
+	 echo "▶ Suppression des mondes parasites :"; \
+	 for w in world world_nether world_the_end hub_nether hub_the_end; do \
+	     kubectl exec -n $(NAMESPACE) $$pod -- sh -c "test -d /data/$$w && rm -rf /data/$$w && echo '  ✓ $$w'" 2>/dev/null \
+	         || echo "  · $$w (absent)"; \
+	 done
+	@if [ "$(INCLUDE_HUB)" = "1" ]; then \
+	     pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main -o jsonpath='{.items[0].metadata.name}'); \
+	     echo "▶ INCLUDE_HUB=1 : suppression de hub/ aussi"; \
+	     kubectl exec -n $(NAMESPACE) $$pod -- rm -rf /data/hub && echo "  ✓ hub"; \
+	 fi
+	@pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main -o jsonpath='{.items[0].metadata.name}'); \
+	 echo "▶ Reset mémoire Multiverse (worlds.yml / worlds2.yml)…"; \
+	 kubectl exec -n $(NAMESPACE) $$pod -- sh -c \
+	     "rm -f /data/plugins/Multiverse-Core/worlds.yml /data/plugins/Multiverse-Core/worlds2.yml" \
+	     && echo "  ✓ Multiverse oubliera les anciens mondes au prochain boot"
+	@echo "▶ Restart pod mc-main…"
+	@kubectl rollout restart deploy/mc-main -n $(NAMESPACE)
+	@echo "✓ Wipe terminé. Suis l'état : make logs-main"
+
+
 # ─── SSH au VPS ────────────────────────────────────────────────────
 ssh: ## Se connecte en SSH au VPS (cf. .env VPS_USER / VPS_IP / VPS_SSH_PORT)
 	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP)
@@ -217,4 +255,4 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
 	@echo "✓ Lint OK."
 
 
-.PHONY: ssh deploy backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics
+.PHONY: ssh deploy backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds

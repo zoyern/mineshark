@@ -67,6 +67,7 @@ sync-paper-config: ## Pousse config/paper-*.yml + purpur.yml dans la ConfigMap K
 	    --from-file=paper-global.yml=config/paper-global.yml \
 	    --from-file=paper-world-defaults.yml=config/paper-world-defaults.yml \
 	    --from-file=purpur.yml=config/purpur.yml \
+	    --from-file=bukkit.yml=config/bukkit.yml \
 	    --dry-run=client -o yaml | kubectl apply -f -
 	@echo "✓ ConfigMap synchronisée. Redémarre mc-main : kubectl rollout restart deploy/mc-main -n $(NAMESPACE)"
 

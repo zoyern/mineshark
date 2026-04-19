@@ -1,0 +1,17 @@
+# ═══════════════════════════════════════════════════════════════════
+#  bukkit.yml — réglages Bukkit hérités
+# ═══════════════════════════════════════════════════════════════════
+#  Paper respecte encore bukkit.yml pour certains flags legacy.
+#  Utilisé ici UNIQUEMENT pour désactiver l'auto-création de l'End.
+#
+#  Paper n'a pas d'option server.properties pour ça (allow-end
+#  n'existe pas), et itzg/minecraft-server n'expose pas ALLOW_END
+#  en variable d'environnement. Seul bukkit.yml peut couper l'End.
+#
+#  Résultat : au 1er boot Paper ne créera PAS hub_the_end/.
+#  Pour créer un End à la demande plus tard :
+#      /mv create end_world end
+# ═══════════════════════════════════════════════════════════════════
+settings:
+  allow-end: false
+  use-map-color-cache: true
