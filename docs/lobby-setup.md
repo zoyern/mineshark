@@ -1,6 +1,8 @@
 # Lobby MineShark — guide de setup
 
-Ce document explique comment assembler un lobby « pro » (style Hypixel/CubeCraft light) sur notre serveur principal Purpur, une fois que la map du hub est déployée depuis l'ancien serveur. Il va du `make re` initial jusqu'aux permissions LuckPerms finales.
+Ce document explique comment assembler un lobby « pro » (style Hypixel/CubeCraft light) sur notre serveur principal Paper, depuis un monde vide jusqu'aux permissions LuckPerms finales, en passant par la paste performante du schematic et l'activation des mini-games SkyWars + TNTRun.
+
+> **Note fork** — guide rédigé pour Paper (défaut depuis avril 2026). Pour les features Purpur exclusives (double-jump, etc.) voir `docs/forks-comparison.md`. La plupart de ce guide est plugin-agnostique et marche sur les deux forks.
 
 ## Convention de nommage des mondes
 
@@ -14,9 +16,9 @@ Le défaut Minecraft `world` est gardé pour rien. On remplace par des noms parl
 Cette convention s'applique à tous les exemples ci-dessous : remplace mentalement `hub` par le nom que tu préfères si tu veux diverger.
 
 On suppose que :
-- Le serveur principal tourne en Purpur 1.21.x derrière Velocity.
-- La map du hub a été importée (via schematic WorldEdit) dans `data/main/hub/` ou via `make import-map`.
-- Les plugins par défaut sont installés (LuckPerms, WorldEdit, WorldGuard, Multiverse-Core, DecentHolograms, PlaceholderAPI, EssentialsX — cf. `docs/plugins.md`).
+- Le serveur principal tourne en Paper 1.21.x derrière Velocity.
+- La map du hub est disponible (schematics dans `assets/schematics/`, déployés via `make push-schematics` puis `//schem load` + `//paste -a`).
+- Les plugins par défaut sont installés (LuckPerms, WorldEdit, WorldGuard, Multiverse-Core, DecentHolograms, PlaceholderAPI, EssentialsX, CoreProtect, Chunky — cf. `docs/plugins.md`).
 
 ## Philosophie
 
@@ -28,38 +30,192 @@ Un lobby doit faire trois choses et rien d'autre :
 
 Tout ce qui n'est pas dans ces trois piliers est du bruit. On reste minimaliste.
 
-## 1. Créer le monde `hub` via Multiverse
+## 0. Repartir propre — wipe des mondes par défaut
+
+Si tu as déjà paste le hub dans `world` (le monde par défaut) et que tu veux tout reprendre à zéro, c'est là. Sinon, saute à §1.
+
+### 0.1 Faire de `hub` le monde par défaut (void)
+
+Deux changements dans `k8s/main/deployment.yaml` (section `env:` du container `minecraft`) :
+
+```yaml
+- name: LEVEL
+  value: "hub"                              # était "world" implicite
+- name: LEVEL_TYPE
+  value: "minecraft:flat"                   # pas de génération naturelle
+- name: GENERATOR_SETTINGS
+  value: '{"biome":"minecraft:the_void","layers":[]}'   # void absolu
+- name: ALLOW_NETHER
+  value: "FALSE"                            # pas de nether (on n'en veut pas en lobby)
+```
+
+Explication : `LEVEL=hub` dit à Paper « le monde par défaut s'appelle hub ». `LEVEL_TYPE=flat` + `GENERATOR_SETTINGS` void = génère RIEN (pas de grass, pas de bedrock, juste du void). Le schematic apportera son propre sol. `ALLOW_NETHER=false` empêche la création de `hub_nether` et `hub_the_end`.
+
+Équivalent `docker-compose.yml` (section `environment:` de `main-paper`) :
+
+```yaml
+LEVEL: "hub"
+LEVEL_TYPE: "minecraft:flat"
+GENERATOR_SETTINGS: '{"biome":"minecraft:the_void","layers":[]}'
+ALLOW_NETHER: "FALSE"
+```
+
+### 0.2 Supprimer les anciens mondes résiduels
+
+Après avoir appliqué les changements (`make re`), Paper démarre et crée `hub/` (void) à côté des anciens `world/`, `world_nether/`, `world_the_end/`. On nettoie :
+
+```bash
+# On attend que mc-main soit UP avec le nouveau monde hub, puis :
+kubectl exec -n mineshark deploy/mc-main -- sh -c '
+  rm -rf /data/world /data/world_nether /data/world_the_end
+  ls /data | head -20
+'
+```
+
+Vérifie bien que tu vois `hub` dans le listing et PLUS `world*`. Plus de pollution.
+
+### 0.3 Reset des joueurs (optionnel)
+
+Les inventaires et positions sont stockés par UUID dans `/data/hub/playerdata/*.dat`. Les anciennes positions pointaient vers `world` qui n'existe plus → au prochain login, le jeu tombe sur le spawn de `hub`. Rien à faire.
+
+Si tu veux vraiment repartir à zéro côté joueurs (perm aussi) :
+
+```bash
+kubectl exec -n mineshark deploy/mc-main -- sh -c 'rm -rf /data/hub/playerdata /data/hub/stats /data/hub/advancements'
+# Et côté LuckPerms (si tu avais déjà des groupes assignés) :
+make cmd ARGS="lp user Zoyern clear"
+```
+
+---
+
+## 1. Configurer le monde `hub` via Multiverse
+
+Si tu as appliqué §0, `hub` existe déjà (créé au boot par Paper, void absolu). Tu le configures en lobby :
 
 ```
-/mv create hub normal -t FLAT -g FLAT -s 0
-/mv modify set gamemode adventure hub
-/mv modify set difficulty peaceful hub
-/mv modify set pvp false hub
-/mv modify set hunger false hub
-/mv modify set weather false hub
-/mv modify set autoHeal true hub
-/mv modify set keepSpawnInMemory true hub
-/mv modify set autoLoad true hub
+make cmd ARGS="mv import hub normal"
+make cmd ARGS="mv modify set gamemode adventure hub"
+make cmd ARGS="mv modify set difficulty peaceful hub"
+make cmd ARGS="mv modify set pvp false hub"
+make cmd ARGS="mv modify set hunger false hub"
+make cmd ARGS="mv modify set weather false hub"
+make cmd ARGS="mv modify set autoHeal true hub"
+make cmd ARGS="mv modify set keepSpawnInMemory true hub"
+make cmd ARGS="mv modify set autoLoad true hub"
+```
+
+Si tu n'as PAS appliqué §0, crée un monde dédié (FLAT classique avec bedrock/grass) à la place du void :
+
+```
+make cmd ARGS="mv create hub normal -t FLAT -g FLAT -s 0"
+# puis mêmes mv modify ci-dessus
 ```
 
 Traduction rapide :
 
-- `adventure` = les joueurs ne peuvent pas casser les blocs (sans outil spécial). Plus strict que `survival`, plus permissif que `spectator`.
+- `adventure` = blocs incassables sans outil spécial. Plus strict que survival.
 - `peaceful` = pas de mobs hostiles.
-- `keepSpawnInMemory true` = le spawn reste chargé même quand il n'y a personne → téléports instantanés.
+- `keepSpawnInMemory true` = spawn toujours chargé → téléports instantanés.
 
-Une fois la map importée (schematic ou copie de dossier) :
+Prérequis avant paste : `make push-schematics` depuis le host pour pousser `assets/schematics/*.schematic` dans le pod (inventaire dans `assets/schematics/README.md`).
+
+## 1bis. Paste centré sur 0, 0, 0 — méthode propre
+
+Le piège du paste « brut » : `//paste` utilise l'offset d'origine enregistré dans le schematic, qui correspond à l'endroit où le mec original avait copié. Pour `hub.schematic` (1.8), c'est aléatoire → le centre atterrit à `45, 63, 30`. Moche.
+
+La méthode en deux passes pour avoir le centre à `0, Y, 0` :
+
+**Passe 1 — paste exploratoire pour repérer le centre**
 
 ```
-/mv import hub normal    # si on a copié un dossier /data/main/hub
-/mv setspawn             # depuis l'endroit où on veut que /spawn amène
+make cmd ARGS="mv tp Zoyern hub"
+# En jeu, haut dans le void :
+/tp 0 120 0
+//perf neighbors off           # désactive physique pendant paste (évite freeze)
+//schem load hub
+//paste -a -o                  # -o = paste à l'origine du schem (= à toi)
 ```
 
-## 2. Activer double-jump UNIQUEMENT sur `hub`
+Marche sur la map, trouve le point qui doit être le centre du lobby (la place, le portail central). Note ses coords avec F3. Exemple : `X=37, Y=85, Z=22`.
 
-Dans `config/purpur.yml` on a laissé `movement.double-jump.enabled: false` par défaut. On l'override juste pour le monde `hub`.
+**Passe 2 — re-copy avec ton bon centre, puis re-paste à 0,0,0**
 
-Crée/édite `data/main/hub/purpur-world.yml` (Purpur le génère au premier boot si absent) :
+```
+# Place-toi PILE au centre souhaité :
+/tp 37 85 22
+
+# Sélectionne toute la zone (vise les 2 coins extrêmes) :
+//pos1                         # coin bas-gauche (viser un bloc)
+/tp <coin_opposé_coords>
+//pos2                         # coin haut-droit
+
+# Copy AVEC TOI comme origine :
+//copy
+//schem save hub-centered -f
+
+# Wipe la zone actuelle :
+//set air
+
+# Repaste centré en 0, 100, 0 :
+/tp 0 100 0
+//schem load hub-centered
+//paste -a -o
+/setworldspawn
+//perf neighbors on            # restaure physique
+```
+
+Le centre du lobby est maintenant à `0, 100, 0`. `/spawn` amène pile au milieu.
+
+**Bonus — versionner le schem centré dans le repo :**
+
+```bash
+pod=$(kubectl get pod -n mineshark -l app=mc-main -o jsonpath='{.items[0].metadata.name}')
+kubectl cp mineshark/$pod:/data/plugins/WorldEdit/schematics/hub-centered.schem \
+    assets/schematics/hub-centered.schem
+git add assets/schematics/hub-centered.schem
+git commit -m "save hub-centered schem (origine 0,0,0)"
+```
+
+Prochaine install = `//schem load hub-centered ; //paste -a -o` à `0 100 0` et fini. Fait-le AUSSI pour toutes les maps SkyWars après centrage (voir `docs/minigames.md`).
+
+## 1ter. Performance paste — éviter le freeze de 5 min
+
+Le `//paste` brut sur `hub.schematic` (248 Ko, ~500k blocs) a gelé Paper ~280s en prod le 19/04. Cause = updates de lighting + physique synchrones sur le main thread. Les leviers :
+
+```
+//perf neighbors off       # coupe updates physique (redstone, gravité, leaves)
+//perf relight minimal     # relight à minima pendant paste
+//paste -a                 # skip air = 10x moins d'écritures
+```
+
+Après la paste :
+
+```
+//perf neighbors on
+//perf relight full
+```
+
+**Upgrade Phase 2 — FAWE** (FastAsyncWorldEdit) : drop-in replacement multi-threaded, ne bloque jamais le main thread. Standard pour schematics > 100 Ko. Lit les MCEdit 1.8 sans souci. Migration :
+
+1. Dans `.env`, remplace `worldedit` par `fastasyncworldedit` dans `PLUGINS_MODRINTH`
+2. Sur le VPS :
+
+```bash
+kubectl exec -n mineshark deploy/mc-main -- sh -c 'rm -f /data/plugins/worldedit-bukkit-*.jar'
+make re
+```
+
+À tester en dev d'abord (quelques commandes diffèrent légèrement).
+
+## 2. Double-jump (Purpur uniquement — désactivé en Paper)
+
+> **Skip cette section en Paper.** Paper n'a pas de double-jump natif. Les options :
+>
+> 1. Repasser à Purpur (change `SERVER_TYPE=PURPUR` dans `.env`, `make re`, et applique la config `purpur-world.yml` ci-dessous).
+> 2. Installer un plugin dédié (`ezDoubleJump`, `DoubleJumpPlus`). À ajouter dans `PLUGINS_MODRINTH` de `.env`.
+> 3. Laisser tomber (le lobby reste très bien sans).
+
+Pour référence, en Purpur, on édite `data/main/hub/purpur-world.yml` (généré au 1er boot) :
 
 ```yaml
 # data/main/hub/purpur-world.yml
@@ -69,7 +225,7 @@ movement:
     add-velocity: 0.5
 ```
 
-Puis `/mv reload` ou `/purpur reload`. Sans serveur restart. Le double-jump est ENSUITE désactivé automatiquement quand le joueur va sur n'importe quel autre monde (survie, mini-games). C'est là toute la force des world-settings Purpur.
+Puis `/mv reload` ou `/purpur reload`. Le double-jump est automatiquement désactivé dès que le joueur quitte le monde `hub`. C'est là toute la force des world-settings Purpur.
 
 ## 3. Définir la région safe-zone avec WorldGuard
 
@@ -205,6 +361,69 @@ Résultat : première connexion → hub. Après mort → hub (sauf si `/sethome`
 
 Pour la survie, on fait simplement `/mv setspawn` sur le monde `main` depuis l'endroit où on veut que les joueurs atterrissent en passant `/mv tp main`.
 
+## 7bis. MOTD & compteurs dynamiques
+
+Trois endroits où afficher du texte stylé avec des compteurs live. Tous utilisent PlaceholderAPI (déjà installé).
+
+### 7bis.1 MOTD ping (l'écran avant de se connecter)
+
+Statique par défaut dans `.env` (`MAIN_MOTD=...`). Pour du dynamique (compteur joueurs, phrase qui change selon l'heure, etc.) installe **AdvancedServerList** côté Velocity :
+
+```bash
+# Ajoute dans velocity plugins via PLUGINS (k8s/velocity/deployment.yaml ou docker-compose.yml) :
+#   https://github.com/Andre601/AdvancedServerList/releases/latest/download/AdvancedServerList-Velocity.jar
+```
+
+Config dans `data/velocity/plugins/AdvancedServerList/profiles/default.yml` :
+
+```yaml
+priority: 1
+motd:
+  - "&b&lMineShark &8| &f%server_online%/%server_max%&7 en ligne"
+  - "&aSkyWars &8• &6TNTRun &8• &cSurvie"
+```
+
+`%server_online%` est rafraîchi à chaque ping du serveur (toutes les secondes côté client). Tu peux ajouter des conditions (`hide_players`, `favicon` custom par hostname, etc.).
+
+### 7bis.2 Holograms dans le lobby (leaderboards, compteurs)
+
+DecentHolograms + PlaceholderAPI — déjà en place. Exemple compteur joueurs en vol au-dessus du spawn :
+
+```
+/dh create spawn-title
+/dh addline spawn-title &b&lMINESHARK
+/dh addline spawn-title
+/dh addline spawn-title &7Connectés : &e%server_online%&7/%server_max_players%
+/dh addline spawn-title &7TPS : &a%server_tps_1%
+/dh setrefresh spawn-title 40               # refresh toutes les 2s (40 ticks)
+/dh move spawn-title                        # place à ta position
+```
+
+Pour des leaderboards top-kills/top-skywars, installe l'extension PAPI `Statistic` :
+
+```
+/papi ecloud download Statistic
+/papi reload
+```
+
+Puis placeholders du style `%statistic_player_kills_top_1%`, `%statistic_player_kills_top_1_name%`, etc.
+
+### 7bis.3 Tab list stylée (avec compteurs)
+
+Plugin **TAB** (Modrinth slug: `tab-was-taken`). Affiche header/footer customs avec PAPI :
+
+```yaml
+# plugins/TAB/config.yml
+header: "&b&lMineShark &8- &f%server_online%/%server_max% joueurs"
+footer: "&7discord.gg/mineshark &8| &eTPS: %server_tps_1%"
+```
+
+Si tu le mets dans `PLUGINS_MODRINTH` : `tab-was-taken`.
+
+### 7bis.4 Scoreboard latéral
+
+Plugin **FeatherBoard** (payant) ou alternatives gratuites : **AnimatedScoreboard** / **Scoreboard Revision**. Même logique : un YAML avec des lignes + PAPI. À voir en phase 2 si tu veux pas sur-charger visuellement le lobby.
+
 ## 8. Checklist ouverture publique
 
 Avant de laisser ton lobby au public :
@@ -224,13 +443,20 @@ Avant de laisser ton lobby au public :
 ## 9. Débug / commandes utiles
 
 ```
-/spark profiler --timeout 60       # profile 60s de CPU, sortie web
-/spark tps                         # affiche TPS récent par monde
+/tps                               # TPS natif Paper (remplace /spark tps)
+/mspt                              # temps serveur par tick (Paper natif)
 /mv list                           # liste tous les mondes chargés
 /co inspect                        # mode inspection CoreProtect (clique un bloc)
 /co rollback u:<user> t:1h         # rollback 1h pour l'utilisateur
 /lp user <name> info               # voir toutes les perms effectives
-/purpur reload                     # recharge purpur.yml + purpur-world.yml
+/reload confirm                    # recharge plugins (⚠ à éviter en prod, préfère rollout restart)
+```
+
+Depuis l'extérieur du jeu :
+
+```
+make cmd ARGS="tps"                # côté host, via RCON
+make logs-main                     # tail des logs en direct
 ```
 
 ## 10. Pour aller plus loin (Phase 2)

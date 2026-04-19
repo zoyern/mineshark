@@ -51,9 +51,17 @@ spec:
             - name: VERSION
               value: "1.21.4"                    # synced with .env PAPER_VERSION
             - name: MEMORY
-              value: "3G"                        # synced with .env MAIN_MEMORY
+              value: "4G"                        # synced with .env MAIN_MEMORY
             - name: USE_AIKAR_FLAGS
               value: "true"
+            - name: LEVEL
+              value: "hub"                              # était "world" implicite
+            - name: LEVEL_TYPE
+              value: "minecraft:flat"                   # pas de génération naturelle
+            - name: GENERATOR_SETTINGS
+              value: '{"biome":"minecraft:the_void","layers":[]}'   # void absolu
+            - name: ALLOW_NETHER
+              value: "FALSE"     
 
             # Velocity authentifie ; ce backend trust le proxy via secret
             - name: ONLINE_MODE

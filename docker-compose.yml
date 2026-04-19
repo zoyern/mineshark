@@ -79,6 +79,10 @@ services:
       VERSION: ${PAPER_VERSION:-1.21.4}
       MEMORY: ${MAIN_MEMORY:-3G}
       USE_AIKAR_FLAGS: "true"
+      LEVEL: "hub"
+      LEVEL_TYPE: "minecraft:flat"
+      GENERATOR_SETTINGS: '{"biome":"minecraft:the_void","layers":[]}'
+      ALLOW_NETHER: "FALSE"
 
       # Velocity gère l'auth Mojang côté proxy. Le backend accepte
       # uniquement les connexions qui présentent le bon secret partagé.
