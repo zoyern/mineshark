@@ -60,8 +60,14 @@ spec:
               value: "minecraft:flat"                   # pas de génération naturelle
             - name: GENERATOR_SETTINGS
               value: '{"biome":"minecraft:the_void","layers":[]}'   # void absolu
+            # Empêche la création auto de hub_nether/ et hub_the_end/ au 1er boot.
+            # Tu pourras créer les dimensions à la demande via :
+            #   /mv create nether_world nether
+            #   /mv create end_world end
             - name: ALLOW_NETHER
-              value: "FALSE"     
+              value: "FALSE"
+            - name: ALLOW_END
+              value: "FALSE"
 
             # Velocity authentifie ; ce backend trust le proxy via secret
             - name: ONLINE_MODE
@@ -121,10 +127,12 @@ spec:
               name: rcon
           resources:
             requests:
-              memory: "1500Mi"
+              memory: "2Gi"
               cpu: "500m"
             limits:
-              memory: "4Gi"      # = MAIN_MEMORY (3G) + 30% marge JVM
+              # Règle Aikar : limit = heap (MEMORY) × 1.35 (metaspace + direct + code cache + stacks)
+              # heap 4G → 5.5Gi. Si tu baisses MEMORY à 3G, remets 4Gi.
+              memory: "5500Mi"   # synced with .env MAIN_MEMORY (4G × 1.35)
               cpu: "2000m"
           # Probes — Purpur 1.21 + plugins = 90-120s au 1er boot.
           # On tolère jusqu'à 180s + 3 échecs avant liveness kill.
