@@ -98,10 +98,25 @@ make cmd ARGS="mv modify hub set gamemode adventure"
 make cmd ARGS="mv modify hub set difficulty peaceful"
 make cmd ARGS="mv modify hub set pvp false"
 make cmd ARGS="mv modify hub set hunger false"
-make cmd ARGS="mv modify hub set weather false"
-make cmd ARGS="mv modify hub set autoHeal true"
-make cmd ARGS="mv modify hub set keepSpawnInMemory true"
-make cmd ARGS="mv modify hub set autoLoad true"
+
+# MV5 (5.x) a retiré les flags weather / autoHeal / keepSpawnInMemory /
+# autoLoad — on passe par les gamerules Minecraft et paper-world-defaults
+# à la place. Lance ces commandes pendant que tu es DANS le monde hub
+# (ou préfixe par /execute in minecraft:overworld run …) :
+make cmd ARGS="gamerule doWeatherCycle false"     # remplace weather
+make cmd ARGS="gamerule doDaylightCycle false"    # cycle figé, on fixe l'heure
+make cmd ARGS="time set day"                      # midi perpétuel au lobby
+make cmd ARGS="gamerule doMobSpawning false"      # ceinture en plus de peaceful
+make cmd ARGS="gamerule doFireTick false"         # plus de propagation de feu
+make cmd ARGS="gamerule naturalRegeneration true" # remplace autoHeal
+
+# keepSpawnInMemory : déjà configuré dans config/paper-world-defaults.yml
+#   spawn:
+#     keep-spawn-loaded: true
+#     keep-spawn-loaded-range: 8     # 8 chunks = 128 blocs autour du spawn
+# (appliqué par `make sync-paper-config` + `kubectl rollout restart deploy/mc-main`)
+#
+# autoLoad : activé par défaut en MV5 sur tout monde importé — rien à faire.
 ```
 
 Si tu n'as PAS appliqué §0, crée un monde dédié (FLAT classique avec bedrock/grass) à la place du void :
