@@ -140,13 +140,18 @@ spec:
                   name: rcon-secret
                   key: rcon-password
 
-            # Plugins via Modrinth — résolution automatique des versions
+            # Plugins via Modrinth — syntaxe `slug[:version]`.
             # (synced avec .env PLUGINS_MODRINTH)
             # NOTE: essentialsx retiré de Modrinth car leur packaging lag
             # derrière GitHub (ex. 2.21.0 Modrinth vs 2.21.2 GitHub).
             # On le tire directement depuis GitHub via PLUGINS (voir ci-dessous).
+            #
+            # Pinning explicite :
+            #   • worldedit:7.3.16 → dernière qui supporte officiellement 1.21.8.
+            #     Sans pin, itzg prend 7.4.2 qui est dev build pour 1.21.9+
+            #     et fallback sur un adapter 1.21.6 (warning "not tested").
             - name: MODRINTH_PROJECTS
-              value: "luckperms,worldedit,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky"
+              value: "luckperms,worldedit:7.3.16,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky"
             # Plugins SpigotMC (pas dispos sur Modrinth) : Vault (34315),
             # ProtocolLib (1997). Synced avec .env PLUGINS_SPIGET.
             - name: SPIGET_RESOURCES
