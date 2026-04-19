@@ -72,10 +72,14 @@ spec:
             - name: TYPE
               value: PAPER                       # synced with .env SERVER_TYPE
             - name: VERSION
-              value: "1.21.10"                   # synced with .env PAPER_VERSION
-              # ⚠️ Bloqué à 1.21.10 : CoreProtect CE v23.1 = dernière version
-              # publiée sur Modrinth (déc 2025), supporte jusqu'à 1.21.10.
-              # Quand CoreProtect sortira un build 1.21.11 → bump ici + .env.
+              value: "1.21.8"                    # synced with .env PAPER_VERSION
+              # ⚠️ Bloqué à 1.21.8 (LTS de facto) :
+              #   • EssentialsX 2.21.2 officiellement testée sur 1.21.8
+              #   • WorldEdit 7.3.16 (Modrinth) couvre 1.21.3 → 1.21.8
+              #   • CoreProtect CE 23.0/23.1 supportent 1.21.8
+              # Au-dessus (1.21.9-11) → warnings "unsupported" + adapter
+              # fallback. Pour rebumper : attendre WorldEdit 7.4.x stable
+              # + EssentialsX 2.22.x.
             - name: MEMORY
               value: "4G"                        # synced with .env MAIN_MEMORY
             - name: USE_AIKAR_FLAGS
