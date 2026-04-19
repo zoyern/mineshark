@@ -178,9 +178,34 @@ vps-put: ## Envoie un fichier local sur le VPS. Usage: make vps-put FILE=<chemin
 
 
 # ─── Déploiement à distance ────────────────────────────────────────
-deploy: ## Push git puis pull + make re sur le VPS
+# Explication du "bug reload plugins pas clean" :
+#   `make deploy` → git push + git pull (VPS) + `make re`.
+#   `make re` = fclean + up = supprime deployments/services/configmaps/
+#   secrets puis réapplique. Les PVC restent → les jars plugins *aussi*.
+#   itzg, au reboot, voit que `/data/plugins/FooPlugin-1.2.jar` existe
+#   déjà et NE RE-TÉLÉCHARGE PAS (même si une version plus récente est
+#   dispo sur Modrinth/Spiget). Résultat : tu modifies .env pour ajouter
+#   un plugin ou bumper une version → `make deploy` ne le reflète pas.
+#
+# Deux usages distincts :
+#   make deploy            → soft : code K8s / config changé, plugins OK
+#   make deploy FORCE=1    → dur : wipe tous les jars plugins puis `re`,
+#                            itzg retélécharge depuis Modrinth/Spiget/URL
+#                            (≡ `make re` + `make update-plugins` côté VPS).
+#   make redeploy-plugins  → idem FORCE=1 mais sans passer par `make re`
+#                            (juste rollout restart, plus rapide).
+deploy: ## Push git + pull + rollout sur VPS. FORCE=1 force retéléchargement plugins
+	@echo "▶ git push…"
 	@git push
-	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) 'cd /opt/mineshark && git pull && make re'
+	@if [ "$(FORCE)" = "1" ]; then \
+	    echo "▶ FORCE=1 → pull + re + wipe plugins + rollout (retéléchargement complet)"; \
+	    ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	        'cd /opt/mineshark && git pull && make re && kubectl -n $(NAMESPACE) rollout status deploy/mc-main --timeout=120s && make update-plugins'; \
+	 else \
+	    echo "▶ Soft deploy (plugins cached conservés — use FORCE=1 pour les rafraîchir)"; \
+	    ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	        'cd /opt/mineshark && git pull && make re'; \
+	 fi
 
 
 # ─── Sync des plugins déposés à la main (plugins/manual/ → VPS) ─────
@@ -205,36 +230,101 @@ deploy: ## Push git puis pull + make re sur le VPS
 #   exit
 #
 # Puis `make plugins-sync` fonctionnera en SSH user normal.
-MANUAL_PLUGINS_DIR      ?= plugins/manual
-MANUAL_PLUGINS_VPS_PATH ?= /var/lib/mineshark/manual-plugins
+MANUAL_PLUGINS_DIR              ?= plugins/manual
+MANUAL_PLUGINS_VPS_PATH         ?= /var/lib/mineshark/manual-plugins
+MANUAL_BENTOBOX_ADDONS_DIR      ?= plugins/manual/bentobox-addons
+MANUAL_BENTOBOX_ADDONS_VPS_PATH ?= /var/lib/mineshark/manual-bentobox-addons
 
-plugins-sync: ## Synchronise plugins/manual/*.jar vers le VPS et redémarre mc-main
+plugins-sync: ## Synchronise plugins/manual/*.jar (+ addons BentoBox) vers le VPS et redémarre mc-main
 	@test -d $(MANUAL_PLUGINS_DIR) \
 	    || (echo "❌ $(MANUAL_PLUGINS_DIR)/ inexistant. Voir plugins/manual/README.md"; exit 1)
+	@# ─ Plugins "classiques" (rang 4, cf. docs/plugins.md) ──────────────
 	@count=$$(ls $(MANUAL_PLUGINS_DIR)/*.jar 2>/dev/null | wc -l); \
 	 if [ "$$count" = "0" ]; then \
 	     echo "ℹ️  Aucun jar dans $(MANUAL_PLUGINS_DIR)/. On sync quand même"; \
 	     echo "   (utile pour purger les jars qui auraient été retirés)."; \
 	 else \
-	     echo "▶ $$count jar(s) à synchroniser :"; \
+	     echo "▶ $$count plugin(s) classique(s) à synchroniser :"; \
 	     ls -1 $(MANUAL_PLUGINS_DIR)/*.jar | sed 's|^|    |'; \
 	 fi
-	@echo "▶ rsync vers $(VPS_USER)@$(VPS_IP):$(MANUAL_PLUGINS_VPS_PATH)/ …"
+	@echo "▶ rsync (plugins)   → $(VPS_USER)@$(VPS_IP):$(MANUAL_PLUGINS_VPS_PATH)/ …"
 	@rsync -avz --delete \
 	    --include='*.jar' --exclude='*' \
 	    -e "ssh -p $(VPS_SSH_PORT)" \
 	    $(MANUAL_PLUGINS_DIR)/ \
 	    "$(VPS_USER)@$(VPS_IP):$(MANUAL_PLUGINS_VPS_PATH)/" \
-	    || (echo "❌ rsync a échoué. Le dossier existe-t-il sur le VPS ?"; \
-	        echo "   Fix : make ssh puis :"; \
-	        echo "     sudo mkdir -p $(MANUAL_PLUGINS_VPS_PATH)"; \
-	        echo "     sudo chown -R $(VPS_USER):$(VPS_USER) $(MANUAL_PLUGINS_VPS_PATH)"; \
+	    || (echo "❌ rsync a échoué. Causes possibles :"; \
+	        echo "   a) rsync pas installé SUR LE VPS (il faut aux 2 bouts) :"; \
+	        echo "        make ssh"; \
+	        echo "        sudo apt install rsync -y"; \
+	        echo "   b) Le dossier n'existe pas ou n'appartient pas à $(VPS_USER) :"; \
+	        echo "        make ssh"; \
+	        echo "        sudo mkdir -p $(MANUAL_PLUGINS_VPS_PATH)"; \
+	        echo "        sudo chown -R $(VPS_USER):$(VPS_USER) $(MANUAL_PLUGINS_VPS_PATH)"; \
 	        exit 1)
+	@# ─ Addons BentoBox (sous-dossier dédié) ────────────────────────────
+	@# Séparé car destiné à /data/plugins/BentoBox/addons/ et non à
+	@# /data/plugins/. Voir initContainer copy-manual-plugins.
+	@if [ -d $(MANUAL_BENTOBOX_ADDONS_DIR) ]; then \
+	     acount=$$(ls $(MANUAL_BENTOBOX_ADDONS_DIR)/*.jar 2>/dev/null | wc -l); \
+	     if [ "$$acount" = "0" ]; then \
+	         echo "ℹ️  Aucun addon BentoBox dans $(MANUAL_BENTOBOX_ADDONS_DIR)/. Sync quand même (purge)."; \
+	     else \
+	         echo "▶ $$acount addon(s) BentoBox à synchroniser :"; \
+	         ls -1 $(MANUAL_BENTOBOX_ADDONS_DIR)/*.jar | sed 's|^|    |'; \
+	     fi; \
+	     echo "▶ rsync (addons)    → $(VPS_USER)@$(VPS_IP):$(MANUAL_BENTOBOX_ADDONS_VPS_PATH)/ …"; \
+	     rsync -avz --delete \
+	         --include='*.jar' --exclude='*' \
+	         -e "ssh -p $(VPS_SSH_PORT)" \
+	         $(MANUAL_BENTOBOX_ADDONS_DIR)/ \
+	         "$(VPS_USER)@$(VPS_IP):$(MANUAL_BENTOBOX_ADDONS_VPS_PATH)/" \
+	         || (echo "❌ rsync addons a échoué. Fix :"; \
+	             echo "   a) rsync pas installé sur le VPS ? make ssh + sudo apt install rsync -y"; \
+	             echo "   b) Dossier manquant sur le VPS :"; \
+	             echo "        sudo mkdir -p $(MANUAL_BENTOBOX_ADDONS_VPS_PATH)"; \
+	             echo "        sudo chown -R $(VPS_USER):$(VPS_USER) $(MANUAL_BENTOBOX_ADDONS_VPS_PATH)"; \
+	             exit 1); \
+	 else \
+	     echo "ℹ️  $(MANUAL_BENTOBOX_ADDONS_DIR)/ absent — skip (normal si pas d'addon BentoBox)"; \
+	 fi
 	@echo "▶ Rollout restart du pod mc-main (pour recharger les jars)…"
 	@kubectl rollout restart deploy/mc-main -n $(NAMESPACE)
 	@echo "✓ Sync terminée. L'initContainer copy-manual-plugins va recopier"
-	@echo "  les jars dans /data/plugins/ au prochain boot (~90s)."
+	@echo "  les jars dans /data/plugins/ et /data/plugins/BentoBox/addons/"
+	@echo "  au prochain boot (~90s)."
 	@echo "  Suivi : make logs-main  |  Vérif : make cmd ARGS=plugins"
+
+
+# ─── Re-deploy "propre" des plugins (force pull Modrinth/Spiget/URL) ─
+# `make deploy` (git push + pull + make re) ne force PAS un re-download
+# des jars déjà présents dans le PVC : itzg ne retélécharge que si la
+# version distante est > version locale (et SPIGET_UPDATE_CHECK_INTERVAL
+# temporise à 72h côté Spiget). Quand tu ajoutes un plugin dans .env ou
+# quand tu veux vraiment tout rebumper : lance cette cible.
+#
+# Différences pratiques :
+#   make deploy            → git push + git pull + make re (soft reload)
+#                            ⚠️ ne retélécharge PAS les plugins existants.
+#   make re                → docker compose / k8s rollout restart seul,
+#                            idem : pas de refresh plugins.
+#   make redeploy-plugins  → git push + pull + wipe /data/plugins/*.jar
+#                            + rollout → itzg retélécharge TOUT depuis
+#                            Modrinth/Spiget/URL. Safe (configs gardées).
+#
+# Pour juste re-télécharger sans redéployer le code : make update-plugins.
+redeploy-plugins: ## Push + pull + force retéléchargement complet des plugins (Modrinth/Spiget/URL)
+	@echo "▶ git push…"
+	@git push
+	@echo "▶ SSH → git pull sur le VPS…"
+	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) 'cd /opt/mineshark && git pull'
+	@echo "▶ Sync plugins manuels (si nouveaux jars dans plugins/manual/)…"
+	@$(MAKE) --no-print-directory plugins-sync
+	@echo "▶ Wipe /data/plugins/*.jar pour forcer itzg à tout retélécharger…"
+	@$(MAKE) --no-print-directory update-plugins
+	@echo ""
+	@echo "✓ Redeploy des plugins en cours. Suis : make logs-main"
+	@echo "  Vérifie après ~2min : make cmd ARGS=plugins"
 
 
 # ─── Migration ancien serveur 1.8 ──────────────────────────────────
@@ -381,4 +471,4 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
 	@echo "✓ Lint OK."
 
 
-.PHONY: ssh vps-get vps-put deploy plugins-sync backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds update-plugins
+.PHONY: ssh vps-get vps-put deploy plugins-sync redeploy-plugins backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds update-plugins

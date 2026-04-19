@@ -8,7 +8,8 @@ mécanismes automatiques du serveur principal :
 | `MODRINTH_PROJECTS` | plugins libres sur modrinth.com | `.env` → `PLUGINS_MODRINTH` |
 | `SPIGET_RESOURCES` | plugins free/libres sur spigotmc.org | `.env` → `PLUGINS_SPIGET` |
 | `PLUGINS` (URL) | releases GitHub, builds CI publics | `k8s/main/deployment.yaml` |
-| **`plugins/manual/`** | **tout le reste** | **ici** |
+| **`plugins/manual/`** | plugins "Bukkit classiques" — BuiltByBit payants, disparus, jars custom, versions pinnées | **ici (ce dossier)** |
+| **`plugins/manual/bentobox-addons/`** | addons BentoBox (AOneBlock, Level, etc.) — PAS des plugins Bukkit, iront dans `/data/plugins/BentoBox/addons/` | **sous-dossier dédié** |
 
 ## Cas d'usage typiques
 
@@ -43,6 +44,24 @@ plugins/manual/monjar.jar
                                                         (autres jars
                                                          MODRINTH/SPIGET
                                                          téléchargés)
+
+plugins/manual/bentobox-addons/AOneBlock-1.23.0.jar
+         │
+         │   make plugins-sync (même target)
+         ▼                      /var/lib/mineshark/
+                                  manual-bentobox-addons/
+                                    AOneBlock-1.23.0.jar
+                                        │
+                                        │  rollout restart
+                                        ▼
+                                                      initContainer
+                                                       copy-manual-plugins
+                                                         (2e étape)
+                                                           │
+                                                           ▼
+                                                      /data/plugins/BentoBox/
+                                                        addons/
+                                                          AOneBlock-1.23.0.jar
 ```
 
 ## Comment ajouter un jar
@@ -70,6 +89,31 @@ plugins/manual/monjar.jar
    make logs                 # watch les lignes "Loaded MonPlugin"
    make rcon CMD=plugins     # liste des plugins chargés
    ```
+
+## Cas particulier — addons BentoBox
+
+BentoBox est installé automatiquement via Spiget (ID 73261). **Ses addons**
+(AOneBlock, Level, BSkyBlock, etc.) ne sont PAS des plugins Bukkit et
+doivent aller dans `plugins/BentoBox/addons/` du pod, sinon BentoBox les
+ignore silencieusement.
+
+Workflow :
+
+1. Télécharge le jar de l'addon depuis les releases GitHub du projet
+   BentoBoxWorld (ex. `https://github.com/BentoBoxWorld/AOneBlock/releases`).
+2. Dépose-le dans **`plugins/manual/bentobox-addons/`** (PAS dans
+   `plugins/manual/` directement).
+3. `make plugins-sync` (la cible gère les deux dossiers d'un coup).
+4. Vérifie après redémarrage :
+   ```
+   make rcon CMD="bentobox version"
+   make rcon CMD="bentobox catalog"
+   ```
+   L'addon doit apparaître dans la liste et être `enabled`.
+
+Compatibilité : toujours prendre la version de l'addon **compilée pour la
+même major de BentoBox** que celle téléchargée par Spiget (ID 73261). Les
+releases BentoBoxWorld indiquent la compat en tête de changelog.
 
 ## Comment supprimer un jar
 

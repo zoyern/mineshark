@@ -1,40 +1,56 @@
-# Mini-games MineShark — TntRun & SkyWars
+# Mini-games MineShark — catalogue complet
 
-Guide **end-to-end** pour installer, configurer et faire tourner **TntRun** et **SkyWars** sur le serveur principal MineShark (Paper 1.21.8). Tout est auto-installé au boot du pod — pas de manipulation manuelle sur le VPS.
+Guide **end-to-end** pour installer, configurer et faire tourner tous les mini-jeux du serveur principal MineShark (Paper 1.21.8). Tout est auto-installé au boot du pod — pas de manipulation manuelle sur le VPS. La référence pour la liste des plugins et leurs versions est [`docs/plugins.md`](plugins.md).
 
-> **Statut du stack (avril 2026)** — les deux plugins retenus sont activement maintenus pour 1.21.x :
-> - **TntRun_reloaded** par TheDev12 (SpigotMC ID 53359, compat 1.13 → 1.21.x).
-> - **SkyWarsReloaded** par lukasvdgaag (SpigotMC ID 69436, 1.14 → 1.21+, fork officiel repris en 2024).
+> **Stack mini-jeux (avril 2026)** — tous activement maintenus pour 1.21.x :
 >
-> Les deux sont disponibles **gratuitement** sur SpigotMC et s'auto-installent via l'API Spiget → aucun téléchargement manuel nécessaire.
+> | Mini-jeu | Plugin | Spiget ID | Joueurs |
+> |---|---|---|---|
+> | TntRun | TntRun_reloaded (TheDev12) | `53359` | 2-12 |
+> | SkyWars | SkyWarsReloaded (fork **lukasvdgaag** FREE) | `69436` | 2-12 par arène |
+> | BedWars | ScreamingBedWars (ScreamingSandals) | `63714` | 2-16 par équipe |
+> | Spleef / Splegg | Spleef_reloaded (steve4744) | `118673` | 2-8 |
+> | Murder Mystery | MurderMystery (Plugily-Projects) | `66614` | 4-12 |
+> | One In The Chamber | OITC (Despical) | `81185` | 2-8 |
+> | OneBlock (Skyblock) | BentoBox + AOneBlock | `73261` + jar manuel | solo ou co-op |
+>
+> Toutes les sources Spiget s'auto-installent via l'API Spiget. L'addon AOneBlock (OneBlock) est un jar manuel (`plugins/manual/bentobox-addons/`, voir section dédiée).
 
 ## Sommaire
 
-- [Ajout d'un plugin mini-game : les 3 voies](#ajout-dun-plugin-mini-game--les-3-voies)
+- [Ajout d'un plugin mini-game : les 4 voies](#ajout-dun-plugin-mini-game--les-4-voies)
 - [Workflow complet côté VPS](#workflow-complet-côté-vps)
 - [TntRun — setup & configuration](#tntrun--setup--configuration)
 - [SkyWars — setup & configuration des 11 maps](#skywars--setup--configuration-des-11-maps)
-- [Intégration lobby (warps + NPC)](#intégration-lobby-warps--npc)
+- [ScreamingBedWars — setup 2-4 équipes](#screamingbedwars--setup-2-4-équipes)
+- [Spleef_reloaded — setup arène](#spleef_reloaded--setup-arène)
+- [MurderMystery — setup arène](#murdermystery--setup-arène)
+- [OITC (One In The Chamber) — setup arène](#oitc-one-in-the-chamber--setup-arène)
+- [OneBlock (AOneBlock + BentoBox) — setup skyblock moderne](#oneblock-aoneblock--bentobox--setup-skyblock-moderne)
+- [Intégration lobby — Advanced Portals (hub → hub-minigames)](#intégration-lobby--advanced-portals-hub--hub-minigames)
 - [Checklist de test](#checklist-de-test)
 - [Troubleshooting](#troubleshooting)
+- [Convention schematics (.schem > .schematic)](#convention-schematics-schem--schematic)
 - [Références](#références)
 
 ---
 
-## Ajout d'un plugin mini-game : les 3 voies
+## Ajout d'un plugin mini-game : les 4 voies
 
-Selon où se trouve le plugin, on a **trois** mécaniques d'installation automatique — toutes gérées par l'image `itzg/minecraft-server`. Aucune ne nécessite de toucher au VPS à la main.
+Selon où se trouve le plugin, on a **quatre** mécaniques d'installation automatique — toutes gérées par l'image `itzg/minecraft-server`. Aucune ne nécessite de toucher au VPS à la main (sauf la voie "jar manuel" qui passe par `make plugins-sync`).
 
 | Source | Variable | Fichier | Exemple |
 |---|---|---|---|
 | **Modrinth** (modrinth.com) | `MODRINTH_PROJECTS` | `.env` → `PLUGINS_MODRINTH` | `luckperms`, `chunky` |
 | **SpigotMC** (spigotmc.org, free) | `SPIGET_RESOURCES` | `.env` → `PLUGINS_SPIGET` | `53359` (TntRun), `69436` (SkyWars) |
 | **URL directe** (GitHub, CDN) | `PLUGINS` | `k8s/main/deployment.yaml` | EssentialsX, ViaVersion |
-| **Jar à la main** (payant, disparu, custom) | `plugins/manual/` | le dossier du repo | voir [README.md](../plugins/manual/README.md) |
+| **Jar à la main** (payant, disparu, custom, addon BentoBox) | `plugins/manual/` ou `plugins/manual/bentobox-addons/` | le dossier du repo | voir [README.md](../plugins/manual/README.md) |
 
 **Règle de choix** : toujours préférer Modrinth > Spiget > URL > manuel. Plus haut dans cette liste = moins de friction et mises à jour gérées par itzg.
 
-**TntRun et SkyWars sont en voie Spiget** (déjà ajoutés au projet, tu n'as rien à faire — voir section suivante).
+**Tous les mini-jeux listés dans le tableau d'intro sont déjà ajoutés** au projet — rien à faire pour l'installation, il faut juste les configurer in-game.
+
+> Pour ajouter un nouveau plugin, la source de vérité unique est [`docs/plugins.md`](plugins.md) (sections 3 et 7). **Jamais** ajouter un plugin ici sans l'ajouter là.
 
 ---
 
@@ -220,74 +236,156 @@ Logs attendus :
 [SkyWarsReloaded] Loaded 0 arenas
 ```
 
-### Étape 2 — créer un monde par arène (Multiverse, autoLoad=false)
+### Étape 2 — modèle **V3 lukasvdgaag** : 1 monde Multiverse = 1 map
 
-Une map par arène, toutes préfixées `sw-` pour tri propre dans `/mv list`. Le `autoLoad false` fait que la map n'est chargée **que** quand un joueur y TP → économie RAM critique avec 11 arènes.
+Contrairement à l'ancien SkyWarsReloaded (Dabo Ross) qui copiait un schematic dans un monde "arena" temporaire, la **v3 de lukasvdgaag** utilise **Multiverse directement** : chaque map est **son propre monde Multiverse** et SWR gère le reset via backup/restore du monde. Avantages :
+
+- Pas de duplication de map à chaque game.
+- Le monde est persistant → tu peux y retourner pour le modifier entre deux parties.
+- Reset automatique entre games (option).
+- `autoLoad=false` → la map n'est chargée que quand quelqu'un y joue → économie RAM massive.
+
+**SkyWarsReloaded fournit son propre générateur void** (fichier `SkyWarsReloadedGenerator` dans le jar). On l'utilise via le flag `-g SkyWarsReloaded` de Multiverse → monde **100 % vide**, pas de bedrock, pas de grass, rien. Juste de l'air jusqu'à Y=-64.
+
+> ⚠️ **Piège à éviter** : `-t FLAT -g FLAT` crée un monde **superflat** (bedrock+dirt+grass) — c'est **PAS** un void, tu aurais une plaine sous les îles. Ne l'utilise jamais pour SkyWars.
+
+### Étape 3 — commencer **par une seule map** : Bones (validation de la chaîne)
+
+Avant de batcher les 11 maps, on fait **bones** seule de A à Z pour valider que la pipeline fonctionne. Une fois bones jouable, tu dupliques pour les autres.
+
+**3.1 — Créer le monde void**
 
 ```bash
-# Boucle shell côté local (via make cmd, chaque cmd passe par RCON)
-for map in classico dune frozen jungle tree ballon ballon-oringin bones nethugly duels sky-duel; do
-    make cmd ARGS="mv create sw-$map normal -t FLAT -g FLAT -s 0"
-    make cmd ARGS="mv modify sw-$map set gamemode adventure"
+# Monde void via le générateur bundlé SkyWarsReloaded
+make cmd ARGS="mv create sw-bones normal -g SkyWarsReloaded"
+
+# Config de l'arène (PVP on, pas d'auto-load pour économie RAM)
+make cmd ARGS="mv modify sw-bones set pvp true"
+make cmd ARGS="mv modify sw-bones set difficulty normal"
+make cmd ARGS="mv modify sw-bones set autoLoad false"
+make cmd ARGS="mv modify sw-bones set keepSpawnInMemory false"
+
+# Gamemode : survival (les joueurs doivent pouvoir casser les blocs des
+# îles + ouvrir les chests). SWR forcera le gamemode "survival" au start
+# de chaque partie de toute façon, donc peu importe ici — mais NE PAS
+# mettre adventure (bloquerait WorldEdit quand tu pastes le schematic).
+make cmd ARGS="mv modify sw-bones set gamemode survival"
+```
+
+Vérification que le monde est bien void :
+
+```bash
+make cmd ARGS="mvtp Zoyern sw-bones"
+# En jeu : tu devrais flotter dans le vide, rien à l'horizon.
+# Si tu vois une plaine → le générateur SWR n'a pas été trouvé (voir Troubleshooting).
+```
+
+**3.2 — Paster le schematic bones**
+
+En jeu (client OP) :
+
+```
+/tp 0 100 0
+/gamemode creative
+//perf neighbors off          # désactive light updates (paste beaucoup plus rapide)
+//schem load skywars-bones
+//paste -a -o                 # -a = ignore air, -o = origin at player
+/setworldspawn
+//perf neighbors on
+/gamemode survival
+```
+
+**3.3 — Noter les coords des spawns (cages)**
+
+Chaque île a une cage en verre où spawn un joueur. Vole à chaque cage, **pose-toi sur le bloc où le joueur doit apparaître** (centre de la cage, sur le sol), et note tes coords avec `/tp` ou l'overlay F3.
+
+Format à noter (exemple, à adapter à ton schematic bones) :
+
+```
+Cage 1 :   X  Y  Z
+Cage 2 :   X  Y  Z
+...
+```
+
+Pour le schematic bones il y a typiquement **8 îles** disposées en octogone. Les coords sont souvent à ±80 à 100 blocs du centre, à Y=100.
+
+**3.4 — Enregistrer l'arène dans SkyWarsReloaded**
+
+SWR v3 a un mode setup interactif. En jeu :
+
+```
+# Crée l'arène "bones" (le nom interne SWR, pas forcément le nom de monde)
+/swr create bones sw-bones
+
+# Entre en mode édition
+/swr edit bones
+
+# Pour chaque cage (1 à 8) :
+#   1. TP à la position notée en 3.3
+#   2. Exécute :
+/swr addspawn
+
+# Position où les morts / spectateurs TP :
+/swr setspectatespawn
+
+# Coins de la zone à reset entre parties (la bounding box de toute la map) :
+#   1. Vole au coin bas-ouest-sud (-X, -Y, -Z)
+/swr setpos1
+#   2. Vole au coin haut-est-nord (+X, +Y, +Z)
+/swr setpos2
+
+# Sauvegarde la config
+/swr save
+
+# Active l'arène (joueurs peuvent la rejoindre)
+/swr enable bones
+```
+
+**3.5 — Tester**
+
+```
+/swr join bones           # tu devrais être TP dans une cage
+# Attends 1 autre joueur (ou lance seul avec /swr forcestart bones en OP)
+```
+
+**Si ça marche → passe au 3.6. Si ça plante → voir [Troubleshooting](#troubleshooting).**
+
+### Étape 4 — dupliquer pour les 10 autres maps
+
+Une fois bones validée, tu automatises le reste. Mais attention : **les coords des cages ne sont pas identiques d'une map à l'autre** (chaque schematic est différent). Les étapes automatisables sont la création du monde void + le paste. Le `/swr addspawn` reste manuel (une fois par cage).
+
+**4.1 — Boucle shell pour créer les 10 mondes void restants**
+
+```bash
+# Mondes (hors bones, déjà faite)
+for map in classico dune frozen jungle tree ballon ballon-oringin nethugly duels sky-duel; do
+    make cmd ARGS="mv create sw-$map normal -g SkyWarsReloaded"
     make cmd ARGS="mv modify sw-$map set pvp true"
     make cmd ARGS="mv modify sw-$map set difficulty normal"
     make cmd ARGS="mv modify sw-$map set autoLoad false"
+    make cmd ARGS="mv modify sw-$map set keepSpawnInMemory false"
+    make cmd ARGS="mv modify sw-$map set gamemode survival"
 done
 ```
 
-### Étape 3 — paste chaque schematic dans sa map
+**4.2 — Pour chaque map, paster son schematic + setup SWR**
 
-Pour chaque arène (ex. `classico`) :
+Répète les étapes 3.2 à 3.5 pour chaque nom de map. Le schematic correspondant est `skywars-<map>` (ex. `skywars-classico`, `skywars-dune`...).
 
-```
-make cmd ARGS="mvtp Zoyern sw-classico"
-# En jeu (client OP) :
-/tp 0 100 0
-//perf neighbors off                       # désactive lighting updates (paste rapide)
-//schem load skywars-classico
-//paste -a -o
-/setworldspawn
-//perf neighbors on
-```
-
-Pendant que tu pastes, **note les coords des cages** (spawns des joueurs sur chaque îlot). Typiquement 8 cages disposées autour du centre, à ±80-100 blocs. Un modèle qui marche : on note les coords d'un bord de chaque cage (où le joueur se tient) sous forme de `X Y Z`.
+**Tableau de suivi** — coche au fur et à mesure :
 
 ```
-# Exemple pour sw-classico (à adapter par arène) :
-Cage 1 :  80 100  80     Cage 5 :  80 100 -80
-Cage 2 :   0 100 113     Cage 6 :   0 100 -113
-Cage 3 : -80 100  80     Cage 7 : -80 100 -80
-Cage 4 : 113 100   0     Cage 8 : -113 100   0
-```
-
-### Étape 4 — enregistrer l'arène dans SkyWarsReloaded
-
-SWR a un mode "setup" assez guidé. Séquence pour **une** arène (`classico`) ; à répéter pour chaque map.
-
-```
-# 1) Crée l'arène
-make cmd ARGS="swr create classico"
-
-# 2) Entre en mode édition (commandes exécutées en jeu, OP)
-/swr edit classico
-
-# 3) TP dans chaque cage (1 à 8) puis :
-/swr addspawn                    # enregistre la position du cursor comme spawn
-
-# 4) TP à l'endroit du spectator spawn (au-dessus de la map, vue d'ensemble)
-/swr setspectatespawn
-
-# 5) TP au centre du lobby de pré-partie (scoreboard, compte à rebours)
-/swr setlobby
-
-# 6) Définit les coins de la map (pour reset auto — SWR copie l'état
-#    initial et le restaure entre parties)
-/swr setpos1           # coin -X -Y -Z
-/swr setpos2           # coin +X +Y +Z
-
-# 7) Sauvegarde + valide
-/swr save
-/swr enable classico
+[x] bones          (validée)
+[ ] classico       ( /__ cages enregistrées)
+[ ] dune           ( /__ cages)
+[ ] frozen         ( /__ cages)
+[ ] jungle         ( /__ cages)
+[ ] tree           ( /__ cages)
+[ ] ballon         ( /__ cages)
+[ ] ballon-oringin ( /__ cages)
+[ ] nethugly       ( /__ cages)
+[ ] duels          ( /__ cages)
+[ ] sky-duel       ( /__ cages)
 ```
 
 ### Étape 5 — loot tables (chest loot)
@@ -466,6 +564,55 @@ kubectl -n mineshark exec deploy/mc-main -c minecraft -- cat /data/plugins/SkyWa
 ```
 
 Doit être ≤ 1.21. Si non, pin une version précédente via `plugins/manual/` (télécharge une release GitHub plus ancienne).
+
+### `mv create sw-bones -g SkyWarsReloaded` → "Unknown generator"
+
+Cause : SkyWarsReloaded n'a pas fini de charger avant que tu tapes la commande, **OU** la version de SWR installée est trop ancienne (< v3, pas de générateur bundlé).
+
+**Fix 1 — attendre** : le premier boot post-install prend 60-90s. Tape :
+```
+make cmd ARGS="plugins"
+```
+Et vérifie que `SkyWarsReloaded` est en **vert** (chargé). Si en rouge, attends 30s et retente.
+
+**Fix 2 — fallback sur un plugin void générique** : si tu n'arrives vraiment pas à faire fonctionner le générateur SWR, installe un plugin void dédié. Exemple avec `VoidGen` (SpigotMC ID 27934, très petit, zéro config) :
+
+```bash
+# Ajoute à .env :
+PLUGINS_SPIGET=34315,1997,53359,69436,27934
+
+# Et dans k8s/main/deployment.yaml :
+value: "34315,1997,53359,69436,27934"
+
+# Puis :
+make re
+
+# Et utilise -g VoidGen au lieu de -g SkyWarsReloaded :
+make cmd ARGS="mv create sw-bones normal -g VoidGen"
+```
+
+Les deux générateurs donnent un monde 100% vide — fonctionnellement identiques.
+
+### Je vois des plaines sous mes îles SkyWars
+
+Cause : tu as utilisé `-t FLAT -g FLAT` (ou rien, qui tombe sur le générateur normal = plaines biome aléatoire). Le monde n'est **pas** void.
+
+**Fix** : supprime le monde et recrée avec le bon générateur :
+
+```bash
+# 1) Arrête le monde côté Multiverse
+make cmd ARGS="mv delete sw-bones"
+# Multiverse demande confirmation : retape la commande dans les 5s
+make cmd ARGS="mv delete sw-bones"
+
+# 2) Recrée avec -g SkyWarsReloaded
+make cmd ARGS="mv create sw-bones normal -g SkyWarsReloaded"
+# Puis refais les mv modify + le paste schematic
+```
+
+### `/swr addspawn` me dit "arena not in edit mode"
+
+Cause : tu as oublié de faire `/swr edit bones` avant. Il faut être **dans le monde** `sw-bones` **ET** en mode édition (`/swr edit bones`) pour que les commandes de setup s'appliquent à cette arène.
 
 ### TntRun_reloaded : erreur "could not load arena classico"
 

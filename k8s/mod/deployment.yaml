@@ -100,10 +100,23 @@ spec:
             # son slug ici en respectant EXACTEMENT l'URL CurseForge.
             - name: CF_EXCLUDE_MODS
               value: "substrate-add-on,particle-core,pretty-rain"
+            # CLÉ DU FIX : sans CF_FORCE_SYNCHRONIZE=true, itzg ne re-évalue
+            # PAS CF_EXCLUDE_MODS entre les boots. Les jars client-only déjà
+            # présents dans le PVC (téléchargés lors d'un boot antérieur)
+            # restent en place → crash à l'init Substrate/ParticleCore.
+            # Avec true, itzg re-compare le manifest CF avec /data/mods/ à
+            # chaque boot et supprime les jars qui matchent CF_EXCLUDE_MODS.
+            # Coût : ~5-10s de re-check par boot (pas de re-download si les
+            # hashes matchent, juste validation). Acceptable.
+            - name: CF_FORCE_SYNCHRONIZE
+              value: "true"
             # Défense en profondeur : même si CF_EXCLUDE_MODS rate un slug,
             # REMOVE_OLD_MODS scanne /data/mods/ au boot et purge ces jars.
             # Matche par nom de fichier (wildcards glob), profondeur 2 pour
             # attraper aussi les JarJar extraits dans des sous-dossiers.
+            # ⚠️ REMOVE_OLD_MODS s'exécute AVANT AUTO_CURSEFORGE, donc il
+            # ne protège que contre les reliquats. Le vrai filtre, c'est
+            # CF_EXCLUDE_MODS + CF_FORCE_SYNCHRONIZE ci-dessus.
             - name: REMOVE_OLD_MODS
               value: "TRUE"
             - name: REMOVE_OLD_MODS_INCLUDE

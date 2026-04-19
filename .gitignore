@@ -106,3 +106,6 @@ coverage/
 !plugins/manual/*.jar
 !plugins/manual/.gitkeep
 !plugins/manual/README.md
+!plugins/manual/bentobox-addons/
+!plugins/manual/bentobox-addons/*.jar
+!plugins/manual/bentobox-addons/.gitkeep

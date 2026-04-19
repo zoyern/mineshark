@@ -82,6 +82,7 @@ spec:
             - |
               set -e
               mkdir -p /data/plugins
+              # 1) Plugins "classiques" dans /data/plugins/
               if [ -d /manual-plugins ] && ls /manual-plugins/*.jar >/dev/null 2>&1; then
                 cp -f /manual-plugins/*.jar /data/plugins/
                 count=$(ls /manual-plugins/*.jar | wc -l)
@@ -90,11 +91,25 @@ spec:
               else
                 echo "ℹ️  /manual-plugins vide ou absent — skip (normal si aucun plugin manuel)"
               fi
+              # 2) Addons BentoBox dans /data/plugins/BentoBox/addons/
+              #    (NE PAS mettre dans /data/plugins/ — BentoBox ignore.)
+              mkdir -p /data/plugins/BentoBox/addons
+              if [ -d /manual-bentobox-addons ] && ls /manual-bentobox-addons/*.jar >/dev/null 2>&1; then
+                cp -f /manual-bentobox-addons/*.jar /data/plugins/BentoBox/addons/
+                acount=$(ls /manual-bentobox-addons/*.jar | wc -l)
+                echo "✓ $acount addon(s) BentoBox copié(s) dans /data/plugins/BentoBox/addons/"
+                ls -1 /manual-bentobox-addons/*.jar | sed 's|.*/|  → |'
+              else
+                echo "ℹ️  /manual-bentobox-addons vide ou absent — skip (normal si pas d'addon)"
+              fi
           volumeMounts:
             - name: data
               mountPath: /data
             - name: manual-plugins
               mountPath: /manual-plugins
+              readOnly: true
+            - name: manual-bentobox-addons
+              mountPath: /manual-bentobox-addons
               readOnly: true
       containers:
         - name: minecraft
@@ -189,17 +204,34 @@ spec:
             #     et fallback sur un adapter 1.21.6 (warning "not tested").
             - name: MODRINTH_PROJECTS
               value: "luckperms,worldedit:7.3.16,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky"
-            # Plugins SpigotMC (pas dispos sur Modrinth) — synced avec .env PLUGINS_SPIGET :
-            #   34315 vault           — API économie (prérequis bcp plugins)
-            #   1997  protocollib     — lib paquets (dep WorldGuard/AuthMe/etc.)
-            #   53359 tntrun_reloaded — mini-game TntRun, compat 1.13 → 1.21
-            #   69436 skywarsreloaded — mini-game SkyWars (fork lukasvdgaag,
-            #                           compat 1.21.x, features modernes)
-            # Ajout/retrait : édite ici + .env PLUGINS_SPIGET (même liste).
+            # Plugins SpigotMC (pas dispos sur Modrinth) — synced avec
+            # .env PLUGINS_SPIGET et docs/plugins.md section 2 :
+            #   ─ Core/libs ─
+            #     34315  vault             — API économie (prérequis bcp plugins)
+            #     1997   protocollib       — lib paquets (dep WorldGuard/SWR/etc)
+            #   ─ Navigation hub ─
+            #     14356  advanced-portals  — portails lobby ↔ hub-minigames
+            #   ─ Mini-jeux ─
+            #     53359  tntrun_reloaded   — TntRun (compat 1.13 → 1.21)
+            #     69436  skywarsreloaded   — SkyWars (fork lukasvdgaag, FREE)
+            #     63714  screamingbedwars  — BedWars 1.21.x (remplace BW1058)
+            #     118673 spleef_reloaded   — Spleef/Splegg (steve4744)
+            #     66614  mystery           — MurderMystery (Plugily-Projects)
+            #     81185  oitc              — One In The Chamber (Despical)
+            #   ─ Skyblock ─
+            #     73261  bentobox          — plateforme Skyblock/OneBlock
+            #                                 (addon AOneBlock via plugins/manual/
+            #                                  bentobox-addons/, pas auto)
+            #   ─ Divers ─
+            #     113931 <slot existant>   — voir docs/plugins.md
+            #
+            # Ajout/retrait : MAJ docs/plugins.md + .env + .env.example + ici
+            # (section 7 "checklist cohérence" de docs/plugins.md).
             # itzg retélécharge à chaque boot si la version Spiget est plus
             # récente (contrôle via SPIGET_UPDATE_CHECK_INTERVAL = 72h).
+            # Pour forcer un refresh immédiat : `make redeploy-plugins`.
             - name: SPIGET_RESOURCES
-              value: "34315,1997,53359,69436,113931"
+              value: "34315,1997,14356,53359,69436,63714,118673,66614,81185,73261,113931"
             # Hors-Modrinth/Spiget :
             #   • Floodgate (GeyserMC)
             #   • ViaVersion / ViaBackwards : compat clients 1.8 → 1.21
@@ -265,4 +297,15 @@ spec:
         - name: manual-plugins
           hostPath:
             path: /var/lib/mineshark/manual-plugins
+            type: DirectoryOrCreate
+        # ─── Addons BentoBox (workflow plugins/manual/bentobox-addons/) ──
+        # Les addons BentoBox (AOneBlock, Level, etc.) ne sont PAS des
+        # plugins Bukkit classiques : ils doivent être posés dans
+        # `plugins/BentoBox/addons/` pour être détectés. Sous-répertoire
+        # dédié côté repo (`plugins/manual/bentobox-addons/*.jar`),
+        # rsync-é sur VPS dans `/var/lib/mineshark/manual-bentobox-addons/`,
+        # copié par l'initContainer dans `/data/plugins/BentoBox/addons/`.
+        - name: manual-bentobox-addons
+          hostPath:
+            path: /var/lib/mineshark/manual-bentobox-addons
             type: DirectoryOrCreate
