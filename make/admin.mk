@@ -7,8 +7,8 @@
 
 # Valeurs par défaut si .env absent (le `?=` ne définit que si non set)
 VPS_USER     ?= mineshark
-VPS_IP       ?= 127.0.0.1
-VPS_SSH_PORT ?= 22
+VPS_IP       ?= 159.195.146.234
+VPS_SSH_PORT ?= 2222
 
 # Emplacement des secrets auto-générés (jamais committés, gitignored via data/)
 SECRETS_DIR        := data/secrets
@@ -180,8 +180,7 @@ vps-put: ## Envoie un fichier local sur le VPS. Usage: make vps-put FILE=<chemin
 # ─── Déploiement à distance ────────────────────────────────────────
 deploy: ## Push git puis pull + make re sur le VPS
 	@git push
-	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
-	    'cd ~/mineshark && git pull && make re'
+	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) 'cd /opt/mineshark && git pull && make re'
 
 
 # ─── Sync des plugins déposés à la main (plugins/manual/ → VPS) ─────
