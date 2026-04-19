@@ -16,6 +16,51 @@ RCON_SECRET_FILE   := $(SECRETS_DIR)/rcon.secret
 FWD_SECRET_FILE    := data/velocity/forwarding.secret
 
 
+# ─── Console RCON (envoyer des commandes MC au serveur main) ──────
+# En k3s, on exec rcon-cli dans le pod mc-main. RCON est activé via
+# ENABLE_RCON=true dans le Deployment + mot de passe via Secret.
+NAMESPACE ?= mineshark
+
+cmd: ## Envoie une commande MC au main via RCON. Usage: make cmd ARGS="say hello"
+	@test -n "$(ARGS)" || (echo "❌ Usage: make cmd ARGS=\"<commande MC>\""; exit 1)
+	@kubectl exec -n $(NAMESPACE) deploy/mc-main -- rcon-cli $(ARGS)
+
+op: ## Donne OP à un joueur. Usage: make op PLAYER=Zoyern
+	@test -n "$(PLAYER)" || (echo "❌ Usage: make op PLAYER=<pseudo>"; exit 1)
+	@kubectl exec -n $(NAMESPACE) deploy/mc-main -- rcon-cli op $(PLAYER)
+	@echo "✓ $(PLAYER) est maintenant OP."
+
+deop: ## Retire OP à un joueur. Usage: make deop PLAYER=Zoyern
+	@test -n "$(PLAYER)" || (echo "❌ Usage: make deop PLAYER=<pseudo>"; exit 1)
+	@kubectl exec -n $(NAMESPACE) deploy/mc-main -- rcon-cli deop $(PLAYER)
+
+console: ## Shell RCON interactif (tape les commandes MC une par une, Ctrl+D pour quitter)
+	@kubectl exec -n $(NAMESPACE) -it deploy/mc-main -- rcon-cli
+
+
+# ─── Schematics (assets/schematics/ → pod mc-main) ─────────────────
+# On commit les .schematic dans le repo sous assets/schematics/ pour
+# les avoir en gitops. `push-schematics` les copie dans le pod vers
+# /data/plugins/WorldEdit/schematics/ (accessibles via //schem load).
+push-schematics: ## Copie assets/schematics/*.schematic vers le pod mc-main
+	@test -d assets/schematics \
+	    || (echo "❌ assets/schematics/ inexistant"; exit 1)
+	@pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main \
+	    -o jsonpath='{.items[0].metadata.name}'); \
+	 test -n "$$pod" \
+	    || (echo "❌ Pas de pod mc-main trouvé. make status ?"; exit 1); \
+	 kubectl exec -n $(NAMESPACE) $$pod -- \
+	    mkdir -p /data/plugins/WorldEdit/schematics; \
+	 for f in assets/schematics/*.schematic assets/schematics/*.schem; do \
+	     [ -f "$$f" ] || continue; \
+	     name=$$(basename "$$f"); \
+	     echo "  ▶ $$name"; \
+	     kubectl cp "$$f" \
+	         $(NAMESPACE)/$$pod:/data/plugins/WorldEdit/schematics/$$name; \
+	 done
+	@echo "✓ Schematics poussés. En jeu : //schem list"
+
+
 # ─── SSH au VPS ────────────────────────────────────────────────────
 ssh: ## Se connecte en SSH au VPS (cf. .env VPS_USER / VPS_IP / VPS_SSH_PORT)
 	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP)
@@ -172,4 +217,4 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
 	@echo "✓ Lint OK."
 
 
-.PHONY: ssh deploy backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run
+.PHONY: ssh deploy backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics
