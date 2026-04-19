@@ -136,6 +136,47 @@ ssh: ## Se connecte en SSH au VPS (cf. .env VPS_USER / VPS_IP / VPS_SSH_PORT)
 	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP)
 
 
+# ─── Transfert de fichiers VPS ↔ local (debug / inspection) ────────
+# Zone de travail locale non-trackée : ./scratch/ (cf. .gitignore).
+# Utile pour tirer un log/dump du VPS pour l'analyser sans polluer le
+# repo, ou pour pousser rapidement un fichier patché sans commit.
+#
+# Usage :
+#   make vps-get FILE=out_moded.txt              # /opt/mineshark/out_moded.txt → scratch/
+#   make vps-get FILE=/var/log/syslog            # chemin absolu supporté
+#   make vps-get FILE=logs/app.log DEST=backups  # override dossier local
+#   make vps-put FILE=scratch/fix.yaml           # scratch/fix.yaml → /opt/mineshark/
+#   make vps-put FILE=scratch/fix.yaml DEST=/tmp # override dossier distant
+#
+# Conventions :
+#   • côté VPS, un chemin relatif est résolu sous VPS_REMOTE_ROOT
+#     (défaut : /opt/mineshark, racine du repo sur le VPS)
+#   • côté local, les fichiers récupérés atterrissent dans SCRATCH_DIR
+#   • le port SSH est lu depuis .env (VPS_SSH_PORT) — aucun flag à taper
+SCRATCH_DIR     ?= scratch
+VPS_REMOTE_ROOT ?= /opt/mineshark
+
+vps-get: ## Récupère un fichier du VPS dans ./scratch/. Usage: make vps-get FILE=<chemin> [DEST=<dir_local>]
+	@test -n "$(FILE)" || (echo "❌ Usage: make vps-get FILE=<chemin_distant> [DEST=<dir_local>]"; exit 1)
+	@local_dest="$${DEST:-$(SCRATCH_DIR)}"; \
+	 mkdir -p "$$local_dest"; \
+	 case "$(FILE)" in \
+	     /*) remote="$(FILE)" ;; \
+	     *)  remote="$(VPS_REMOTE_ROOT)/$(FILE)" ;; \
+	 esac; \
+	 echo "▶ scp $(VPS_USER)@$(VPS_IP):$$remote → $$local_dest/"; \
+	 scp -P $(VPS_SSH_PORT) "$(VPS_USER)@$(VPS_IP):$$remote" "$$local_dest/" \
+	     && echo "✓ Récupéré dans $$local_dest/"
+
+vps-put: ## Envoie un fichier local sur le VPS. Usage: make vps-put FILE=<chemin_local> [DEST=<dir_distant>]
+	@test -n "$(FILE)" || (echo "❌ Usage: make vps-put FILE=<chemin_local> [DEST=<dir_distant>]"; exit 1)
+	@test -f "$(FILE)" || (echo "❌ Fichier local introuvable : $(FILE)"; exit 1)
+	@remote_dest="$${DEST:-$(VPS_REMOTE_ROOT)}"; \
+	 echo "▶ scp $(FILE) → $(VPS_USER)@$(VPS_IP):$$remote_dest/"; \
+	 scp -P $(VPS_SSH_PORT) "$(FILE)" "$(VPS_USER)@$(VPS_IP):$$remote_dest/" \
+	     && echo "✓ Poussé vers $(VPS_USER)@$(VPS_IP):$$remote_dest/"
+
+
 # ─── Déploiement à distance ────────────────────────────────────────
 deploy: ## Push git puis pull + make re sur le VPS
 	@git push
@@ -249,9 +290,9 @@ doctor: ## Vérifie env, dépendances et cohérence config
 CONTAINER_UID ?= 1000
 CONTAINER_GID ?= 1000
 
-init: ## Crée les dossiers data/, backups/, .env initial et les secrets
-	@mkdir -p data/velocity data/main data/mod data/secrets backups/main backups/manual
-	@touch data/.gitkeep backups/.gitkeep
+init: ## Crée les dossiers data/, backups/, scratch/, .env initial et les secrets
+	@mkdir -p data/velocity data/main data/mod data/secrets backups/main backups/manual $(SCRATCH_DIR)
+	@touch data/.gitkeep backups/.gitkeep $(SCRATCH_DIR)/.gitkeep
 	@test -f .env || (cp .env.example .env && echo "✓ .env créé. Édite CF_API_KEY avant `make up`.")
 	@$(MAKE) --no-print-directory gen-secrets
 	@# Aligne les permissions sur l'UID non-root des conteneurs (silencieux
@@ -287,4 +328,4 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
 	@echo "✓ Lint OK."
 
 
-.PHONY: ssh deploy backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds update-plugins
+.PHONY: ssh vps-get vps-put deploy backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds update-plugins

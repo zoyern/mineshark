@@ -29,6 +29,11 @@ data/
 backups/
 
 
+# ─── Zone de travail locale (fichiers tirés du VPS, dumps, scratch) ─
+# Alimentée par `make vps-get` / à la main. Jamais committée.
+scratch/
+
+
 # ─── Ancien serveur Spigot (archive massive 4.8 Go) ────────────────
 # Conservée localement pour récupérer les maps historiques (lobby,
 # SkyWars, Spawn). À NE JAMAIS committer.
@@ -84,7 +89,8 @@ coverage/
 
 
 # ─── Exception : on garde la structure des dossiers gitignored ────
-# Pour que `data/`, `backups/`, etc. existent au clone, on commit un
-# .gitkeep dedans. La règle ! force l'inclusion malgré le pattern parent.
+# Pour que `data/`, `backups/`, `scratch/` existent au clone, on commit
+# un .gitkeep dedans. La règle ! force l'inclusion malgré le pattern parent.
 !data/.gitkeep
 !backups/.gitkeep
+!scratch/.gitkeep
