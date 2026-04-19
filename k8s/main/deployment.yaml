@@ -72,7 +72,7 @@ spec:
             - name: TYPE
               value: PAPER                       # synced with .env SERVER_TYPE
             - name: VERSION
-              value: "1.21.4"                    # synced with .env PAPER_VERSION
+              value: "1.21.11"                   # synced with .env PAPER_VERSION
             - name: MEMORY
               value: "4G"                        # synced with .env MAIN_MEMORY
             - name: USE_AIKAR_FLAGS
@@ -135,19 +135,25 @@ spec:
 
             # Plugins via Modrinth — résolution automatique des versions
             # (synced avec .env PLUGINS_MODRINTH)
+            # NOTE: essentialsx retiré de Modrinth car leur packaging lag
+            # derrière GitHub (ex. 2.21.0 Modrinth vs 2.21.2 GitHub).
+            # On le tire directement depuis GitHub via PLUGINS (voir ci-dessous).
             - name: MODRINTH_PROJECTS
-              value: "luckperms,essentialsx,worldedit,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky"
+              value: "luckperms,worldedit,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky"
             # Plugins SpigotMC (pas dispos sur Modrinth) : Vault (34315),
             # ProtocolLib (1997). Synced avec .env PLUGINS_SPIGET.
             - name: SPIGET_RESOURCES
               value: "34315,1997"
-            # Hors-Modrinth/Spiget : Floodgate (GeyserMC) + ViaVersion/ViaBackwards
-            # (laisse les clients 1.8 → 1.21 tous se connecter sur un 1.21).
+            # Hors-Modrinth/Spiget :
+            #   • Floodgate (GeyserMC)
+            #   • ViaVersion / ViaBackwards : compat clients 1.8 → 1.21
+            #   • EssentialsX : tiré direct depuis GitHub (Modrinth lag)
             - name: PLUGINS
               value: |-
                 https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
                 https://github.com/ViaVersion/ViaVersion/releases/download/5.8.1/ViaVersion-5.8.1.jar
                 https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar
+                https://github.com/EssentialsX/Essentials/releases/download/2.21.2/EssentialsX-2.21.2.jar
 
           ports:
             - containerPort: 25565
