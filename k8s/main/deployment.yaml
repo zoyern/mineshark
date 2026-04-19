@@ -36,6 +36,29 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+      # itzg copie /config/*.yml dans /data/config/ — OK pour paper-*.yml
+      # mais Paper lit bukkit.yml/spigot.yml à la RACINE de /data/. On copie
+      # explicitement avant que le container principal démarre. Idempotent :
+      # on écrase à chaque boot pour garder ConfigMap comme source de vérité.
+      initContainers:
+        - name: copy-bukkit-yml
+          image: busybox:1.36.1
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              if [ -f /config/bukkit.yml ]; then
+                cp /config/bukkit.yml /data/bukkit.yml
+                echo "✓ bukkit.yml copié à /data/bukkit.yml"
+              else
+                echo "⚠️  /config/bukkit.yml absent, skip"
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: server-config
+              mountPath: /config
+              readOnly: true
       containers:
         - name: minecraft
           image: itzg/minecraft-server:java21    # synced with .env IMG_SERVER
