@@ -91,7 +91,8 @@ re: fclean up ## Reset puis redéploie tout
 # Conservé : Velocity, ses PVC, les Secrets, les ConfigMaps.
 reset-main-data: sync-paper-config ## Wipe complet du PVC mc-main (mondes + plugins data) et redéploie
 	@echo "⚠️  Reset complet du PVC mc-main (toute la data Paper sera perdue) …"
-	@kubectl -n $(NAMESPACE) scale deployment mc-main --replicas=0 --ignore-not-found
+	@# `kubectl scale` n'a pas `--ignore-not-found`. On tolère l'échec manuellement.
+	@kubectl -n $(NAMESPACE) scale deployment mc-main --replicas=0 2>/dev/null || true
 	@kubectl -n $(NAMESPACE) wait --for=delete pod -l app=mc-main --timeout=60s 2>/dev/null || true
 	@kubectl -n $(NAMESPACE) delete pvc server-main-pvc --ignore-not-found
 	@# Applique les manifests SAUF configmap.yaml (placeholder, écraserait
