@@ -199,7 +199,7 @@ spec:
             # itzg retélécharge à chaque boot si la version Spiget est plus
             # récente (contrôle via SPIGET_UPDATE_CHECK_INTERVAL = 72h).
             - name: SPIGET_RESOURCES
-              value: "34315,1997,53359,69436,69111,113931"
+              value: "34315,1997,53359,69436,113931"
             # Hors-Modrinth/Spiget :
             #   • Floodgate (GeyserMC)
             #   • ViaVersion / ViaBackwards : compat clients 1.8 → 1.21
