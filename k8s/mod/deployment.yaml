@@ -93,6 +93,24 @@ spec:
                 secretKeyRef:
                   name: curseforge-api-key
                   key: api-key
+            # ─── Mods client-only exclus du pack ────────────────────
+            # Modded Together embarque quelques mods dont les classes
+            # ne sont dispo que côté client (KeyMapping, Screen, etc.).
+            # Sur DEDICATED_SERVER elles font crasher NeoForge via
+            # RuntimeDistCleaner. On empêche donc itzg de les (ré)installer.
+            #
+            # Slugs = fin de l'URL CurseForge (curseforge.com/minecraft/mc-mods/<slug>).
+            # Pour ajouter un mod : identifier le slug puis lister ici, séparé par
+            # virgule. itzg vérifie le manifest à chaque boot et applique
+            # cette liste avant extraction.
+            #
+            # Historique :
+            #   • substrate     : dev.vesper.substrate.platform.neoforge → KeyMapping
+            #   • pretty-rain   : com.leclowndu93150.particlerain → Screen
+            - name: CF_EXCLUDE_MODS
+              value: "substrate,pretty-rain"
+            # Si un boot échoue encore avec un 3e mod client-only, ajouter
+            # son slug ici puis `kubectl rollout restart deploy/mc-mod -n mineshark`.
 
             - name: MEMORY
               value: "8G"                          # synced with .env MOD_MEMORY
