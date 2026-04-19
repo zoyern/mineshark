@@ -188,7 +188,7 @@ spec:
             #     Sans pin, itzg prend 7.4.2 qui est dev build pour 1.21.9+
             #     et fallback sur un adapter 1.21.6 (warning "not tested").
             - name: MODRINTH_PROJECTS
-              value: "luckperms,worldedit:7.3.16,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky,VoidGen"
+              value: "luckperms,worldedit:7.3.16,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky"
             # Plugins SpigotMC (pas dispos sur Modrinth) — synced avec .env PLUGINS_SPIGET :
             #   34315 vault           — API économie (prérequis bcp plugins)
             #   1997  protocollib     — lib paquets (dep WorldGuard/AuthMe/etc.)
@@ -199,7 +199,7 @@ spec:
             # itzg retélécharge à chaque boot si la version Spiget est plus
             # récente (contrôle via SPIGET_UPDATE_CHECK_INTERVAL = 72h).
             - name: SPIGET_RESOURCES
-              value: "34315,1997,53359,69436"
+              value: "34315,1997,53359,69436,113931"
             # Hors-Modrinth/Spiget :
             #   • Floodgate (GeyserMC)
             #   • ViaVersion / ViaBackwards : compat clients 1.8 → 1.21
