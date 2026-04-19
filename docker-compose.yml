@@ -76,7 +76,7 @@ services:
     environment:
       EULA: "TRUE"
       TYPE: ${SERVER_TYPE:-PAPER}    # PAPER par défaut, cf .env
-      VERSION: ${PAPER_VERSION:-1.21.11}
+      VERSION: ${PAPER_VERSION:-1.21.10}
       MEMORY: ${MAIN_MEMORY:-3G}
       USE_AIKAR_FLAGS: "true"
       LEVEL: "hub"

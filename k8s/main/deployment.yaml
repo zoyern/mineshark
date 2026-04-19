@@ -72,7 +72,10 @@ spec:
             - name: TYPE
               value: PAPER                       # synced with .env SERVER_TYPE
             - name: VERSION
-              value: "1.21.11"                   # synced with .env PAPER_VERSION
+              value: "1.21.10"                   # synced with .env PAPER_VERSION
+              # ⚠️ Bloqué à 1.21.10 : CoreProtect CE v23.1 = dernière version
+              # publiée sur Modrinth (déc 2025), supporte jusqu'à 1.21.10.
+              # Quand CoreProtect sortira un build 1.21.11 → bump ici + .env.
             - name: MEMORY
               value: "4G"                        # synced with .env MAIN_MEMORY
             - name: USE_AIKAR_FLAGS
