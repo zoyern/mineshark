@@ -61,6 +61,38 @@ push-schematics: ## Copie assets/schematics/*.schematic vers le pod mc-main
 	@echo "✓ Schematics poussés. En jeu : //schem list"
 
 
+# ─── Mise à jour des plugins + serveur Paper ───────────────────────
+# itzg cache les jars (Paper, plugins Modrinth/Spiget/Geyser) dans le
+# PVC. Même si une nouvelle version existe, le jar existant reste tant
+# qu'on ne le supprime pas. Cette cible force un re-download complet.
+#
+# Ce qui est supprimé :
+#   • paper-*.jar         → itzg redownload la dernière build 1.21.4
+#   • plugins/*.jar       → Modrinth/Spiget/URL direct retéléchargent
+# Ce qui est conservé :
+#   • mondes (hub/, etc.)
+#   • plugins/<Plugin>/   (configs des plugins)
+#   • usercache, ops.json, bans, etc.
+update-plugins: ## Force le re-download de Paper + tous les plugins (conserve mondes et configs)
+	@pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main \
+	    -o jsonpath='{.items[0].metadata.name}'); \
+	 test -n "$$pod" \
+	    || (echo "❌ Pas de pod mc-main trouvé."; exit 1); \
+	 echo "▶ Pod cible : $$pod"; \
+	 echo "▶ Arrêt propre du serveur…"; \
+	 kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli save-all >/dev/null 2>&1 || true; \
+	 kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli stop >/dev/null 2>&1 || true; \
+	 sleep 5; \
+	 echo "▶ Suppression des jars cachés (Paper + plugins)…"; \
+	 kubectl exec -n $(NAMESPACE) $$pod -- sh -c ' \
+	     rm -f /data/paper-*.jar /data/purpur-*.jar 2>/dev/null; \
+	     rm -f /data/plugins/*.jar 2>/dev/null; \
+	     echo "  ✓ Jars supprimés (les configs plugins/<Plugin>/ sont intactes)" \
+	 '
+	@kubectl rollout restart deploy/mc-main -n $(NAMESPACE)
+	@echo "✓ Redémarrage en cours. itzg retélécharge tout. Suis : make logs-main"
+
+
 # ─── Wipe des mondes parasites du PVC ──────────────────────────────
 # Supprime du PVC mc-main les mondes auto-générés ou hérités d'anciens
 # tests (world*, hub_the_end, hub_nether). Multiverse mémorise les
@@ -255,4 +287,4 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
 	@echo "✓ Lint OK."
 
 
-.PHONY: ssh deploy backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds
+.PHONY: ssh deploy backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds update-plugins

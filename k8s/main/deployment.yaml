@@ -77,6 +77,12 @@ spec:
               value: "4G"                        # synced with .env MAIN_MEMORY
             - name: USE_AIKAR_FLAGS
               value: "true"
+            # Relance toutes les X heures le contrôle de version (Modrinth + Spiget).
+            # Si nouvelle version compatible dispo → téléchargée au prochain boot.
+            # Ne force PAS le re-download à chaque boot (serait trop brutal).
+            # Pour update manuel immédiat : `make update-plugins`.
+            - name: SPIGET_UPDATE_CHECK_INTERVAL
+              value: "4320"    # 72h en minutes
             - name: LEVEL
               value: "hub"                              # était "world" implicite
             - name: LEVEL_TYPE

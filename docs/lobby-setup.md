@@ -94,14 +94,14 @@ Si tu as appliqué §0, `hub` existe déjà (créé au boot par Paper, void abso
 
 ```
 make cmd ARGS="mv import hub normal"
-make cmd ARGS="mv modify set gamemode adventure hub"
-make cmd ARGS="mv modify set difficulty peaceful hub"
-make cmd ARGS="mv modify set pvp false hub"
-make cmd ARGS="mv modify set hunger false hub"
-make cmd ARGS="mv modify set weather false hub"
-make cmd ARGS="mv modify set autoHeal true hub"
-make cmd ARGS="mv modify set keepSpawnInMemory true hub"
-make cmd ARGS="mv modify set autoLoad true hub"
+make cmd ARGS="mv modify hub set gamemode adventure"
+make cmd ARGS="mv modify hub set difficulty peaceful"
+make cmd ARGS="mv modify hub set pvp false"
+make cmd ARGS="mv modify hub set hunger false"
+make cmd ARGS="mv modify hub set weather false"
+make cmd ARGS="mv modify hub set autoHeal true"
+make cmd ARGS="mv modify hub set keepSpawnInMemory true"
+make cmd ARGS="mv modify hub set autoLoad true"
 ```
 
 Si tu n'as PAS appliqué §0, crée un monde dédié (FLAT classique avec bedrock/grass) à la place du void :

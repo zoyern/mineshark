@@ -85,6 +85,22 @@ fclean: clean ## Reset complet (supprime aussi ConfigMap et Secrets — DATA con
 
 re: fclean up ## Reset puis redéploie tout
 
+# Reset de la DATA mc-main (PVC) sans toucher au reste.
+# Utile quand le monde est dans un état pourri et qu'on veut repartir
+# d'un /data vide (Paper et Multiverse régénèrent tout au boot).
+# Conservé : Velocity, ses PVC, les Secrets, les ConfigMaps.
+reset-main-data: sync-paper-config ## Wipe complet du PVC mc-main (mondes + plugins data) et redéploie
+	@echo "⚠️  Reset complet du PVC mc-main (toute la data Paper sera perdue) …"
+	@kubectl -n $(NAMESPACE) scale deployment mc-main --replicas=0 --ignore-not-found
+	@kubectl -n $(NAMESPACE) wait --for=delete pod -l app=mc-main --timeout=60s 2>/dev/null || true
+	@kubectl -n $(NAMESPACE) delete pvc server-main-pvc --ignore-not-found
+	@# Applique les manifests SAUF configmap.yaml (placeholder, écraserait
+	@# la ConfigMap propre poussée par sync-paper-config).
+	@find k8s/main -maxdepth 1 -name '*.yaml' -not -name 'configmap.yaml' \
+	    -exec kubectl apply -f {} \;
+	@echo "✓ PVC mc-main vierge + manifests à jour. Paper recrée tout (~30-60s)."
+	@echo "   Suivre : make logs-main"
+
 # ⚠️ DESTRUCTIF : supprime aussi les volumes persistants (mondes !)
 nuke: ## DANGER — supprime même les PVC (mondes effacés)
 	@echo "⚠️  Suppression de TOUTES les données du namespace $(NAMESPACE)…"
@@ -127,6 +143,6 @@ rcon-mod: ## Ouvre une console RCON sur le serveur moddé
 	@kubectl -n $(NAMESPACE) exec -it deployment/mc-mod -c minecraft -- rcon-cli
 
 
-.PHONY: up _apply secrets sync-velocity-config sync-paper-config down clean fclean re nuke \
+.PHONY: up _apply secrets sync-velocity-config sync-paper-config down clean fclean re reset-main-data nuke \
         status logs-proxy logs-main logs-mod mod-on mod-off mod-reset \
         rcon-main rcon-mod

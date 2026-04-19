@@ -74,10 +74,10 @@ Un monde `void` par arène, tous préfixés `sw-` pour le tri dans `/mv list` :
 ```bash
 for map in classico dune frozen jungle tree ballon bones nethugly duels sky-duel; do
     make cmd ARGS="mv create sw-$map normal -t FLAT -g FLAT -s 0"
-    make cmd ARGS="mv modify set gamemode adventure sw-$map"
-    make cmd ARGS="mv modify set pvp true sw-$map"
-    make cmd ARGS="mv modify set difficulty normal sw-$map"
-    make cmd ARGS="mv modify set autoLoad false sw-$map"   # ne charge QUE quand on y TP
+    make cmd ARGS="mv modify sw-$map set gamemode adventure"
+    make cmd ARGS="mv modify sw-$map set pvp true"
+    make cmd ARGS="mv modify sw-$map set difficulty normal"
+    make cmd ARGS="mv modify sw-$map set autoLoad false"   # ne charge QUE quand on y TP
 done
 ```
 
