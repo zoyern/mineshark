@@ -98,6 +98,10 @@ spec:
             # Screen, ParticleStatus) et crash le dedicated server au boot.
             # Si un boot échoue encore sur un 4e mod client-only, ajouter
             # son slug ici en respectant EXACTEMENT l'URL CurseForge.
+            # discord-chat-mod : relie le tchat in-game à un salon Discord.
+            # Nécessite un token bot (secret discord-bot-token) + config
+            # dans /data/config/. Sans token → log spam "Token may not be
+            # empty" mais le serveur boot OK. Voir section ENV plus bas.
             - name: CF_EXCLUDE_MODS
               value: "substrate-add-on,particle-core,pretty-rain"
             # CLÉ DU FIX : sans CF_FORCE_SYNCHRONIZE=true, itzg ne re-évalue
