@@ -213,8 +213,8 @@ spec:
             #   ─ Core/libs ─
             #     34315  vault             — API économie (prérequis bcp plugins)
             #     1997   protocollib       — lib paquets (dep WorldGuard/SWR/etc)
-            #   ─ Navigation hub ─
-            #     14356  advanced-portals  — portails lobby ↔ hub-minigames
+            #   (advanced-portals déplacé dans MODRINTH_PROJECTS le 2026-04-20 :
+            #    Spiget 14356 renvoyait HTTP 500 sur le download → crashloop.)
             #   ─ Mini-jeux ─
             #     53359  tntrun_reloaded   — TntRun (compat 1.13 → 1.21)
             #     69436  skywarsreloaded   — SkyWars (fork lukasvdgaag, FREE)
@@ -235,7 +235,7 @@ spec:
             # récente (contrôle via SPIGET_UPDATE_CHECK_INTERVAL = 72h).
             # Pour forcer un refresh immédiat : `make redeploy-plugins`.
             - name: SPIGET_RESOURCES
-              value: "34315,1997,14356,53359,69436,63714,118673,66614,81185,73261,113931"
+              value: "34315,1997,53359,69436,63714,118673,66614,81185,73261,113931"
             # Hors-Modrinth/Spiget :
             #   • Floodgate (GeyserMC)
             #   • ViaVersion / ViaBackwards : compat clients 1.8 → 1.21
