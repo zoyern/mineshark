@@ -202,12 +202,15 @@ spec:
             #   • worldedit:7.3.16 → dernière qui supporte officiellement 1.21.8.
             #     Sans pin, itzg prend 7.4.2 qui est dev build pour 1.21.9+
             #     et fallback sur un adapter 1.21.6 (warning "not tested").
-            # advanced-portals : MIGRÉ de Spiget (14356) vers Modrinth le
-            # 2026-04-20. api.spiget.org renvoyait HTTP 500 sur le download
-            # → crashloop init. Le slug Modrinth est exactement
-            # `advanced-portals` (même releases, maintainer `sekwah41`).
+            # Plugins migrés de Spiget vers Modrinth (l'API api.spiget.org
+            # renvoie HTTP 500 de façon persistante depuis 2026-04 — itzg
+            # lui-même pointe vers les alternatives dans ses logs d'erreur) :
+            #   • advanced-portals  : ex-Spiget 14356  → Modrinth `advanced-portals`
+            #                         (maintainer `sekwah41`, même releases)
+            #   • bentobox          : ex-Spiget 73261  → Modrinth `bentobox`
+            #                         (repo officiel BentoBoxWorld)
             - name: MODRINTH_PROJECTS
-              value: "luckperms,worldedit:7.3.16,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky,advanced-portals"
+              value: "luckperms,worldedit:7.3.16,worldguard,coreprotect,multiverse-core,decentholograms,placeholderapi,chunky,advanced-portals,bentobox"
             # Plugins SpigotMC (pas dispos sur Modrinth) — synced avec
             # .env PLUGINS_SPIGET et docs/plugins.md section 2 :
             #   ─ Core/libs ─
@@ -222,10 +225,10 @@ spec:
             #     118673 spleef_reloaded   — Spleef/Splegg (steve4744)
             #     66614  mystery           — MurderMystery (Plugily-Projects)
             #     81185  oitc              — One In The Chamber (Despical)
-            #   ─ Skyblock ─
-            #     73261  bentobox          — plateforme Skyblock/OneBlock
-            #                                 (addon AOneBlock via plugins/manual/
-            #                                  bentobox-addons/, pas auto)
+            #   (bentobox déplacé dans MODRINTH_PROJECTS le 2026-04-20 :
+            #    Spiget 73261 renvoyait HTTP 500 → crashloop init. L'addon
+            #    AOneBlock reste un jar manuel dans plugins/manual/
+            #    bentobox-addons/, tiré par l'initContainer.)
             #   ─ Divers ─
             #     113931 <slot existant>   — voir docs/plugins.md
             #
@@ -235,7 +238,7 @@ spec:
             # récente (contrôle via SPIGET_UPDATE_CHECK_INTERVAL = 72h).
             # Pour forcer un refresh immédiat : `make redeploy-plugins`.
             - name: SPIGET_RESOURCES
-              value: "34315,1997,53359,69436,63714,118673,66614,81185,73261,113931"
+              value: "34315,1997,53359,69436,63714,118673,66614,81185,113931"
             # Hors-Modrinth/Spiget :
             #   • Floodgate (GeyserMC)
             #   • ViaVersion / ViaBackwards : compat clients 1.8 → 1.21

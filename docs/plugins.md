@@ -47,6 +47,7 @@ On a **4 mécanismes** de distribution des plugins. Chacun a sa place, avec un o
 | Plugin | Rôle | Source | Identifiant | Commentaire |
 |---|---|---|---|---|
 | **Advanced Portals** | portails rectangulaires ou pads custom avec `command` ou `teleport` | Modrinth | `advanced-portals` | plus propre que `essentials:warp`, permet créer un vrai hub graphique. Compat 1.21.x. Migré de Spiget (ID `14356`) vers Modrinth le 2026-04-20 : l'API Spiget renvoyait HTTP 500 sur le download → crashloop init. |
+| **BentoBox** | plateforme Skyblock / OneBlock (core framework) | Modrinth | `bentobox` | migré de Spiget (ID `73261`) vers Modrinth le 2026-04-20 : même panne Spiget. L'addon **AOneBlock** reste un jar manuel (pas sur Modrinth ni Spiget) dans `plugins/manual/bentobox-addons/`. |
 
 Utilisation type :
 ```
