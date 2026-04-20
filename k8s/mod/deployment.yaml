@@ -70,6 +70,65 @@ spec:
       # Modded Together n'embarque pas de fork Lithium côté serveur, mais
       # injecter Lithium/ServerCore ajoute des risques de conflit mixin
       # avec Quark/Create. À ré-évaluer si les TPS souffrent en prod.
+      #
+      # ─── InitContainer : patch config discord_chat_mod à chaque boot ──
+      # But : injecter token + guild_id + channel_id depuis un Secret K8s
+      # dans /data/config/discord_chat_mod-common.toml AVANT que le container
+      # principal démarre. Survit à `make mod-reset` (Secret persiste).
+      # Si le fichier n'existe pas encore (1er boot vierge) : skip propre,
+      # le mod le créera, un 2e restart appliquera le patch.
+      initContainers:
+        - name: discord-config-patch
+          image: busybox:1.36.1                 # synced with .env IMG_BUSYBOX
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              CONFIG=/data/config/discord_chat_mod-common.toml
+              if [ ! -f "$CONFIG" ]; then
+                echo "[discord-config] $CONFIG absent (1er boot ?), skip"
+                exit 0
+              fi
+              echo "[discord-config] Patching $CONFIG with values from Secret..."
+              # Indentation = 8 espaces (défaut du mod). Regex tolère 1+ space/tab.
+              # On escape les caractères spéciaux regex éventuels des valeurs.
+              TOKEN_ESC=$(printf '%s' "$DISCORD_TOKEN" | sed 's/[&|]/\\&/g')
+              GUILD_ESC=$(printf '%s' "$DISCORD_GUILD_ID" | sed 's/[&|]/\\&/g')
+              CHAN_ESC=$(printf '%s' "$DISCORD_CHANNEL_ID" | sed 's/[&|]/\\&/g')
+              sed -i \
+                -e "s|^discordBotToken[[:space:]]*=.*|discordBotToken = \"${TOKEN_ESC}\"|" \
+                -e "0,/^[[:space:]]\{1,\}guildId[[:space:]]*=/{s|^[[:space:]]\{1,\}guildId[[:space:]]*=.*|        guildId = \"${GUILD_ESC}\"|}" \
+                -e "0,/^[[:space:]]\{1,\}defaultChannelId[[:space:]]*=/{s|^[[:space:]]\{1,\}defaultChannelId[[:space:]]*=.*|        defaultChannelId = \"${CHAN_ESC}\"|}" \
+                "$CONFIG"
+              echo "[discord-config] Done. Vérif :"
+              grep -E '^(discordBotToken|[[:space:]]+guildId|[[:space:]]+defaultChannelId)' "$CONFIG" \
+                | sed 's/discordBotToken = ".*"/discordBotToken = "***REDACTED***"/'
+          env:
+            - name: DISCORD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: discord-chat-mod-config
+                  key: token
+            - name: DISCORD_GUILD_ID
+              valueFrom:
+                secretKeyRef:
+                  name: discord-chat-mod-config
+                  key: guild-id
+            - name: DISCORD_CHANNEL_ID
+              valueFrom:
+                secretKeyRef:
+                  name: discord-chat-mod-config
+                  key: channel-id
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
       containers:
         - name: minecraft
           image: itzg/minecraft-server:java21      # synced with .env IMG_SERVER
@@ -98,10 +157,6 @@ spec:
             # Screen, ParticleStatus) et crash le dedicated server au boot.
             # Si un boot échoue encore sur un 4e mod client-only, ajouter
             # son slug ici en respectant EXACTEMENT l'URL CurseForge.
-            # discord-chat-mod : relie le tchat in-game à un salon Discord.
-            # Nécessite un token bot (secret discord-bot-token) + config
-            # dans /data/config/. Sans token → log spam "Token may not be
-            # empty" mais le serveur boot OK. Voir section ENV plus bas.
             - name: CF_EXCLUDE_MODS
               value: "substrate-add-on,particle-core,pretty-rain"
             # CLÉ DU FIX : sans CF_FORCE_SYNCHRONIZE=true, itzg ne re-évalue
@@ -128,10 +183,11 @@ spec:
             - name: REMOVE_OLD_MODS_DEPTH
               value: "2"
 
-            # ─── Mods additionnels via Modrinth ────────────────────────────
+            # ─── Mods additionnels via Modrinth (UNIVERSELS) ───────────────
             # itzg accepte MODRINTH_PROJECTS EN PLUS de AUTO_CURSEFORGE :
             # le modpack CF est extrait puis les mods Modrinth sont copiés
             # dans /data/mods/ par-dessus. Les loaders (NeoForge) mergent.
+            # Ces mods sont donc présents QUEL QUE SOIT le modpack CF.
             #
             # chunky : pré-générateur de chunks (commande /chunky). Évite
             # les freezes quand les joueurs explorent de nouvelles zones
@@ -144,8 +200,17 @@ spec:
             # Laisse tourner ~1h (selon CPU), puis `chunky cancel`.
             # Slug Modrinth `chunky` = même maintainer que la version
             # Paper (pop4959), support NeoForge 1.21.1 confirmé.
+            #
+            # discord-chat-mod : bridge tchat in-game ↔ salon Discord.
+            # Serveur-side uniquement (pas de client requis). Auteur :
+            # denisnumb (https://modrinth.com/mod/discord-chat-mod).
+            # Config patchée par l'initContainer discord-config-patch
+            # ci-dessus à partir du Secret `discord-chat-mod-config`
+            # (géré par `make secrets` / `make discord-setup`).
+            # Sans token configuré : le mod se charge mais ne se connecte
+            # pas (log WARN "Token may not be empty") — le serveur boot OK.
             - name: MODRINTH_PROJECTS
-              value: "chunky"
+              value: "chunky,discord-chat-mod"
 
             - name: MEMORY
               value: "6G"                          # synced with .env MOD_MEMORY

@@ -48,6 +48,18 @@ secrets: gen-secrets ## (Re)crée les Secrets K8s depuis data/secrets/ et .env
 	    --namespace=$(NAMESPACE) \
 	    --from-literal=forwarding-secret="$$(cat $(FWD_SECRET_FILE))" \
 	    --dry-run=client -o yaml | kubectl apply -f -
+	@# ─── discord-chat-mod-config ───────────────────────────────────────
+	@# Consommé par l'initContainer `discord-config-patch` du Deployment
+	@# mc-mod (cf. k8s/mod/deployment.yaml). Si DISCORD_* sont vides dans
+	@# .env, on crée quand même le Secret avec des chaînes vides : l'init
+	@# container ne crash pas, le mod boot sans se connecter (log WARN).
+	@# Ça permet `make mod-on` même sans bot Discord configuré.
+	@kubectl create secret generic discord-chat-mod-config \
+	    --namespace=$(NAMESPACE) \
+	    --from-literal=token='$(DISCORD_TOKEN)' \
+	    --from-literal=guild-id='$(DISCORD_GUILD_ID)' \
+	    --from-literal=channel-id='$(DISCORD_CHANNEL_ID)' \
+	    --dry-run=client -o yaml | kubectl apply -f -
 	@echo "✓ Secrets K8s prêts."
 
 
@@ -149,6 +161,55 @@ rcon-mod: ## Ouvre une console RCON sur le serveur moddé
 	@kubectl -n $(NAMESPACE) exec -it deployment/mc-mod -c minecraft -- rcon-cli
 
 
+# ─── Bridge Discord (discord-chat-mod sur mc-mod) ──────────────────
+# Architecture : DISCORD_TOKEN / DISCORD_GUILD_ID / DISCORD_CHANNEL_ID
+# vivent dans .env (gitignored) → Secret K8s `discord-chat-mod-config`
+# → initContainer patch /data/config/discord_chat_mod-common.toml à
+# chaque boot du pod mc-mod. Survit à `make mod-reset` (le Secret K8s
+# n'est pas attaché au PVC). Universel : marche sur tous les modpacks
+# vu que le mod est injecté via MODRINTH_PROJECTS (pas via le pack CF).
+
+discord-setup: ## (Re)synchronise le Secret Discord depuis .env et redémarre mc-mod
+	@echo "▶ Vérification variables .env …"
+	@test -n "$(DISCORD_TOKEN)" \
+	    || (echo "❌ DISCORD_TOKEN vide dans .env — voir docs/discord.md"; exit 1)
+	@test -n "$(DISCORD_GUILD_ID)" \
+	    || (echo "❌ DISCORD_GUILD_ID vide dans .env"; exit 1)
+	@test -n "$(DISCORD_CHANNEL_ID)" \
+	    || (echo "❌ DISCORD_CHANNEL_ID vide dans .env"; exit 1)
+	@echo "  ✓ token / guild-id / channel-id présents"
+	@echo "▶ (Re)création du Secret discord-chat-mod-config …"
+	@kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	@kubectl create secret generic discord-chat-mod-config \
+	    --namespace=$(NAMESPACE) \
+	    --from-literal=token='$(DISCORD_TOKEN)' \
+	    --from-literal=guild-id='$(DISCORD_GUILD_ID)' \
+	    --from-literal=channel-id='$(DISCORD_CHANNEL_ID)' \
+	    --dry-run=client -o yaml | kubectl apply -f -
+	@echo "▶ Rollout restart mc-mod pour déclencher le patch config …"
+	@kubectl -n $(NAMESPACE) rollout restart deployment/mc-mod 2>/dev/null \
+	    || echo "  ℹ️  Deployment mc-mod pas encore créé — le patch s'appliquera au 1er `make mod-on`"
+	@echo "✓ Secret Discord à jour. Vérifier : make discord-status"
+
+discord-status: ## Vérifie que le bot Discord est connecté (parse les logs mc-mod)
+	@echo "▶ Recherche des traces discord_chat_mod dans les logs mc-mod …"
+	@kubectl -n $(NAMESPACE) logs deployment/mc-mod -c minecraft --tail=500 2>/dev/null \
+	    | grep -E '(discord_chat_mod|JDA|Token may not)' \
+	    | tail -20 \
+	    || echo "  ⚠️  Aucune trace — le pod tourne-t-il ? make status"
+	@echo ""
+	@echo "  Si tu vois \"JDA ... Finished Loading!\" → bot connecté ✓"
+	@echo "  Si tu vois \"Token may not be empty\"    → Secret pas injecté"
+	@echo "  Si rien du tout                          → pod pas démarré ou mod pas chargé"
+
+discord-test: ## Envoie un message de test du serveur MC vers Discord (via RCON)
+	@echo "▶ Envoi \"[TEST] MineShark → Discord\" via RCON mc-mod …"
+	@kubectl -n $(NAMESPACE) exec deployment/mc-mod -c minecraft -- \
+	    rcon-cli say "[TEST] MineShark → Discord"
+	@echo "✓ Message envoyé. Vérifie qu'il apparaît dans ton salon Discord."
+	@echo "  S'il n'apparaît pas : make discord-status"
+
+
 .PHONY: up _apply secrets sync-velocity-config sync-paper-config down clean fclean re reset-main-data nuke \
         status logs-proxy logs-main logs-mod mod-on mod-off mod-reset \
-        rcon-main rcon-mod
+        rcon-main rcon-mod discord-setup discord-status discord-test

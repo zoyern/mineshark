@@ -424,6 +424,17 @@ doctor: ## Vérifie env, dépendances et cohérence config
 	@grep -q "change-me" .env 2>/dev/null \
 	    && echo "  ⚠️  des placeholders 'change-me' restent dans .env (CF_API_KEY ?)" \
 	    || echo "  ✓ pas de placeholders évidents dans .env"
+	@# ─── Discord bridge (optionnel) ──────────────────────────────────
+	@# Non bloquant : le mod se charge sans token, il log juste un WARN.
+	@if [ -f .env ]; then \
+	    if grep -qE '^DISCORD_TOKEN=.+$$' .env; then \
+	        echo "  ✓ Discord bridge configuré (token présent)"; \
+	        grep -qE '^DISCORD_GUILD_ID=.+$$'   .env || echo "  ⚠️  DISCORD_TOKEN set mais DISCORD_GUILD_ID vide"; \
+	        grep -qE '^DISCORD_CHANNEL_ID=.+$$' .env || echo "  ⚠️  DISCORD_TOKEN set mais DISCORD_CHANNEL_ID vide"; \
+	    else \
+	        echo "  ℹ️  Discord bridge désactivé (DISCORD_TOKEN vide) — voir docs/discord.md"; \
+	    fi; \
+	 fi
 	@echo "▶ OK."
 
 
