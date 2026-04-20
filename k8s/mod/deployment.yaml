@@ -124,8 +124,39 @@ spec:
             - name: REMOVE_OLD_MODS_DEPTH
               value: "2"
 
+            # ─── Mods additionnels via Modrinth ────────────────────────────
+            # itzg accepte MODRINTH_PROJECTS EN PLUS de AUTO_CURSEFORGE :
+            # le modpack CF est extrait puis les mods Modrinth sont copiés
+            # dans /data/mods/ par-dessus. Les loaders (NeoForge) mergent.
+            #
+            # chunky : pré-générateur de chunks (commande /chunky). Évite
+            # les freezes quand les joueurs explorent de nouvelles zones
+            # (la gen worldgen NeoForge est ×3-5 plus lourde que vanilla
+            # à cause des biomes/structures modés). Lance une fois après
+            # le 1er boot :
+            #   make rcon-mod
+            #   > chunky radius 2000
+            #   > chunky start overworld
+            # Laisse tourner ~1h (selon CPU), puis `chunky cancel`.
+            # Slug Modrinth `chunky` = même maintainer que la version
+            # Paper (pop4959), support NeoForge 1.21.1 confirmé.
+            - name: MODRINTH_PROJECTS
+              value: "chunky"
+
             - name: MEMORY
-              value: "8G"                          # synced with .env MOD_MEMORY
+              value: "6G"                          # synced with .env MOD_MEMORY
+            # Pourquoi 6G et pas 8G ? VPS Netcup = 16Go physique.
+            # Budget si mc-main + mc-mod + velocity + system simultanément :
+            #   system + K3s     ~1.5Gi
+            #   velocity         ~1Gi
+            #   mc-main limit    5.5Gi  (heap 4G × 1.35)
+            #   mc-mod  limit    8Gi    (heap 6G × 1.33)  ← ici
+            #   ──────────────────────
+            #   Total           ~16Gi → marge ~0.5-1Gi
+            # Passer à 8G heap / 10Gi limit sommerait à 18Gi → kernel
+            # OOMkiller quand les 2 pods tirent au max. Modded Together
+            # recommande 8G pour 5-10 joueurs ; 6G tient avec 3-6 joueurs
+            # actifs + SIMULATION_DISTANCE=5. Au-delà : bumper le VPS.
             - name: USE_AIKAR_FLAGS
               value: "true"
             # Safety net : sans flight, la mort = ghost qui flotte puis kick.
@@ -162,10 +193,10 @@ spec:
               name: rcon
           resources:
             requests:
-              memory: "6Gi"
+              memory: "5Gi"     # réserve ferme en dessous du heap (pod schedulable)
               cpu: "1000m"
             limits:
-              memory: "10Gi"    # = MOD_MEMORY (8G) + 25% marge (metaspace + off-heap)
+              memory: "8Gi"     # = MOD_MEMORY (6G) × 1.33 (metaspace + direct + off-heap)
               cpu: "4000m"
           # Modded Together : 1er boot ~3-5 min (download ~500 Mo + gen monde).
           # Boots suivants ~1-2 min. Probes tolérantes.

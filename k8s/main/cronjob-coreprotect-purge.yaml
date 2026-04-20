@@ -1,0 +1,97 @@
+# ═══════════════════════════════════════════════════════════════════
+#  CronJob coreprotect-purge — maintenance auto de la DB CoreProtect
+# ═══════════════════════════════════════════════════════════════════
+#  Problème : CoreProtect écrit 1 ligne SQLite par bloc cassé/posé.
+#  Sur une survie active, la DB croît très vite et sature le PVC
+#  (server-main-pvc = 5Gi). Au-delà de ~3 Go de DB, les writes sync
+#  génèrent des lags au tick.
+#
+#  Solution : purge automatique via la commande RCON `co purge t:14d`
+#  (supprime les logs de plus de 14 jours). Appelée toutes les 2
+#  semaines, un dimanche à 4h UTC (= 5h/6h Paris selon été/hiver) —
+#  l'heure la plus creuse du réseau.
+#
+#  Pourquoi un CronJob K8s et pas un paramètre plugin ?
+#    • CoreProtect a `purge-on-boot` dans config.yml MAIS :
+#      - ConfigMap K8s écraserait le fichier à chaque boot, ou
+#      - le fichier serait dans le PVC et git-ignoré = pas traçable.
+#    • Un CronJob K8s est déclaratif (git-tracké), auditable
+#      (logs K8s, events), et survit aux restarts du plugin.
+#
+#  Pour lancer une purge manuelle immédiate :
+#    kubectl -n mineshark create job --from=cronjob/coreprotect-purge \
+#      coreprotect-purge-manual-$(date +%s)
+# ═══════════════════════════════════════════════════════════════════
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: coreprotect-purge
+  namespace: mineshark
+  labels:
+    app: mc-main
+    component: maintenance
+spec:
+  # "0 4 1,15 * *" = minute 0, heure 4, jours 1 ET 15 du mois, tous
+  # les mois, tous les jours de la semaine. → ~2x par mois à 4h UTC.
+  schedule: "0 4 1,15 * *"
+  concurrencyPolicy: Forbid        # jamais 2 purges en parallèle
+  successfulJobsHistoryLimit: 2    # garde les 2 derniers succès (logs)
+  failedJobsHistoryLimit: 3        # garde les 3 derniers échecs (debug)
+  startingDeadlineSeconds: 3600    # si K8s a raté le créneau (maintenance),
+                                   # tolère jusqu'à 1h de retard avant de skip
+  jobTemplate:
+    spec:
+      backoffLimit: 2              # 2 retries max si la purge échoue
+      ttlSecondsAfterFinished: 604800   # auto-supprime les Jobs après 7j
+      template:
+        metadata:
+          labels:
+            app: mc-main
+            component: maintenance
+            job: coreprotect-purge
+        spec:
+          restartPolicy: OnFailure
+          # Sécurité : pas besoin de root pour rcon-cli
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+          containers:
+            - name: rcon
+              # Image standalone itzg/rcon-cli (~10 MB). Lit RCON_HOST /
+              # RCON_PORT / RCON_PASSWORD depuis l'env. Le service K8s
+              # `mc-main` expose le port RCON (25575) au sein du namespace.
+              image: itzg/rcon-cli:latest
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              command: ["sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  echo "▶ Purge CoreProtect logs > 14j sur mc-main …"
+                  # rcon-cli affiche la réponse du serveur (nombre de
+                  # lignes supprimées). La commande `co purge t:14d`
+                  # est asynchrone côté CoreProtect : le serveur renvoie
+                  # immédiatement un ACK puis purge en tâche de fond.
+                  rcon-cli "co purge t:14d"
+                  echo "✓ Commande envoyée — purge en tâche de fond côté serveur."
+              env:
+                - name: RCON_HOST
+                  value: "mc-main"
+                - name: RCON_PORT
+                  value: "25575"
+                - name: RCON_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: rcon-secret
+                      key: rcon-password
+              resources:
+                requests:
+                  memory: "32Mi"
+                  cpu: "10m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "200m"
