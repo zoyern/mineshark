@@ -53,9 +53,15 @@ DISCORD_CHANNEL_ID=123456789012345678
 
 ### 5. Appliquer
 
+> **⚠️ Lance ces 3 commandes depuis TA MACHINE LOCALE** (WSL/Mac), pas sur
+> le VPS. Elles encapsulent du `ssh` en interne et lisent les variables
+> `DISCORD_*` depuis ton `.env` local. Pas besoin d'avoir `kubectl`
+> installé côté WSL.
+
 ```bash
-make discord-setup     # crée le Secret K8s + rollout mc-mod
-make discord-status    # vérifie la connexion dans les logs
+# Depuis LOCAL (racine du repo) :
+make discord-setup     # lit .env local → SSH → crée le Secret K8s + rollout mc-mod
+make discord-status    # SSH → tail des logs mc-mod (filtre JDA / discord_chat_mod)
 ```
 
 Si tout va bien, tu dois voir dans les logs :
@@ -67,31 +73,52 @@ Si tout va bien, tu dois voir dans les logs :
 Test rapide :
 
 ```bash
-make discord-test      # envoie "[TEST] MineShark → Discord" via RCON
+make discord-test      # SSH → RCON `say [TEST] MineShark → Discord` sur mc-mod
 ```
+
+> Besoin de propager aussi d'autres variables `.env` (CF_API_KEY, slug
+> modpack, etc.) sur le VPS ? Voir `make env-sync` (scp avec diff preview +
+> confirmation). `make discord-setup` lui ne pousse QUE le Secret Discord,
+> pas le fichier `.env` en entier.
 
 ---
 
 ## Architecture technique
 
 ```
-.env (DISCORD_TOKEN / DISCORD_GUILD_ID / DISCORD_CHANNEL_ID)
-    │
-    ▼   make secrets  (ou make discord-setup)
-Secret K8s `discord-chat-mod-config`
-    │
-    ▼   au boot du pod mc-mod
-initContainer `discord-config-patch` (busybox + sed)
-    │
-    ▼
-/data/config/discord_chat_mod-common.toml  (dans le PVC)
-    │
-    ▼   lecture au démarrage du mod
-JDA (lib Discord) → salon Discord
+┌─ LOCAL (WSL / Mac) ─────────────────────────────────────────┐
+│  .env  (DISCORD_TOKEN / DISCORD_GUILD_ID / DISCORD_CHANNEL_ID) │
+│    │                                                         │
+│    │  make discord-setup                                     │
+│    │  (lit .env local, encapsule ssh + kubectl)              │
+│    ▼                                                         │
+│  ssh -p $VPS_SSH_PORT $VPS_USER@$VPS_IP ' kubectl ... '      │
+└──────────────────────────┬──────────────────────────────────┘
+                           │  SSH
+                           ▼
+┌─ VPS (K3s) ─────────────────────────────────────────────────┐
+│  Secret K8s `discord-chat-mod-config`                        │
+│      │                                                       │
+│      ▼   au boot du pod mc-mod                               │
+│  initContainer `discord-config-patch`  (busybox + sed)       │
+│      │                                                       │
+│      ▼                                                       │
+│  /data/config/discord_chat_mod-common.toml   (dans le PVC)   │
+│      │                                                       │
+│      ▼   lecture au démarrage du mod                         │
+│  JDA (lib Discord) ──────────────────────────►  salon Discord │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 **Points clés :**
 
+- Les cibles `make discord-*` tournent **depuis ta machine locale** et
+  appellent `kubectl` à distance via SSH (cf. `make/admin.mk`). Tu n'as
+  donc rien à installer côté WSL à part `ssh` et `make`.
+- Le `.env` local reste source de vérité : pas besoin de le copier sur
+  le VPS pour les 3 variables Discord (le Secret K8s suffit). Si tu
+  veux tout de même propager d'autres variables `.env` (CF_API_KEY,
+  modpack, etc.), `make env-sync` fait un `scp` avec diff preview.
 - Le Secret K8s survit à `make mod-reset` (supprime seulement le PVC).
 - L'initContainer patche le fichier TOML à *chaque* boot → pas de dérive entre Secret et config.
 - Si le fichier TOML n'existe pas encore (1er boot vierge), l'initContainer skip proprement, le mod le crée à sa valeur par défaut, et le 2ᵉ restart applique le patch.
@@ -128,11 +155,15 @@ make discord-status
 
 ### Je veux désactiver temporairement le bridge
 
-Vide les trois variables dans `.env` puis `make discord-setup` échouera (garde-fou). Pour désactiver proprement sans supprimer la config :
+Vide les trois variables dans `.env` puis `make discord-setup` échouera (garde-fou). Pour désactiver proprement sans supprimer la config, connecte-toi au VPS et supprime manuellement le Secret :
 
 ```bash
+# Depuis LOCAL
+make ssh
+# (sur le VPS maintenant)
 kubectl -n mineshark delete secret discord-chat-mod-config
 kubectl -n mineshark rollout restart deployment/mc-mod
+exit
 ```
 
 Le mod se chargera sans token (WARN non bloquant), le serveur tourne normalement.
@@ -148,13 +179,21 @@ Le mod se chargera sans token (WARN non bloquant), le serveur tourne normalement
 
 ## Cibles Make
 
-| Commande                 | Rôle                                                                 |
-|--------------------------|----------------------------------------------------------------------|
-| `make secrets`           | Crée *tous* les Secrets K8s (dont Discord). Appelé par `make up`.    |
-| `make discord-setup`     | Re-crée le Secret Discord + rollout mc-mod. À lancer après modif des `DISCORD_*` dans `.env`. |
-| `make discord-status`    | Parse les logs mc-mod pour afficher l'état de la connexion JDA.      |
-| `make discord-test`      | Envoie un message via RCON qui doit apparaître dans Discord.         |
-| `make doctor`            | Rappelle si le bridge est configuré ou non (non bloquant).           |
+| Commande                 | Exécutée depuis | Rôle                                                                 |
+|--------------------------|-----------------|----------------------------------------------------------------------|
+| `make secrets`           | VPS             | Crée *tous* les Secrets K8s (dont Discord). Appelé par `make up`.    |
+| `make discord-setup`     | **LOCAL**       | Lit `.env` local → SSH → (re)crée le Secret Discord sur K3s + rollout mc-mod. À lancer après modif des `DISCORD_*` dans `.env`. |
+| `make discord-status`    | **LOCAL**       | SSH → tail des logs mc-mod filtré JDA / discord_chat_mod.            |
+| `make discord-test`      | **LOCAL**       | SSH → RCON `say [TEST] MineShark → Discord`. Doit apparaître dans le salon Discord.  |
+| `make env-sync`          | **LOCAL**       | Propage le `.env` entier (pas que Discord) sur le VPS via scp, avec diff preview + confirmation. Utile après un changement de `CF_API_KEY`, `MODPACK_SLUG`, etc. |
+| `make doctor`            | LOCAL           | Rappelle si le bridge est configuré ou non (non bloquant). Détecte aussi `VPS_IP=127.0.0.1` (placeholder du repo public). |
+
+> **Récap "où je lance quoi ?"** — les cibles `make discord-*` tournent
+> depuis **ta zsh locale**. Elles ne nécessitent pas que tu sois connecté
+> au VPS : elles font le SSH elles-mêmes. Tu n'as donc aucune raison de
+> faire `make ssh` d'abord puis `make discord-setup` dessus — ce serait
+> une double indirection qui ne marcherait d'ailleurs pas (le VPS n'a pas
+> le `.env` du repo local).
 
 ---
 

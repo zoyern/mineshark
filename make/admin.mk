@@ -177,36 +177,209 @@ vps-put: ## Envoie un fichier local sur le VPS. Usage: make vps-put FILE=<chemin
 	     && echo "✓ Poussé vers $(VPS_USER)@$(VPS_IP):$$remote_dest/"
 
 
-# ─── Déploiement à distance ────────────────────────────────────────
+# ─── Déploiement à distance (asynchrone) ───────────────────────────
+# `make deploy` ne BLOQUE PLUS ta console pendant le rollout (qui peut
+# durer 3-5 min). Il :
+#   1. git push local
+#   2. SSH vers le VPS → git pull + lance scripts/deploy.sh en nohup
+#   3. Rend la main en ~3s avec l'ID du log créé
+#
+# Tu suis l'avancement quand TU veux avec `make deploy-logs` (tail -f)
+# ou `make deploy-status` (état résumé + pods).
+#
 # Explication du "bug reload plugins pas clean" :
-#   `make deploy` → git push + git pull (VPS) + `make re`.
 #   `make re` = fclean + up = supprime deployments/services/configmaps/
 #   secrets puis réapplique. Les PVC restent → les jars plugins *aussi*.
 #   itzg, au reboot, voit que `/data/plugins/FooPlugin-1.2.jar` existe
-#   déjà et NE RE-TÉLÉCHARGE PAS (même si une version plus récente est
-#   dispo sur Modrinth/Spiget). Résultat : tu modifies .env pour ajouter
-#   un plugin ou bumper une version → `make deploy` ne le reflète pas.
+#   déjà et NE RE-TÉLÉCHARGE PAS. D'où FORCE=1 qui wipe + redownload.
 #
-# Deux usages distincts :
+# Usages :
 #   make deploy            → soft : code K8s / config changé, plugins OK
-#   make deploy FORCE=1    → dur : wipe tous les jars plugins puis `re`,
-#                            itzg retélécharge depuis Modrinth/Spiget/URL
-#                            (≡ `make re` + `make update-plugins` côté VPS).
-#   make redeploy-plugins  → idem FORCE=1 mais sans passer par `make re`
-#                            (juste rollout restart, plus rapide).
-deploy: ## Push git + pull + rollout sur VPS. FORCE=1 force retéléchargement plugins
+#   make deploy FORCE=1    → dur : wipe plugins, itzg retélécharge tout
+#   make deploy-logs       → tail -f du dernier log deploy
+#   make deploy-status     → en cours ? terminé ? pods up ?
+#   make deploy FOLLOW=1   → lance ET suit (revient au comportement sync)
+deploy: ## Push git + pull + rollout async sur VPS. FORCE=1 force plugins. FOLLOW=1 pour suivre.
 	@echo "▶ git push…"
 	@git push
-	@if [ "$(FORCE)" = "1" ]; then \
-	    echo "▶ FORCE=1 → pull + re + wipe plugins + rollout (retéléchargement complet)"; \
-	    echo "   ⚠️  1er boot après fclean : 3-5 min (download Paper+plugins+gen monde)"; \
-	    ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
-	        'cd /opt/mineshark && git pull && make re && kubectl -n $(NAMESPACE) rollout status deploy/mc-main --timeout=360s && make update-plugins'; \
+	@echo "▶ Lancement du déploiement en arrière-plan sur $(VPS_IP)…"
+	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) '\
+	    set -e; \
+	    cd /opt/mineshark; \
+	    git pull --ff-only --quiet; \
+	    chmod +x scripts/deploy.sh 2>/dev/null || true; \
+	    mkdir -p logs; \
+	    ts=$$(date +%Y%m%d-%H%M%S); \
+	    log="logs/deploy-$$ts.log"; \
+	    ln -sf "deploy-$$ts.log" logs/deploy-latest.log; \
+	    nohup env FORCE=$(FORCE) ./scripts/deploy.sh > "$$log" 2>&1 < /dev/null & \
+	    disown; \
+	    echo "✓ Déploiement lancé. Log : $$log"'
+	@echo ""
+	@if [ "$(FOLLOW)" = "1" ]; then \
+	    echo "▶ FOLLOW=1 → suivi en direct (Ctrl+C pour sortir, le déploiement continue)"; \
+	    $(MAKE) --no-print-directory deploy-logs; \
 	 else \
-	    echo "▶ Soft deploy (plugins cached conservés — use FORCE=1 pour les rafraîchir)"; \
-	    ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
-	        'cd /opt/mineshark && git pull && make re'; \
+	    echo "   Suivre en live : make deploy-logs"; \
+	    echo "   État           : make deploy-status"; \
 	 fi
+
+deploy-logs: ## Tail -f du dernier déploiement (Ctrl+C pour sortir, le deploy continue)
+	@echo "▶ tail -f logs/deploy-latest.log sur $(VPS_IP) (Ctrl+C sort du tail seulement)"
+	@ssh -t -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	    'cd /opt/mineshark && tail -f logs/deploy-latest.log'
+
+deploy-status: ## État du dernier déploiement (en cours / fini / pods)
+	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) '\
+	    cd /opt/mineshark; \
+	    echo "▶ Déploiement :"; \
+	    if [ -f logs/deploy.pid ] && kill -0 $$(cat logs/deploy.pid) 2>/dev/null; then \
+	        echo "  ⏳ en cours (PID $$(cat logs/deploy.pid))"; \
+	    else \
+	        last=$$(readlink logs/deploy-latest.log 2>/dev/null || echo "(aucun)"); \
+	        echo "  ✓ terminé (dernier log : $$last)"; \
+	        tail -1 logs/deploy-latest.log 2>/dev/null | sed "s/^/    /"; \
+	    fi; \
+	    echo ""; \
+	    echo "▶ Pods :"; \
+	    kubectl -n $(NAMESPACE) get pods -o wide 2>/dev/null | sed "s/^/  /"'
+
+
+# ─── Wrapper générique : exécuter une cible make sur le VPS ─────────
+# Utile pour toutes les cibles kubectl (status, logs-*, mod-on, secrets,
+# up, down, etc.) quand tu n'as pas de kubeconfig local (cas par défaut
+# depuis WSL). Équivalent à se connecter en SSH et lancer la cible.
+#
+# Usage :
+#   make remote T=status
+#   make remote T=logs-main
+#   make remote T=mod-on
+#   make remote T="cmd ARGS=\"say Hello\""
+#
+# Pour les cibles les plus fréquentes, des alias dédiés existent :
+#   make r-status, make r-logs-main, make r-logs-mod, make r-mod-on
+remote: ## Exécute une cible make sur le VPS via SSH. Usage: make remote T=status
+	@test -n "$(T)" || (echo "❌ Usage: make remote T=<cible> [args…]"; exit 1)
+	@ssh -t -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	    "cd /opt/mineshark && make $(T)"
+
+# Alias pratiques pour les cibles consultatives les plus fréquentes.
+r-status:    ; @$(MAKE) --no-print-directory remote T=status
+r-logs-main: ; @$(MAKE) --no-print-directory remote T=logs-main
+r-logs-mod:  ; @$(MAKE) --no-print-directory remote T=logs-mod
+r-logs-proxy:; @$(MAKE) --no-print-directory remote T=logs-proxy
+r-mod-on:    ; @$(MAKE) --no-print-directory remote T=mod-on
+r-mod-off:   ; @$(MAKE) --no-print-directory remote T=mod-off
+
+
+# ─── Synchronisation .env local → VPS ──────────────────────────────
+# .env est gitignored (contient VPS_IP, CF_API_KEY, DISCORD_TOKEN…) →
+# `git pull` sur le VPS ne le met PAS à jour automatiquement.
+# Quand tu édites .env localement (ex. ajout d'un DISCORD_TOKEN) et
+# que tu veux que le VPS le voie, lance `make env-sync`.
+#
+# Sécurité :
+#   • rsync direct par SSH (chiffré de bout en bout).
+#   • On copie en tmp + rename atomique → jamais de .env tronqué.
+#   • On affiche un diff succinct (noms de variables changées, SANS
+#     les valeurs) pour que tu valides visuellement avant le push.
+#
+# Tu n'es PAS obligé de `env-sync` pour `discord-setup` : cette dernière
+# inline les valeurs directement via SSH. env-sync est utile quand :
+#   - tu changes CF_API_KEY (lu par make secrets sur le VPS)
+#   - tu changes VPS_IP / VPS_SSH_PORT (mais en pratique tu ne les
+#     changes jamais sur le VPS, uniquement en local)
+#   - tu veux que `make re` / `make up` sur le VPS ait les nouvelles
+#     valeurs .env sans passer par les cibles *-setup dédiées
+env-sync: ## Copie le .env local vers /opt/mineshark/.env sur le VPS (après confirmation)
+	@test -f .env || (echo "❌ .env local absent"; exit 1)
+	@echo "▶ .env local → $(VPS_USER)@$(VPS_IP):$(VPS_REMOTE_ROOT)/.env"
+	@echo "  Diff des noms de variables (valeurs masquées) :"
+	@diff \
+	    <(grep -E '^[A-Z_]+=' .env 2>/dev/null | cut -d= -f1 | sort) \
+	    <(ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	        "grep -E '^[A-Z_]+=' $(VPS_REMOTE_ROOT)/.env 2>/dev/null" \
+	      | cut -d= -f1 | sort) \
+	    | sed 's/^/    /' || true
+	@printf "  Continuer le push ? [y/N] "
+	@read ans; test "$$ans" = "y" || test "$$ans" = "Y" || (echo "  Annulé."; exit 1)
+	@# Push atomique : scp vers un .env.tmp puis mv. Si scp échoue au
+	@# milieu, le .env existant reste intact.
+	@scp -P $(VPS_SSH_PORT) -q .env \
+	    "$(VPS_USER)@$(VPS_IP):$(VPS_REMOTE_ROOT)/.env.tmp"
+	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	    "mv $(VPS_REMOTE_ROOT)/.env.tmp $(VPS_REMOTE_ROOT)/.env && chmod 600 $(VPS_REMOTE_ROOT)/.env"
+	@echo "✓ .env synchronisé (chmod 600). Pour appliquer les changements"
+	@echo "  côté K8s : make deploy FORCE=1  (ou make discord-setup si"
+	@echo "  c'était juste les DISCORD_*)"
+
+
+# ─── Bridge Discord — wrappers SSH ─────────────────────────────────
+# Ces cibles sont pensées pour être lancées DEPUIS TA MACHINE LOCALE
+# (WSL / Mac / Linux). Elles SSH-wrappent les opérations kubectl qui
+# tournent sur le VPS — pas besoin d'installer kubectl localement, pas
+# besoin de `make ssh` à la main.
+#
+# Architecture rappel (détail dans docs/discord.md) :
+#   .env local  ─(make discord-setup)─>  SSH  ─>  kubectl create secret
+#                                                      discord-chat-mod-config
+#                                                → rollout restart mc-mod
+#                                                → initContainer patch TOML
+#
+# Le token/guild-id/channel-id sont transmis **via SSH** au moment
+# d'exécuter kubectl. Ils n'atterrissent PAS dans le .env du VPS,
+# uniquement dans le Secret K8s (base64-obfusqué). Si tu veux aussi
+# que le .env du VPS les contienne (pour `make up` standalone) : lance
+# `make env-sync` en plus.
+
+discord-setup: ## (Depuis LOCAL) Pousse DISCORD_* du .env local → Secret K8s sur VPS + redémarre mc-mod
+	@echo "▶ Vérification du .env local …"
+	@test -n "$(DISCORD_TOKEN)" \
+	    || (echo "❌ DISCORD_TOKEN vide dans .env local — voir docs/discord.md"; exit 1)
+	@test -n "$(DISCORD_GUILD_ID)" \
+	    || (echo "❌ DISCORD_GUILD_ID vide dans .env local"; exit 1)
+	@test -n "$(DISCORD_CHANNEL_ID)" \
+	    || (echo "❌ DISCORD_CHANNEL_ID vide dans .env local"; exit 1)
+	@echo "  ✓ token / guild-id / channel-id présents"
+	@echo "▶ SSH → (re)création du Secret discord-chat-mod-config sur le VPS …"
+	@# Le bloc SSH : crée le namespace si absent + (re)crée le Secret en
+	@# idempotent via `kubectl apply` + rollout restart. Si mc-mod n'est
+	@# pas déployé (replicas=0), le rollout restart log juste un warning,
+	@# non bloquant. Les DISCORD_* sont transmis au VPS via l'argument
+	@# SSH (pas via env SSH pour éviter les conflits avec ta shell locale).
+	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	    "kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml \
+	        | kubectl apply -f - >/dev/null && \
+	     kubectl create secret generic discord-chat-mod-config \
+	        --namespace=$(NAMESPACE) \
+	        --from-literal=token='$(DISCORD_TOKEN)' \
+	        --from-literal=guild-id='$(DISCORD_GUILD_ID)' \
+	        --from-literal=channel-id='$(DISCORD_CHANNEL_ID)' \
+	        --dry-run=client -o yaml | kubectl apply -f - && \
+	     kubectl -n $(NAMESPACE) rollout restart deployment/mc-mod 2>/dev/null \
+	        || echo '  ℹ️  mc-mod pas encore déployé — le patch s'\\''appliquera au 1er make r-mod-on'"
+	@echo "✓ Secret Discord à jour sur le VPS. Vérifier : make discord-status"
+
+discord-status: ## (Depuis LOCAL) Vérifie que le bot Discord est connecté (parse les logs mc-mod via SSH)
+	@echo "▶ SSH → recherche des traces discord_chat_mod dans les logs mc-mod …"
+	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	    "kubectl -n $(NAMESPACE) logs deployment/mc-mod -c minecraft --tail=500 2>/dev/null \
+	        | grep -E '(discord_chat_mod|JDA|Token may not)' \
+	        | tail -20" \
+	    || echo "  ⚠️  Aucune trace — le pod tourne-t-il ? make r-status"
+	@echo ""
+	@echo "  ✓ \"JDA ... Finished Loading!\"     → bot connecté"
+	@echo "  ❌ \"Token may not be empty\"        → Secret pas injecté / token vide"
+	@echo "  ❌ \"401 Unauthorized\"              → token invalide ou révoqué"
+	@echo "  (rien du tout)                      → pod pas démarré ou mod pas chargé"
+
+discord-test: ## (Depuis LOCAL) Envoie un message de test MC → Discord via RCON (SSH-wrappé)
+	@echo "▶ SSH → envoi \"[TEST] MineShark → Discord\" via RCON mc-mod …"
+	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	    "kubectl -n $(NAMESPACE) exec deployment/mc-mod -c minecraft -- \
+	        rcon-cli say '[TEST] MineShark → Discord'"
+	@echo "✓ Message envoyé. Vérifie qu'il apparaît dans ton salon Discord."
+	@echo "  S'il n'apparaît pas : make discord-status"
 
 
 # ─── Sync des plugins déposés à la main (plugins/manual/ → VPS) ─────
@@ -424,6 +597,16 @@ doctor: ## Vérifie env, dépendances et cohérence config
 	@grep -q "change-me" .env 2>/dev/null \
 	    && echo "  ⚠️  des placeholders 'change-me' restent dans .env (CF_API_KEY ?)" \
 	    || echo "  ✓ pas de placeholders évidents dans .env"
+	@# ─── VPS : détecter le placeholder par défaut 127.0.0.1 ─────────
+	@# Cause #1 historique du `ssh: Connection timed out port 22` après
+	@# un `cp .env.example .env` incomplet : VPS_IP=127.0.0.1 par défaut.
+	@if [ -f .env ] && grep -qE '^VPS_IP=127\.0\.0\.1$$' .env; then \
+	    echo "  ⚠️  VPS_IP=127.0.0.1 (placeholder .env.example) — édite .env avec l'IP réelle du VPS"; \
+	    echo "     sinon make deploy / make env-sync / make discord-* vont timeout."; \
+	 elif [ -f .env ] && grep -qE '^VPS_IP=' .env; then \
+	    ip=$$(grep -E '^VPS_IP=' .env | head -1 | cut -d= -f2); \
+	    echo "  ✓ VPS_IP=$$ip"; \
+	 fi
 	@# ─── Discord bridge (optionnel) ──────────────────────────────────
 	@# Non bloquant : le mod se charge sans token, il log juste un WARN.
 	@if [ -f .env ]; then \
@@ -483,4 +666,12 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
 	@echo "✓ Lint OK."
 
 
-.PHONY: ssh vps-get vps-put deploy plugins-sync redeploy-plugins backup gen-secrets show-secrets doctor init ci-lint old-server-reset old-server-prep old-server-run cmd op deop console push-schematics wipe-worlds update-plugins
+.PHONY: ssh vps-get vps-put \
+        deploy deploy-logs deploy-status \
+        remote r-status r-logs-main r-logs-mod r-logs-proxy r-mod-on r-mod-off \
+        env-sync \
+        discord-setup discord-status discord-test \
+        plugins-sync redeploy-plugins update-plugins wipe-worlds push-schematics \
+        backup gen-secrets show-secrets doctor init ci-lint \
+        old-server-reset old-server-prep old-server-run \
+        cmd op deop console
