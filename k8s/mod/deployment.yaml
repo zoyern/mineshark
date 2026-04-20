@@ -201,16 +201,21 @@ spec:
             # Slug Modrinth `chunky` = même maintainer que la version
             # Paper (pop4959), support NeoForge 1.21.1 confirmé.
             #
-            # discord-chat-mod : bridge tchat in-game ↔ salon Discord.
+            # discord-chat-connect : bridge tchat in-game ↔ salon Discord.
             # Serveur-side uniquement (pas de client requis). Auteur :
-            # denisnumb (https://modrinth.com/mod/discord-chat-mod).
+            # denisnumb (https://modrinth.com/mod/discord-chat-connect).
+            # ⚠️ Le slug Modrinth est `discord-chat-connect`, PAS
+            # `discord-chat-mod` (nom affiché = "Discord & Chat Images",
+            # ancien nom CurseForge = discord-chat-mod). Se tromper de
+            # slug = `Project(s) could not be located` + crash loop du
+            # pod. Toujours vérifier sur modrinth.com/mod/<slug>.
             # Config patchée par l'initContainer discord-config-patch
             # ci-dessus à partir du Secret `discord-chat-mod-config`
             # (géré par `make secrets` / `make discord-setup`).
             # Sans token configuré : le mod se charge mais ne se connecte
             # pas (log WARN "Token may not be empty") — le serveur boot OK.
             - name: MODRINTH_PROJECTS
-              value: "chunky,discord-chat-mod"
+              value: "chunky,discord-chat-connect"
 
             - name: MEMORY
               value: "6G"                          # synced with .env MOD_MEMORY

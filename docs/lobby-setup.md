@@ -18,7 +18,7 @@ Cette convention s'applique à tous les exemples ci-dessous : remplace mentaleme
 On suppose que :
 - Le serveur principal tourne en Paper 1.21.x derrière Velocity.
 - La map du hub est disponible (schematics dans `assets/schematics/`, déployés via `make push-schematics` puis `//schem load` + `//paste -a`).
-- Les plugins par défaut sont installés (LuckPerms, WorldEdit, WorldGuard, Multiverse-Core, DecentHolograms, PlaceholderAPI, EssentialsX, CoreProtect, Chunky — cf. `docs/plugins.md`).
+- Les plugins par défaut sont installés (LuckPerms, WorldEdit, WorldGuard, Multiverse-Core, DecentHolograms, PlaceholderAPI, EssentialsX, CoreProtect, Chunky, **Advanced Portals** — cf. `docs/plugins.md`).
 
 ## Philosophie
 
@@ -278,9 +278,11 @@ Vérifie avec `/rg info hub-safe`. Flags principaux expliqués :
 - `interact allow` + `use allow` = on peut cliquer sur les NPC, les boutons, ouvrir les signs. Sans ces deux-là le lobby est « mort ».
 - `mob-spawning deny` = pas besoin de passer en peaceful si on met ça (redondant avec Multiverse mais ceinture + bretelles).
 
-## 4. NPC & hologrammes
+## 4. Hologrammes & portails mini-games (Advanced Portals)
 
-Les hologrammes via DecentHolograms (sans plugin Citizens, moins lourd) :
+### 4.1 Hologrammes — DecentHolograms
+
+DecentHolograms est notre choix (plus léger que HolographicDisplays, actif, sans dépendance Citizens) :
 
 ```
 /dh create lobby-title
@@ -292,22 +294,72 @@ Les hologrammes via DecentHolograms (sans plugin Citizens, moins lourd) :
 # DecentHolograms refresh auto toutes les 20 ticks.
 ```
 
-Pour un NPC qui téléporte vers un mini-game, on fait sans Citizens pour rester light : un armor stand invisible + un sign au-dessus, combiné à un `/warp` Essentials.
+### 4.2 Téléportation vers mini-games — Advanced Portals (recommandé)
+
+On a abandonné l'approche « armor stand invisible + pressure plate + command block » qui était fragile (command blocks désactivés en prod, NBT custom difficile à maintenir, pas de placeholders propres). On utilise **Advanced Portals** (Modrinth, slug `advanced-portals`, déjà dans `PLUGINS_MODRINTH` de `.env`) : portails déclaratifs avec sélection WorldEdit, triggers au contact, permissions LuckPerms intégrées.
+
+**Principe** : tu sélectionnes une zone (un cadre de glowstone, un arch de portail, une pressure-plate style, etc.), tu la transformes en portail nommé, et tu lui associes une **destination** (un `/warp`, des coords, un `/server skywars`, etc.). Quand un joueur marche dans la zone → action exécutée.
+
+**Setup d'un portail SkyWars** :
 
 ```
-# Place un armor stand là où tu veux le NPC :
-/summon armor_stand ~ ~ ~ {Invisible:1b,NoGravity:1b,ShowArms:1b,Marker:0b}
+# 1. Va dans le lobby, face à la zone où tu veux le portail (ex : sous un arch de glowstone)
+# 2. Donne-toi la portal wand (admin requis) :
+/portal wand                    # = stick avec sélection spéciale (pos1 clic gauche, pos2 clic droit)
 
-# Au-dessus, un hologramme :
-/dh create npc-skywars
-/dh move npc-skywars ~ ~1.8 ~
-/dh line npc-skywars 1 &6&l[SKYWARS]
-/dh line npc-skywars 2 &7Clic droit pour rejoindre
+# 3. Clique les 2 coins opposés de la zone
+#    (typiquement un volume 3×3×3 dans un arch)
+
+# 4. Crée une destination nommée (point d'arrivée) :
+/desti create skywars-lobby 0 100 0 hub    # x y z world (arrivée dans hub, ou dans sw-lobby)
+
+# 5. Crée le portail :
+/portal create skywars                     # nom du portail
+
+# 6. Configure : destination + trigger visuel
+/portal select skywars                     # met le portail 'skywars' en sélection
+/portal arg destination skywars-lobby
+/portal arg triggerblock AIR               # déclenche quand le joueur marche dedans (pas besoin de water/nether portal)
+/portal arg particles ENCHANT              # particules décoratives au portail
+
+# 7. Permission (optionnel) :
+/portal arg permission mineshark.portal.skywars
+# puis LuckPerms :
+/lp group default permission set mineshark.portal.skywars true
 ```
 
-Côté interaction : EssentialsX `/warp skywars` + un plugin PlayerInteractAtEntityEvent custom, ou plus simple : un pressure plate juste devant l'NPC qui exécute `/warp skywars` via un command block (rappel : command block activable pour admin seulement via `/gamerule commandBlockOutput false` puis `/setblock` avec NBT).
+**Résultat** : tout joueur qui entre dans le cadre est téléporté au spawn `skywars-lobby` sans animation Minecraft native (pas d'écran violet, pas de lag).
 
-Plus propre à long terme : un petit plugin custom « NPCRouter » (~200 lignes Java) qui écoute `PlayerInteractAtEntityEvent` et mappe armor_stand UUID → commande serveur.
+**Liste des portails à créer pour le lobby** (exécuter dans l'ordre après avoir placé un hologramme d'annonce au-dessus de chaque zone) :
+
+```
+skywars        → desti sw-lobby ou exécute /swr join
+tntrun         → desti trun-lobby (monde tnr-map1 par exemple)
+bedwars        → desti bw-lobby
+spleef         → desti spleef-lobby
+murder         → desti mm-lobby
+oitc           → desti oitc-lobby
+oneblock       → desti oneblock-lobby
+```
+
+**Hologramme au-dessus du portail** (optionnel mais propre) :
+
+```
+/dh create portal-skywars
+/dh move portal-skywars <x> <y+3> <z>
+/dh line portal-skywars 1 &6&l[SKYWARS]
+/dh line portal-skywars 2 &7Marche pour rejoindre
+/dh line portal-skywars 3 &e%server_online% joueurs en ligne
+```
+
+**Pourquoi ce choix** :
+
+- **Declaratif** : portails stockés dans `plugins/AdvancedPortals/portals.yml`, versionnable dans git si tu veux.
+- **Sans command block** : `enable-command-block: false` reste dans `server.properties` (anti-grief). Moins de surface d'attaque.
+- **Placeholders-friendly** : dans les messages de portail (`/portal arg message`) tu peux mettre du PAPI.
+- **Cross-server ready** : si plus tard tu veux un portail qui envoie sur un backend Velocity, `/portal arg bungee skywars` fait le job.
+
+Pour aller plus loin (Citizens NPCs cliquables avec menu GUI), voir §10 Phase 2.
 
 ## 5. Configuration LuckPerms de base
 
@@ -480,7 +532,7 @@ Quand le hub est stable, on peut rajouter :
 
 - **Cosmétiques** : plugin custom « Cosmetics » — particles trails, gadgets, hats. À écrire nous-mêmes (~1000 lignes, refait ce qui existe en closed-source sur Hypixel).
 - **Leaderboards dynamiques** : DecentHolograms + PlaceholderAPI expansion `Statistic` → classements top-kills, top-skywars live.
-- **NPC routing custom** : voir §4, un petit plugin interne qui mappe UUID d'armor_stand → commande. Plus extensible que des pressure plates.
+- **Citizens NPCs cliquables** : plugin Citizens (Spigot 13811) pour remplacer les portails Advanced Portals par des NPCs humanoïdes cliquables avec GUI. Lourd (~8 Mo, dépendances) mais visuellement bien plus pro. Command associée par NPC : `/npc command add /warp skywars`. À considérer si l'esthétique Advanced Portals (cadre visible) ne te plait pas.
 - **Particles parkour** : des zones en Multiverse avec WorldEdit command blocks qui téléportent sur un échec de saut, pour un petit parkour lobby annexe.
 - **Queue mini-games** : BungeeCord/Velocity queue via RedisBungee ou un plugin maison. Seulement quand on a plusieurs serveurs mini-games distincts, pas avant.
 
@@ -491,3 +543,4 @@ Quand le hub est stable, on peut rajouter :
 - LuckPerms contexts : <https://luckperms.net/wiki/Context>
 - Multiverse-Core commands : <https://dev.bukkit.org/projects/multiverse-core/pages/commands>
 - DecentHolograms : <https://wiki.decentholograms.eu/>
+- Advanced Portals : <https://modrinth.com/plugin/advanced-portals>

@@ -15,6 +15,25 @@ SECRETS_DIR        := data/secrets
 RCON_SECRET_FILE   := $(SECRETS_DIR)/rcon.secret
 FWD_SECRET_FILE    := data/velocity/forwarding.secret
 
+# ─── Wrappers SSH/kubectl ──────────────────────────────────────────
+# Toutes les cibles de ce Makefile tournent DEPUIS TON POSTE LOCAL
+# (WSL / Mac). Le cluster K3s vit sur le VPS — il n'y a pas de
+# kubeconfig local, et on veut que ça reste ainsi (secret non exposé).
+#
+# Donc on préfixe chaque kubectl par un SSH :
+#
+#   SSH_VPS      : base SSH (non-interactive)
+#   SSH_VPS_TTY  : idem avec -t (exec -it, console)
+#   KUBECTL      : `ssh … kubectl`  → 99% des cas
+#   KUBECTL_TTY  : `ssh -t … kubectl` → console / exec -it
+#
+# Pour les scripts multi-étapes (update-plugins, wipe-worlds), on
+# envoie le shell complet en un seul SSH via `$(SSH_VPS) bash -c`.
+SSH_VPS     := ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP)
+SSH_VPS_TTY := ssh -t -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP)
+KUBECTL     := $(SSH_VPS) kubectl
+KUBECTL_TTY := $(SSH_VPS_TTY) kubectl
+
 
 # ─── Console RCON (envoyer des commandes MC au serveur main) ──────
 # En k3s, on exec rcon-cli dans le pod mc-main. RCON est activé via
@@ -23,41 +42,72 @@ NAMESPACE ?= mineshark
 
 cmd: ## Envoie une commande MC au main via RCON. Usage: make cmd ARGS="say hello"
 	@test -n "$(ARGS)" || (echo "❌ Usage: make cmd ARGS=\"<commande MC>\""; exit 1)
-	@kubectl exec -n $(NAMESPACE) deploy/mc-main -- rcon-cli $(ARGS)
+	@$(KUBECTL) exec -n $(NAMESPACE) deploy/mc-main -- rcon-cli $(ARGS)
 
 op: ## Donne OP à un joueur. Usage: make op PLAYER=Zoyern
 	@test -n "$(PLAYER)" || (echo "❌ Usage: make op PLAYER=<pseudo>"; exit 1)
-	@kubectl exec -n $(NAMESPACE) deploy/mc-main -- rcon-cli op $(PLAYER)
+	@$(KUBECTL) exec -n $(NAMESPACE) deploy/mc-main -- rcon-cli op $(PLAYER)
 	@echo "✓ $(PLAYER) est maintenant OP."
 
 deop: ## Retire OP à un joueur. Usage: make deop PLAYER=Zoyern
 	@test -n "$(PLAYER)" || (echo "❌ Usage: make deop PLAYER=<pseudo>"; exit 1)
-	@kubectl exec -n $(NAMESPACE) deploy/mc-main -- rcon-cli deop $(PLAYER)
+	@$(KUBECTL) exec -n $(NAMESPACE) deploy/mc-main -- rcon-cli deop $(PLAYER)
 
 console: ## Shell RCON interactif (tape les commandes MC une par une, Ctrl+D pour quitter)
-	@kubectl exec -n $(NAMESPACE) -it deploy/mc-main -- rcon-cli
+	@$(KUBECTL_TTY) exec -n $(NAMESPACE) -it deploy/mc-main -- rcon-cli
+
+
+# ─── Rollout restart (rapide, sans re-deploy) ──────────────────────
+# Usage typique : après avoir édité arenas.yml / basic.yml d'un plugin
+# mini-game dans le pod, ou quand le plugin est corrompu. Garde le PVC
+# intact (mondes, configs, plugins), tue juste le container.
+restart-main: ## Rollout restart du pod mc-main (garde mondes et configs)
+	@$(KUBECTL) -n $(NAMESPACE) rollout restart deploy/mc-main
+	@$(KUBECTL) -n $(NAMESPACE) rollout status deploy/mc-main --timeout=180s
+
+restart-mod: ## Rollout restart du pod mc-mod (garde mondes et configs)
+	@$(KUBECTL) -n $(NAMESPACE) rollout restart deploy/mc-mod
+	@$(KUBECTL) -n $(NAMESPACE) rollout status deploy/mc-mod --timeout=360s
 
 
 # ─── Schematics (assets/schematics/ → pod mc-main) ─────────────────
 # On commit les .schematic dans le repo sous assets/schematics/ pour
 # les avoir en gitops. `push-schematics` les copie dans le pod vers
 # /data/plugins/WorldEdit/schematics/ (accessibles via //schem load).
-push-schematics: ## Copie assets/schematics/*.schematic vers le pod mc-main
+push-schematics: ## Copie assets/schematics/*.schem(atic) → VPS → pod mc-main
 	@test -d assets/schematics \
 	    || (echo "❌ assets/schematics/ inexistant"; exit 1)
-	@pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main \
-	    -o jsonpath='{.items[0].metadata.name}'); \
-	 test -n "$$pod" \
-	    || (echo "❌ Pas de pod mc-main trouvé. make status ?"; exit 1); \
-	 kubectl exec -n $(NAMESPACE) $$pod -- \
-	    mkdir -p /data/plugins/WorldEdit/schematics; \
-	 for f in assets/schematics/*.schematic assets/schematics/*.schem; do \
-	     [ -f "$$f" ] || continue; \
-	     name=$$(basename "$$f"); \
-	     echo "  ▶ $$name"; \
-	     kubectl cp "$$f" \
-	         $(NAMESPACE)/$$pod:/data/plugins/WorldEdit/schematics/$$name; \
-	 done
+	@# Convention : préférer .schem (format WorldEdit 7+) ; .schematic accepté
+	@# pour compat WorldEdit 6 legacy (Minecraft < 1.13). Voir docs/minigames.md.
+	@count=$$(ls assets/schematics/*.schem assets/schematics/*.schematic 2>/dev/null | wc -l); \
+	 if [ "$$count" = "0" ]; then \
+	     echo "❌ assets/schematics/ ne contient aucun .schem ou .schematic"; exit 1; \
+	 fi; \
+	 echo "▶ $$count schematic(s) à pousser :"; \
+	 ls -1 assets/schematics/*.schem assets/schematics/*.schematic 2>/dev/null | sed 's|^|    |'
+	@# 1) rsync LOCAL → VPS (zone scratch persistante, user-writable)
+	@echo "▶ rsync → $(VPS_USER)@$(VPS_IP):/tmp/mineshark-schematics/ …"
+	@$(SSH_VPS) 'mkdir -p /tmp/mineshark-schematics'
+	@rsync -avz \
+	    --include='*.schem' --include='*.schematic' --exclude='*' \
+	    -e "ssh -p $(VPS_SSH_PORT)" \
+	    assets/schematics/ \
+	    "$(VPS_USER)@$(VPS_IP):/tmp/mineshark-schematics/"
+	@# 2) VPS → pod via kubectl cp (côté VPS, donc kubectl réel)
+	@$(SSH_VPS) ' \
+	    pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main \
+	        -o jsonpath="{.items[0].metadata.name}"); \
+	    test -n "$$pod" \
+	        || { echo "❌ Pas de pod mc-main trouvé. make r-status ?"; exit 1; }; \
+	    kubectl exec -n $(NAMESPACE) $$pod -- \
+	        mkdir -p /data/plugins/WorldEdit/schematics; \
+	    for f in /tmp/mineshark-schematics/*.schem /tmp/mineshark-schematics/*.schematic; do \
+	        [ -f "$$f" ] || continue; \
+	        name=$$(basename "$$f"); \
+	        echo "  ▶ $$name"; \
+	        kubectl cp "$$f" \
+	            $(NAMESPACE)/$$pod:/data/plugins/WorldEdit/schematics/$$name; \
+	    done'
 	@echo "✓ Schematics poussés. En jeu : //schem list"
 
 
@@ -66,31 +116,47 @@ push-schematics: ## Copie assets/schematics/*.schematic vers le pod mc-main
 # PVC. Même si une nouvelle version existe, le jar existant reste tant
 # qu'on ne le supprime pas. Cette cible force un re-download complet.
 #
+# ⚠️ PIÈGE VÉCU (2026-04-20) : Spiget cache AUSSI des fichiers dotfiles
+# `/data/plugins/.<id>-version.json` (ex. `.69436-version.json`). Tant
+# que ce fichier dotfile est plus récent que `SPIGET_DOWNLOAD_TOLERANCE`
+# minutes (défaut = 5 min), itzg logge "resource 'X' not checked because
+# version meta file newer than 5 minutes" et SAUTE le download — même si
+# le jar lui-même a été supprimé. On doit donc wiper les dotfiles aussi,
+# sinon les plugins Spiget "disparaissent" silencieusement du serveur.
+# Source : scripts/start-spiget dans itzg/docker-minecraft-server.
+#
 # Ce qui est supprimé :
-#   • paper-*.jar         → itzg redownload la dernière build 1.21.4
-#   • plugins/*.jar       → Modrinth/Spiget/URL direct retéléchargent
+#   • /data/paper-*.jar                   → retélécharge la build 1.21.8
+#   • /data/plugins/*.jar                 → Modrinth/Spiget/URL redownload
+#   • /data/plugins/.*-version.json       → FORCE la re-vérif Spiget
 # Ce qui est conservé :
 #   • mondes (hub/, etc.)
-#   • plugins/<Plugin>/   (configs des plugins)
+#   • /data/plugins/<Plugin>/             configs des plugins
+#   • /data/plugins/BentoBox/addons/      addons (posés via plugins/manual/)
 #   • usercache, ops.json, bans, etc.
 update-plugins: ## Force le re-download de Paper + tous les plugins (conserve mondes et configs)
-	@pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main \
-	    -o jsonpath='{.items[0].metadata.name}'); \
-	 test -n "$$pod" \
-	    || (echo "❌ Pas de pod mc-main trouvé."; exit 1); \
-	 echo "▶ Pod cible : $$pod"; \
-	 echo "▶ Arrêt propre du serveur…"; \
-	 kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli save-all >/dev/null 2>&1 || true; \
-	 kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli stop >/dev/null 2>&1 || true; \
-	 sleep 5; \
-	 echo "▶ Suppression des jars cachés (Paper + plugins)…"; \
-	 kubectl exec -n $(NAMESPACE) $$pod -- sh -c ' \
-	     rm -f /data/paper-*.jar /data/purpur-*.jar 2>/dev/null; \
-	     rm -f /data/plugins/*.jar 2>/dev/null; \
-	     echo "  ✓ Jars supprimés (les configs plugins/<Plugin>/ sont intactes)" \
-	 '
-	@kubectl rollout restart deploy/mc-main -n $(NAMESPACE)
-	@echo "✓ Redémarrage en cours. itzg retélécharge tout. Suis : make logs-main"
+	@# Tout est encapsulé dans UN SEUL SSH : évite 5-6 round-trips réseau
+	@# et partage la variable $$pod entre les étapes sans la re-résoudre.
+	@$(SSH_VPS) ' \
+	    set -e; \
+	    pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main \
+	        -o jsonpath="{.items[0].metadata.name}"); \
+	    test -n "$$pod" \
+	        || { echo "❌ Pas de pod mc-main trouvé."; exit 1; }; \
+	    echo "▶ Pod cible : $$pod"; \
+	    echo "▶ Arrêt propre du serveur…"; \
+	    kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli save-all >/dev/null 2>&1 || true; \
+	    kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli stop     >/dev/null 2>&1 || true; \
+	    sleep 5; \
+	    echo "▶ Suppression des jars cachés (Paper + plugins + meta Spiget)…"; \
+	    kubectl exec -n $(NAMESPACE) $$pod -- sh -c " \
+	        rm -f /data/paper-*.jar /data/purpur-*.jar 2>/dev/null; \
+	        rm -f /data/plugins/*.jar 2>/dev/null; \
+	        rm -f /data/plugins/.*-version.json 2>/dev/null; \
+	        echo \"  ✓ Jars + meta Spiget supprimés (plugins/<Plugin>/ intacts)\" \
+	    "; \
+	    kubectl rollout restart deploy/mc-main -n $(NAMESPACE); \
+	    echo "✓ Redémarrage en cours. itzg retélécharge tout. Suis : make r-logs-main"'
 
 
 # ─── Wipe des mondes parasites du PVC ──────────────────────────────
@@ -102,33 +168,33 @@ update-plugins: ## Force le re-download de Paper + tous les plugins (conserve mo
 # ⚠️ NE TOUCHE PAS au monde `hub` (le seul qu'on garde).
 # Pour wipe AUSSI hub : ajoute INCLUDE_HUB=1.
 wipe-worlds: ## Supprime les mondes parasites du PVC mc-main (world*, *_the_end, *_nether)
-	@pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main \
-	    -o jsonpath='{.items[0].metadata.name}'); \
-	 test -n "$$pod" \
-	    || (echo "❌ Pas de pod mc-main trouvé. make status ?"; exit 1); \
-	 echo "▶ Pod cible : $$pod"; \
-	 echo "▶ Arrêt du serveur Minecraft (sauvegarde + stop propre)…"; \
-	 kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli save-all >/dev/null 2>&1 || true; \
-	 kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli stop >/dev/null 2>&1 || true; \
-	 echo "▶ Attente 5s pour flush des chunks…"; sleep 5; \
-	 echo "▶ Suppression des mondes parasites :"; \
-	 for w in world world_nether world_the_end hub_nether hub_the_end; do \
-	     kubectl exec -n $(NAMESPACE) $$pod -- sh -c "test -d /data/$$w && rm -rf /data/$$w && echo '  ✓ $$w'" 2>/dev/null \
-	         || echo "  · $$w (absent)"; \
-	 done
-	@if [ "$(INCLUDE_HUB)" = "1" ]; then \
-	     pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main -o jsonpath='{.items[0].metadata.name}'); \
-	     echo "▶ INCLUDE_HUB=1 : suppression de hub/ aussi"; \
-	     kubectl exec -n $(NAMESPACE) $$pod -- rm -rf /data/hub && echo "  ✓ hub"; \
-	 fi
-	@pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main -o jsonpath='{.items[0].metadata.name}'); \
-	 echo "▶ Reset mémoire Multiverse (worlds.yml / worlds2.yml)…"; \
-	 kubectl exec -n $(NAMESPACE) $$pod -- sh -c \
-	     "rm -f /data/plugins/Multiverse-Core/worlds.yml /data/plugins/Multiverse-Core/worlds2.yml" \
-	     && echo "  ✓ Multiverse oubliera les anciens mondes au prochain boot"
-	@echo "▶ Restart pod mc-main…"
-	@kubectl rollout restart deploy/mc-main -n $(NAMESPACE)
-	@echo "✓ Wipe terminé. Suis l'état : make logs-main"
+	@$(SSH_VPS) ' \
+	    set -e; \
+	    pod=$$(kubectl get pod -n $(NAMESPACE) -l app=mc-main \
+	        -o jsonpath="{.items[0].metadata.name}"); \
+	    test -n "$$pod" \
+	        || { echo "❌ Pas de pod mc-main trouvé. make r-status ?"; exit 1; }; \
+	    echo "▶ Pod cible : $$pod"; \
+	    echo "▶ Arrêt du serveur Minecraft (sauvegarde + stop propre)…"; \
+	    kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli save-all >/dev/null 2>&1 || true; \
+	    kubectl exec -n $(NAMESPACE) $$pod -- rcon-cli stop     >/dev/null 2>&1 || true; \
+	    echo "▶ Attente 5s pour flush des chunks…"; sleep 5; \
+	    echo "▶ Suppression des mondes parasites :"; \
+	    for w in world world_nether world_the_end hub_nether hub_the_end tntrun-monstre; do \
+	        kubectl exec -n $(NAMESPACE) $$pod -- sh -c "test -d /data/$$w && rm -rf /data/$$w && echo \"  ✓ $$w\"" 2>/dev/null \
+	            || echo "  · $$w (absent)"; \
+	    done; \
+	    if [ "$(INCLUDE_HUB)" = "1" ]; then \
+	        echo "▶ INCLUDE_HUB=1 : suppression de hub/ aussi"; \
+	        kubectl exec -n $(NAMESPACE) $$pod -- rm -rf /data/hub && echo "  ✓ hub"; \
+	    fi; \
+	    echo "▶ Reset mémoire Multiverse (worlds.yml / worlds2.yml)…"; \
+	    kubectl exec -n $(NAMESPACE) $$pod -- sh -c \
+	        "rm -f /data/plugins/Multiverse-Core/worlds.yml /data/plugins/Multiverse-Core/worlds2.yml" \
+	        && echo "  ✓ Multiverse oubliera les anciens mondes au prochain boot"; \
+	    echo "▶ Restart pod mc-main…"; \
+	    kubectl rollout restart deploy/mc-main -n $(NAMESPACE); \
+	    echo "✓ Wipe terminé. Suis l'\''état : make r-logs-main"'
 
 
 # ─── SSH au VPS ────────────────────────────────────────────────────
@@ -463,10 +529,10 @@ plugins-sync: ## Synchronise plugins/manual/*.jar (+ addons BentoBox) vers le VP
 	     echo "ℹ️  $(MANUAL_BENTOBOX_ADDONS_DIR)/ absent — skip (normal si pas d'addon BentoBox)"; \
 	 fi
 	@echo "▶ Rollout restart du pod mc-main (pour recharger les jars)…"
-	@kubectl rollout restart deploy/mc-main -n $(NAMESPACE)
-	@echo "✓ Sync terminée. L'initContainer copy-manual-plugins va recopier"
+	@$(KUBECTL) -n $(NAMESPACE) rollout restart deploy/mc-main
+	@$(KUBECTL) -n $(NAMESPACE) rollout status  deploy/mc-main --timeout=180s
+	@echo "✓ Sync terminée. L'initContainer copy-manual-plugins a recopié"
 	@echo "  les jars dans /data/plugins/ et /data/plugins/BentoBox/addons/"
-	@echo "  au prochain boot (~90s)."
 	@echo "  Suivi : make logs-main  |  Vérif : make cmd ARGS=plugins"
 
 
@@ -594,9 +660,16 @@ doctor: ## Vérifie env, dépendances et cohérence config
 	@test -f .env                       && echo "  ✓ .env présent"      || echo "  ⚠️  .env absent — cp .env.example .env"
 	@test -f $(RCON_SECRET_FILE)        && echo "  ✓ RCON secret"       || echo "  ⚠️  RCON secret absent — make gen-secrets"
 	@test -f $(FWD_SECRET_FILE)         && echo "  ✓ Forwarding secret" || echo "  ⚠️  Forwarding secret absent — make gen-secrets"
-	@grep -q "change-me" .env 2>/dev/null \
-	    && echo "  ⚠️  des placeholders 'change-me' restent dans .env (CF_API_KEY ?)" \
-	    || echo "  ✓ pas de placeholders évidents dans .env"
+	@# Détecte un placeholder "change-me" UNIQUEMENT dans une valeur de var
+	@# (pas dans un commentaire). Forme attendue : VAR=...change-me...
+	@# Les commentaires d'exemple (ex. « Laisse "change-me" si tu ne veux
+	@# pas du serveur moddé ») sont exclus via le ^[^#] au début.
+	@if grep -qE '^[A-Z_]+=[^#]*change-me' .env 2>/dev/null; then \
+	    var=$$(grep -oE '^[A-Z_]+=[^#]*change-me' .env | head -1 | cut -d= -f1); \
+	    echo "  ⚠️  placeholder 'change-me' dans .env (variable $$var)"; \
+	 else \
+	    echo "  ✓ pas de placeholders 'change-me' dans les valeurs .env"; \
+	 fi
 	@# ─── VPS : détecter le placeholder par défaut 127.0.0.1 ─────────
 	@# Cause #1 historique du `ssh: Connection timed out port 22` après
 	@# un `cp .env.example .env` incomplet : VPS_IP=127.0.0.1 par défaut.
@@ -652,9 +725,20 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
 	@echo "▶ docker compose config…"
 	@RCON_PASSWORD=ci-placeholder docker compose config -q
 	@echo "▶ kubectl dry-run…"
+	@# --validate=false : évite que kubectl tente de télécharger l'OpenAPI
+	@# depuis localhost:8080 quand aucun cluster n'est configuré (cas WSL
+	@# par défaut). La validation syntaxique YAML reste assurée par kubectl
+	@# (parsing) + yamllint (ligne 651). Pour une validation schémas stricte,
+	@# installer `kubeconform` (optionnel, activé si présent).
 	@for d in k8s/base k8s/velocity k8s/main k8s/mod; do \
-	    echo "  $$d" && kubectl apply --dry-run=client -f "$$d/" >/dev/null || exit 1; \
+	    echo "  $$d" && kubectl apply --dry-run=client --validate=false -f "$$d/" >/dev/null || exit 1; \
 	 done
+	@if command -v kubeconform >/dev/null 2>&1; then \
+	    echo "▶ kubeconform (schemas stricts)…"; \
+	    kubeconform -strict -summary -ignore-missing-schemas k8s/ || exit 1; \
+	 else \
+	    echo "  ℹ️  kubeconform absent (optionnel) — skip schémas stricts"; \
+	 fi
 	@echo "▶ shellcheck…"
 	@command -v shellcheck >/dev/null 2>&1 \
 	    && shellcheck -S warning scripts/*.sh \
@@ -674,4 +758,4 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
         plugins-sync redeploy-plugins update-plugins wipe-worlds push-schematics \
         backup gen-secrets show-secrets doctor init ci-lint \
         old-server-reset old-server-prep old-server-run \
-        cmd op deop console
+        cmd op deop console restart-main restart-mod

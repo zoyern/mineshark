@@ -245,9 +245,11 @@ Contrairement à l'ancien SkyWarsReloaded (Dabo Ross) qui copiait un schematic d
 - Reset automatique entre games (option).
 - `autoLoad=false` → la map n'est chargée que quand quelqu'un y joue → économie RAM massive.
 
-**SkyWarsReloaded fournit son propre générateur void** (fichier `SkyWarsReloadedGenerator` dans le jar). On l'utilise via le flag `-g SkyWarsReloaded` de Multiverse → monde **100 % vide**, pas de bedrock, pas de grass, rien. Juste de l'air jusqu'à Y=-64.
+**Choix du générateur void** : on utilise **VoidWorldGenerator** (Spiget 113931 par HydrolienF, déjà dans `PLUGINS_SPIGET`), un plugin dédié qui expose un générateur nommé `VoidWorldGenerator` à Multiverse. On l'invoque via `-g VoidWorldGenerator` → monde **100 % vide**, pas de bedrock, pas de grass, rien. Juste de l'air de Y=-64 à Y=320.
 
-> ⚠️ **Piège à éviter** : `-t FLAT -g FLAT` crée un monde **superflat** (bedrock+dirt+grass) — c'est **PAS** un void, tu aurais une plaine sous les îles. Ne l'utilise jamais pour SkyWars.
+> **Pourquoi pas le générateur bundlé SkyWarsReloaded (`-g SkyWarsReloaded`) ?** Parce qu'on veut garder MineShark **stack-propre** : un seul générateur void réutilisable par **tous** les mini-jeux (SkyWars, BedWars dérivés, Spleef, etc.) plutôt qu'un par plugin. Si un jour on retire SkyWarsReloaded, les mondes ne deviennent pas orphelins (erreur `Unknown generator` au boot).
+>
+> ⚠️ **Piège à éviter** : `-t FLAT -g FLAT` crée un monde **superflat** (bedrock+dirt+grass) — c'est **PAS** un void, tu aurais une plaine sous les îles. Ne l'utilise **jamais** pour SkyWars.
 
 ### Étape 3 — commencer **par une seule map** : Bones (validation de la chaîne)
 
@@ -256,8 +258,8 @@ Avant de batcher les 11 maps, on fait **bones** seule de A à Z pour valider que
 **3.1 — Créer le monde void**
 
 ```bash
-# Monde void via le générateur bundlé SkyWarsReloaded
-make cmd ARGS="mv create sw-bones normal -g SkyWarsReloaded"
+# Monde void via VoidWorldGenerator (Spiget 113931)
+make cmd ARGS="mv create sw-bones normal -g VoidWorldGenerator"
 
 # Config de l'arène (PVP on, pas d'auto-load pour économie RAM)
 make cmd ARGS="mv modify sw-bones set pvp true"
@@ -277,7 +279,7 @@ Vérification que le monde est bien void :
 ```bash
 make cmd ARGS="mvtp Zoyern sw-bones"
 # En jeu : tu devrais flotter dans le vide, rien à l'horizon.
-# Si tu vois une plaine → le générateur SWR n'a pas été trouvé (voir Troubleshooting).
+# Si tu vois une plaine → VoidWorldGenerator n'est pas chargé (voir Troubleshooting).
 ```
 
 **3.2 — Paster le schematic bones**
@@ -359,7 +361,7 @@ Une fois bones validée, tu automatises le reste. Mais attention : **les coords 
 ```bash
 # Mondes (hors bones, déjà faite)
 for map in classico dune frozen jungle tree ballon ballon-oringin nethugly duels sky-duel; do
-    make cmd ARGS="mv create sw-$map normal -g SkyWarsReloaded"
+    make cmd ARGS="mv create sw-$map normal -g VoidWorldGenerator"
     make cmd ARGS="mv modify sw-$map set pvp true"
     make cmd ARGS="mv modify sw-$map set difficulty normal"
     make cmd ARGS="mv modify sw-$map set autoLoad false"
@@ -466,48 +468,568 @@ done
 
 ---
 
-## Intégration lobby (warps + NPC)
+## ScreamingBedWars — setup 2-4 équipes
 
-Dans le monde `hub`, on pose **un portail visuel par mini-game** qui TP directement dans le lobby du plugin correspondant.
+**Plugin** : ScreamingBedWars (SpigotMC 63714), maintenu par ScreamingSandals.
+**État repo** : **déjà ajouté** à `PLUGINS_SPIGET` et `SPIGET_RESOURCES` → install auto.
 
-### Étape 1 — créer les warps EssentialsX
+### Étape 1 — déployer et vérifier
 
-```
-# TP à l'emplacement souhaité dans le hub, puis :
-/warp set tntrun            # portail TntRun
-/warp set skywars           # portail SkyWars
-```
-
-### Étape 2 — pressure plate + command block (rapide, moche)
-
-```
-# Sous le portail :
-/fill ~ ~-1 ~ ~ ~-1 ~ light_weighted_pressure_plate
-/setblock ~ ~-2 ~ command_block{Command:"execute as @p run tr join classico",auto:1b}
+```bash
+make re
+make cmd ARGS=plugins          # → "ScreamingBedWars" en vert
 ```
 
-Remplace la commande par `swr join` pour SkyWars.
+Logs attendus :
+```
+[ScreamingBedWars] Enabling ScreamingBedWars vX.Y
+[ScreamingBedWars] Loaded 0 games
+```
 
-### Étape 3 — holograms DecentHolograms (propre)
+### Étape 2 — créer le monde void de la map
 
-Un holo flottant au-dessus du portail, avec placeholders SWR/TR :
+```bash
+# 1 monde Multiverse = 1 carte BedWars (convention MineShark)
+make cmd ARGS="mv create bw-classico normal -g VoidWorldGenerator"
+make cmd ARGS="mv modify bw-classico set pvp true"
+make cmd ARGS="mv modify bw-classico set difficulty normal"
+make cmd ARGS="mv modify bw-classico set autoLoad false"
+make cmd ARGS="mv modify bw-classico set gamemode survival"
+```
+
+### Étape 3 — paster la map depuis `assets/schematics/`
+
+En jeu (client OP) :
+
+```
+/mvtp bw-classico
+/tp 0 100 0
+/gamemode creative
+//schem load bedwars-classico
+//paste -a -o
+/setworldspawn
+```
+
+La map typique BedWars a : **1 île centrale** (diamants/émeraudes), **2-4 îles d'équipe** (chacune avec 1 lit + 1 spawner de fer/or + 1 coffre d'achat), et **des forges** (generators) qui droppent les ressources au sol.
+
+### Étape 4 — créer l'arène BedWars
+
+ScreamingBedWars expose la commande `/bw admin` pour le setup complet. En jeu :
+
+```
+# Créer l'arène
+/bw admin classico add
+
+# Entrer en mode édition
+/bw admin classico edit
+
+# Définir les 2 coins de la bounding box (reset zone) :
+#   1. Vole au coin bas-ouest-sud (-X min, -Y min, -Z min)
+/bw admin classico pos1
+#   2. Vole au coin haut-est-nord (+X max, +Y max, +Z max)
+/bw admin classico pos2
+
+# Spawn du lobby (là où les joueurs attendent avant le start)
+/bw admin classico lobby
+# (mets-toi à la position du lobby dans un monde lobby séparé, ex. 'hub')
+# Note : le lobby peut être hors du monde bw-classico — c'est l'intérêt du plugin.
+
+# Point de spectateur (joueurs morts sans lit)
+/bw admin classico spec
+
+# Limites de joueurs et durée
+/bw admin classico min 2
+/bw admin classico max 16
+/bw admin classico time 1800        # 30 minutes max par partie
+
+# Ajouter des équipes (couleur = nom interne)
+/bw admin classico team add red RED 4         # nom=red, couleur=RED, taille max=4
+/bw admin classico team add blue BLUE 4
+/bw admin classico team add green GREEN 4     # optionnel, si map 3 équipes
+/bw admin classico team add yellow YELLOW 4   # optionnel, si map 4 équipes
+
+# Pour chaque équipe, définir :
+#   - Le spawn (bloc où le joueur apparaît)
+/bw admin classico team spawn red
+#   - La position du lit (bloc du lit)
+/bw admin classico team bed red
+#   - Le village marchand (villager shops)
+/bw admin classico store add red
+
+# Spawners de ressources (fer/or/diamant/émeraude) :
+#   - Va sur le bloc du spawner, puis :
+/bw admin classico spawner add iron 1         # tier 1
+/bw admin classico spawner add gold 1
+/bw admin classico spawner add diamond 2      # spawners diamant au centre (tier 2)
+/bw admin classico spawner add emerald 3      # émeraudes tier 3
+
+# Sauvegarder
+/bw admin classico save
+```
+
+### Étape 5 — tester
+
+```
+/bw join classico          # rejoint le lobby
+/bw leave                  # quitte
+/bw list                   # liste des arènes
+/bw stats                  # stats perso
+```
+
+### Étape 6 — permissions
+
+```
+make cmd ARGS="lp group default permission set bw.join true"
+make cmd ARGS="lp group default permission set bw.leave true"
+make cmd ARGS="lp group default permission set bw.stats true"
+```
+
+Les permissions admin (`bw.admin.*`) sont réservées aux OP.
+
+### Étape 7 — shop items (facultatif)
+
+Fichier : `/data/plugins/ScreamingBedWars/shop.yml` (livré avec un catalogue par défaut jouable). Pour customiser, édite la liste `items:` en ajoutant/retirant des entrées (sword, armor, pickaxe, potions, TNT bridge, etc.). `make cmd ARGS="bw admin reload"` pour recharger.
+
+---
+
+## Spleef_reloaded — setup arène
+
+**Plugin** : Spleef_reloaded par steve4744 (SpigotMC 118673).
+**État repo** : **déjà ajouté** à `PLUGINS_SPIGET` et `SPIGET_RESOURCES` → install auto.
+
+**Principe** : les joueurs cassent le sol sous leurs pieds (pelles), le dernier debout gagne. Mode "Splegg" = lanceurs d'œufs qui cassent les blocs à distance.
+
+### Étape 1 — vérifier
+
+```bash
+make cmd ARGS=plugins        # → "Spleef_reloaded" en vert
+```
+
+### Étape 2 — créer la map
+
+Plateforme carrée (typique 20×20 à 40×40) en **neige** (casse rapide à la pelle) ou **TNT décorative**, sur un monde void.
+
+```bash
+make cmd ARGS="mv create spleef_arena normal -g VoidWorldGenerator"
+make cmd ARGS="mv modify spleef_arena set pvp false"
+make cmd ARGS="mv modify spleef_arena set gamemode survival"
+make cmd ARGS="mv modify spleef_arena set autoLoad false"
+```
+
+En jeu, construit la plateforme :
+
+```
+/mvtp spleef_arena
+/tp 0 100 0
+//pos1 -20 100 -20 ; //pos2 20 100 20
+//set snow_block
+```
+
+### Étape 3 — créer l'arène
+
+Spleef_reloaded expose `/spleef` (setup). En jeu :
+
+```
+/spleef create classico          # nom interne "classico"
+/spleef edit classico
+
+# Définir les 2 coins du layer qui sera reset entre parties :
+/spleef floor pos1               # vole au coin bas-ouest-sud de la plateforme
+/spleef floor pos2               # vole au coin haut-est-nord
+
+# Spawn des joueurs (un point = spawn aléatoire dans un rayon ;
+# ou plusieurs points = un par spot) :
+/spleef addspawn                 # TP-toi sur la plateforme, une fois par spawn
+
+# Lobby (salle d'attente, peut être dans un autre monde) :
+/spleef lobby                    # TP-toi au lobby puis commande
+
+# Point de sortie (après défaite) :
+/spleef setexit                  # TP-toi dans le hub puis commande
+
+# Paramètres
+/spleef setmin 2
+/spleef setmax 8
+/spleef settime 300              # 5 min max
+
+# Activer
+/spleef enable classico
+/spleef save
+```
+
+### Étape 4 — permissions + jeu
+
+```
+make cmd ARGS="lp group default permission set spleef.join true"
+make cmd ARGS="lp group default permission set spleef.leave true"
+```
+
+```
+/spleef join classico
+/spleef leave
+/spleef list
+```
+
+### Étape 5 — mode Splegg (facultatif)
+
+Dans `/data/plugins/Spleef_reloaded/arenas.yml`, section de l'arène :
+```yaml
+classico:
+  game_type: SPLEGG     # au lieu de SPLEEF (pelles)
+  splegg_item: EGG
+```
+`make cmd ARGS="spleef reload"`. Les joueurs reçoivent un œuf-lanceur au lieu d'une pelle.
+
+---
+
+## MurderMystery — setup arène
+
+**Plugin** : MurderMystery par Plugily-Projects (SpigotMC 66614).
+**État repo** : **déjà ajouté** à `PLUGINS_SPIGET` et `SPIGET_RESOURCES` → install auto.
+
+**Principe** : 1 murderer (couteau), 1 detective (arc), les autres sont innocents. Le murderer doit tuer tout le monde sans se faire tirer dessus. Les innocents récoltent des lingots d'or qui peuvent être échangés contre un arc.
+
+### Étape 1 — vérifier
+
+```bash
+make cmd ARGS=plugins        # → "MurderMystery" en vert
+```
+
+### Étape 2 — paster une map classique
+
+MurderMystery se joue sur une map thématique (manoir, rue, usine…) avec des couloirs et pièces où se cacher. Paste n'importe quel schematic "building" sur un monde void ou normal.
+
+```bash
+make cmd ARGS="mv create mm_manoir normal -g VoidWorldGenerator"
+make cmd ARGS="mv modify mm_manoir set autoLoad false"
+make cmd ARGS="mv modify mm_manoir set gamemode survival"
+make cmd ARGS="mv modify mm_manoir set pvp true"
+```
+
+En jeu :
+```
+/mvtp mm_manoir
+//schem load murdermystery-manoir       # adapte au nom réel de ton schematic
+//paste -a -o
+```
+
+### Étape 3 — créer l'arène
+
+En jeu (OP) :
+
+```
+/mm create manoir
+
+# Entre en mode édition
+/mm edit manoir
+
+# Lobby (hors-arène)
+/mm setlobby manoir
+
+# Points de spawn des joueurs (4 à 12 points min)
+#   TP-toi à chaque spot, puis à chaque fois :
+/mm addspawn manoir
+
+# Emplacements des lingots d'or (gold spawners) :
+/mm addgold manoir
+
+# Spawn des waiting spectators / ending
+/mm setendlocation manoir
+
+# Paramètres
+/mm setminplayers manoir 4
+/mm setmaxplayers manoir 12
+/mm settimer manoir 540          # 9 min par partie
+
+# Activer
+/mm enable manoir
+```
+
+### Étape 4 — permissions + jeu
+
+```
+make cmd ARGS="lp group default permission set murdermystery.join true"
+make cmd ARGS="lp group default permission set murdermystery.leave true"
+make cmd ARGS="lp group default permission set murdermystery.stats true"
+```
+
+```
+/mm join manoir
+/mm leave
+/mm list
+/mm stats
+```
+
+### Étape 5 — skins rôles (facultatif)
+
+Fichier : `/data/plugins/MurderMystery/arenas.yml`. Tu peux définir des skins Mojang par rôle (murderer/detective/innocent) via `role_skins:` — nécessite que le serveur soit en mode online (online-mode=true) ou qu'un plugin SkinsRestorer soit présent. Pour MineShark en mode LAN/cracked, laisse par défaut.
+
+---
+
+## OITC (One In The Chamber) — setup arène
+
+**Plugin** : OITC par Despical (SpigotMC 81185).
+**État repo** : **déjà ajouté** à `PLUGINS_SPIGET` et `SPIGET_RESOURCES` → install auto.
+
+**Principe** : chaque joueur commence avec 1 arc + 1 flèche + 1 épée. Un kill = 1 flèche récupérée + 1 point. Premier à N kills gagne.
+
+### Étape 1 — vérifier
+
+```bash
+make cmd ARGS=plugins        # → "OneInTheChamber" en vert (nom interne : OITC)
+```
+
+### Étape 2 — paster une map
+
+Arène compacte PVP avec plusieurs spawns répartis (typiquement 4-8 spawns, couloirs courts).
+
+```bash
+make cmd ARGS="mv create oitc_arena normal -g VoidWorldGenerator"
+make cmd ARGS="mv modify oitc_arena set pvp true"
+make cmd ARGS="mv modify oitc_arena set autoLoad false"
+make cmd ARGS="mv modify oitc_arena set gamemode survival"
+```
+
+```
+/mvtp oitc_arena
+//schem load oitc-arena          # adapte au nom réel
+//paste -a -o
+```
+
+### Étape 3 — créer l'arène
+
+En jeu (OP), commandes Despical OITC :
+
+```
+/oitc create classico
+/oitc edit classico
+
+# Lobby (hors arène)
+/oitc lobby classico
+
+# Spawns (au moins 4, idéalement 6-8)
+/oitc addspawn classico          # TP à chaque point, répète
+
+# Point de fin (écran "GG" / retour hub)
+/oitc end classico
+
+# Paramètres
+/oitc setminplayers classico 2
+/oitc setmaxplayers classico 8
+/oitc setscore classico 10       # premier à 10 kills gagne
+/oitc settimer classico 600      # 10 min max
+
+# Activer
+/oitc enable classico
+```
+
+### Étape 4 — permissions + jeu
+
+```
+make cmd ARGS="lp group default permission set oitc.join true"
+make cmd ARGS="lp group default permission set oitc.leave true"
+make cmd ARGS="lp group default permission set oitc.stats true"
+```
+
+```
+/oitc join classico
+/oitc leave
+/oitc list
+```
+
+---
+
+## OneBlock (AOneBlock + BentoBox) — setup skyblock moderne
+
+**Plugin** : BentoBox (SpigotMC 73261) + addon **AOneBlock** (jar manuel, `plugins/manual/bentobox-addons/`).
+**État repo** : BentoBox est **déjà ajouté** à `PLUGINS_SPIGET`. AOneBlock est déposé dans `plugins/manual/bentobox-addons/` et poussé sur le VPS via `make plugins-sync`.
+
+**Principe** : chaque joueur a son île mono-bloc qui se régénère au fur et à mesure des casses. Progression par "phases" (grass → sand → stone → …) qui débloquent de nouveaux drops.
+
+### Étape 1 — vérifier que BentoBox et AOneBlock sont chargés
+
+```bash
+make cmd ARGS=plugins        # → "BentoBox" en vert
+```
+
+Logs attendus :
+```
+[BentoBox] Enabling BentoBox v2.X
+[BentoBox] Loading addon AOneBlock vX.Y
+[AOneBlock] Registered gamemode 'AOneBlock'
+```
+
+Si AOneBlock n'apparaît pas : `ls /data/plugins/BentoBox/addons/` doit contenir `AOneBlock-*.jar`. Si absent, c'est que `make plugins-sync` n'a pas propagé les addons. Voir [plugins/manual/README.md](../plugins/manual/README.md).
+
+### Étape 2 — monde géré par BentoBox (automatique)
+
+Contrairement aux autres mini-jeux, **tu ne crées PAS le monde manuellement avec Multiverse**. BentoBox crée automatiquement au premier boot :
+- `aoneblock` (monde principal)
+- `aoneblock_nether` (enfer si enabled dans config)
+- `aoneblock_the_end` (end si enabled)
+
+> **Normal** de voir ces 2 mondes apparaître automatiquement même si tu n'as pas créé d'île : c'est le comportement par défaut de BentoBox. Pour désactiver :
+> ```yaml
+> # /data/plugins/BentoBox/addons/AOneBlock/config.yml
+> world:
+>   nether:
+>     generate: false
+>   end:
+>     generate: false
+> ```
+> Puis `make cmd ARGS="bbox reload"`. **Attention** : tu ne peux désactiver le nether/end qu'**avant** qu'un joueur crée sa première île. Après, les mondes sont persistants.
+
+### Étape 3 — config importante (`AOneBlock/config.yml`)
+
+```yaml
+world:
+  friendly-name: "OneBlock"
+  island-start-x: 0
+  island-start-z: 0
+  island-distance: 400          # distance entre îles joueurs (évite conflits)
+  max-islands: 0                # 0 = illimité
+  default-game-mode: SURVIVAL
+  nether:
+    generate: true              # laisse à true ou false selon ta préférence
+    islands: true               # îles nether par joueur
+  end:
+    generate: true
+    islands: true
+
+island:
+  max-team-size: 4              # max 4 joueurs par île (co-op)
+  max-homes: 5
+```
+
+Après modif : `make cmd ARGS="bbox reload AOneBlock"`.
+
+### Étape 4 — permissions
+
+```
+make cmd ARGS="lp group default permission set aoneblock.island.create true"
+make cmd ARGS="lp group default permission set aoneblock.island.home true"
+make cmd ARGS="lp group default permission set aoneblock.island.invite true"
+make cmd ARGS="lp group default permission set aoneblock.island.team true"
+```
+
+### Étape 5 — jeu (commandes joueurs)
+
+```
+/aob create              # crée ton île (ou '/is' via alias BentoBox)
+/aob home                # TP à ta maison
+/aob invite <pseudo>     # invite en co-op
+/aob level               # calcule ton score (basé sur les blocs posés)
+/aob top                 # leaderboard
+
+# Commandes admin
+/aob admin delete <pseudo>    # reset l'île d'un joueur
+/aob admin info <pseudo>
+```
+
+### Étape 6 — phases custom (facultatif, avancé)
+
+Les phases sont définies dans `/data/plugins/BentoBox/addons/AOneBlock/phases/`. Chaque fichier `.yml` décrit 100 blocs de progression (pondération des drops). AOneBlock livre une 20aine de phases par défaut (Plains → Underground → Snow → Desert → etc.), le jeu est très jouable tel quel.
+
+---
+
+## Intégration lobby — Advanced Portals (hub → hub-minigames)
+
+**Plugin** : Advanced Portals (par sekwah41, disponible sur Modrinth + Spiget). **Déjà ajouté** à `PLUGINS_MODRINTH` → install auto.
+
+**Pourquoi Advanced Portals plutôt que pressure-plate + command-block ?**
+
+- Les portails sont **des régions** (pas des blocs uniques) → effet visuel avec particules, "seuil" de téléportation propre (pas besoin de sauter sur une dalle).
+- Config persistée dans `/data/plugins/AdvancedPortals/` → backup/restore via `make backup` capture tout.
+- Commande de destination → warp EssentialsX → commande plugin. Modifiable à la volée sans casser/reposer de command-blocks.
+- Activation conditionnelle : exige une permission, un item, un gamemode, etc.
+
+### Étape 1 — vérifier le plugin
+
+```bash
+make cmd ARGS=plugins        # → "AdvancedPortals" en vert
+```
+
+### Étape 2 — créer les destinations (commandes à exécuter)
+
+Les "destinations" sont les commandes que chaque portail lancera quand un joueur passera à travers. On les nomme selon le mini-jeu :
+
+```
+# En jeu, OP :
+/portal destination create tntrun-lobby command "tr join classico"
+/portal destination create skywars-lobby command "swr join"
+/portal destination create bedwars-lobby command "bw join classico"
+/portal destination create spleef-lobby command "spleef join classico"
+/portal destination create murder-lobby command "mm join manoir"
+/portal destination create oitc-lobby command "oitc join classico"
+/portal destination create oneblock-lobby command "aob create"
+```
+
+### Étape 3 — créer chaque portail (sélection visuelle)
+
+Tu passes dans le mode éditeur du plugin (t'équipes l'outil selector) puis sélectionnes une zone 3D. Le plugin enregistre la bounding box comme "portail".
+
+```
+# En jeu (OP), dans le hub :
+/portal wand                      # te donne l'outil sélecteur (blaze_rod par défaut)
+
+# 1) Clic-gauche le coin bas-ouest-sud du portail (ex. sous la dalle)
+# 2) Clic-droit le coin haut-est-nord (ex. 3 blocs au-dessus)
+# 3) Enregistre le portail (exemple pour SkyWars) :
+/portal create skywars skywars-lobby
+#                 ^       ^
+#                 nom     destination créée à l'étape 2
+```
+
+Répète pour chaque mini-jeu (`tntrun`, `bedwars`, `spleef`, `murder`, `oitc`, `oneblock`).
+
+### Étape 4 — effets visuels (facultatif)
+
+```
+# Particules (portal_particle par défaut) :
+/portal arg skywars particle PORTAL
+/portal arg skywars sound ENTITY_ENDERMAN_TELEPORT
+# Message de traversée :
+/portal arg skywars message "&6[SkyWars]&e Matchmaking..."
+```
+
+### Étape 5 — holograms au-dessus (DecentHolograms)
+
+Un holo flottant au-dessus de chaque portail, avec placeholders PlaceholderAPI :
 
 ```
 /dh create sw-portal
-/dh addline sw-portal &6&l⚔ SKYWARS ⚔
-/dh addline sw-portal &7%swr_arena_count% arènes actives
-/dh addline sw-portal &e%swr_total_players% joueurs en ligne
-/dh addline sw-portal &aClic droit pour rejoindre
+/dh addline sw-portal "&6&l⚔ SKYWARS ⚔"
+/dh addline sw-portal "&7%swr_arena_count% arènes actives"
+/dh addline sw-portal "&e%swr_total_players% joueurs en ligne"
+/dh addline sw-portal "&aTraverse le portail pour jouer !"
 
 /dh create tr-portal
-/dh addline tr-portal &c&l☄ TNTRUN ☄
-/dh addline tr-portal &7Dernier debout gagne
-/dh addline tr-portal &aClic droit pour rejoindre
+/dh addline tr-portal "&c&l☄ TNTRUN ☄"
+/dh addline tr-portal "&7Dernier debout gagne"
+/dh addline tr-portal "&aTraverse le portail pour jouer !"
 ```
 
-### Étape 4 — NPC (optionnel, nécessite Citizens ou équivalent)
+Duplique pour chaque mini-jeu (placeholder approprié : `%bedwars_*%`, `%mm_*%`, etc.).
 
-Citizens n'est pas dans notre stack. Alternative : **armor stands taggés** + un mini-plugin custom qui écoute `PlayerInteractAtEntityEvent` et exécute le warp. ~100 lignes Java, à déposer dans `plugins/manual/` plus tard. Pour l'instant, l'option pressure plate + holo suffit.
+### Étape 6 — permission de traversée (tous les joueurs par défaut)
+
+Advanced Portals met par défaut `advancedportals.use.*` à `true` (bypass si tu n'as aucune règle). Si tu veux restreindre :
+
+```
+make cmd ARGS="lp group default permission set advancedportals.use.skywars true"
+# etc.
+```
+
+### Étape 7 — liste/édition
+
+```
+/portal list                      # liste tous les portails du hub
+/portal edit skywars              # entre en mode édition
+/portal destination list          # liste des destinations
+/portal remove skywars            # supprime un portail (la zone reste vide)
+```
+
+> **Config brute** : `/data/plugins/AdvancedPortals/portals.yml` et `.../destinations.yml`. Tu peux les éditer à la main (plus rapide que commande par commande pour 7 portails), puis `/portal reload`.
 
 ---
 
@@ -516,14 +1038,24 @@ Citizens n'est pas dans notre stack. Alternative : **armor stands taggés** + un
 Avant de tester avec un ami :
 
 ```
-[ ] make cmd ARGS=plugins affiche TNTRun ET SkyWarsReloaded en vert
+[ ] make cmd ARGS=plugins affiche tous les plugins mini-jeux en vert :
+       TNTRun, SkyWarsReloaded, ScreamingBedWars, Spleef_reloaded,
+       MurderMystery, OITC (OneInTheChamber), BentoBox, AdvancedPortals,
+       VoidWorldGenerator
 [ ] make cmd ARGS="lp group default permission info"
-        → inclut tntrun.* et swr.*
-[ ] /mv list montre toutes les sw-* + tntrun_arena
-[ ] /tr list  → classico (ou autre) apparaît "enabled"
-[ ] /swr list → au moins 1 arène "enabled"
-[ ] Tu peux /tr join classico depuis le hub
-[ ] Tu peux /swr join classico depuis le hub
+        → inclut tntrun.*, swr.*, bw.*, spleef.*, murdermystery.*, oitc.*,
+          aoneblock.island.*
+[ ] /mv list montre toutes les sw-*, bw-*, tntrun_arena, spleef_arena,
+        mm_manoir, oitc_arena, aoneblock (+ aoneblock_nether / _the_end)
+[ ] /tr list         → au moins 1 arène "enabled"
+[ ] /swr list        → au moins 1 arène "enabled"
+[ ] /bw list         → au moins 1 arène "enabled"
+[ ] /spleef list     → au moins 1 arène "enabled"
+[ ] /mm list         → au moins 1 arène "enabled"
+[ ] /oitc list       → au moins 1 arène "enabled"
+[ ] /portal list     → au moins 7 portails dans le hub (un par mini-jeu)
+[ ] Tu peux /tr join <map> / /swr join / /bw join … depuis le hub
+[ ] Tu peux traverser chaque portail Advanced Portals → TP automatique au lobby du mini-jeu
 [ ] Les chests des îles SkyWars ont du loot (entre dans une cage, ouvre le chest)
 [ ] En tombant dans le vide → tu meurs et respawn dans le lobby du mini-game
 [ ] En fin de partie, TP automatique au hub
@@ -565,33 +1097,33 @@ kubectl -n mineshark exec deploy/mc-main -c minecraft -- cat /data/plugins/SkyWa
 
 Doit être ≤ 1.21. Si non, pin une version précédente via `plugins/manual/` (télécharge une release GitHub plus ancienne).
 
-### `mv create sw-bones -g SkyWarsReloaded` → "Unknown generator"
+### `mv create sw-bones -g VoidWorldGenerator` → "Unknown generator"
 
-Cause : SkyWarsReloaded n'a pas fini de charger avant que tu tapes la commande, **OU** la version de SWR installée est trop ancienne (< v3, pas de générateur bundlé).
+Cause : VoidWorldGenerator n'a pas fini de charger avant que tu tapes la commande, **OU** le plugin n'a pas pu être téléchargé depuis Spiget (rate-limit, jar cache obsolète).
 
-**Fix 1 — attendre** : le premier boot post-install prend 60-90s. Tape :
+**Fix 1 — attendre + vérifier** : le premier boot post-install prend 60-90s. Tape :
 ```
 make cmd ARGS="plugins"
 ```
-Et vérifie que `SkyWarsReloaded` est en **vert** (chargé). Si en rouge, attends 30s et retente.
+Et vérifie que `VoidWorldGenerator` est en **vert** (chargé). Si absent ou en rouge :
+```
+make logs-main | grep -iE "void|113931|HydrolienF"
+```
+Si `Failed to download resource 113931`, force un re-download :
+```
+make update-plugins
+```
+(supprime les jars + les dotfiles `.113931-version.json` du cache meta Spiget → itzg retélécharge tout au redémarrage).
 
-**Fix 2 — fallback sur un plugin void générique** : si tu n'arrives vraiment pas à faire fonctionner le générateur SWR, installe un plugin void dédié. Exemple avec `VoidGen` (SpigotMC ID 27934, très petit, zéro config) :
+**Fix 2 — fallback sur le générateur bundlé SkyWarsReloaded** : SkyWarsReloaded v3 expose aussi son propre générateur `SkyWarsReloaded`. Tu peux l'utiliser en dépannage (mais on préfère `VoidWorldGenerator` pour la portabilité cross-minigames — cf. Étape 2) :
 
 ```bash
-# Ajoute à .env :
-PLUGINS_SPIGET=34315,1997,53359,69436,27934
-
-# Et dans k8s/main/deployment.yaml :
-value: "34315,1997,53359,69436,27934"
-
-# Puis :
-make re
-
-# Et utilise -g VoidGen au lieu de -g SkyWarsReloaded :
-make cmd ARGS="mv create sw-bones normal -g VoidGen"
+make cmd ARGS="mv create sw-bones normal -g SkyWarsReloaded"
 ```
 
-Les deux générateurs donnent un monde 100% vide — fonctionnellement identiques.
+Fonctionnellement identique — monde 100 % vide. À n'utiliser que si VoidWorldGenerator refuse obstinément de charger.
+
+> **Note pour les lecteurs qui ont un vieux tuto sous les yeux** : l'ID Spiget `27934` n'est **PAS** un plugin void generator. C'est "Simple Spawners" (plugin de mob spawners pour Minecraft 1.7-1.12, plus maintenu). Ne l'ajoute **jamais** à `PLUGINS_SPIGET` — il ne se chargera même pas sur Paper 1.21.
 
 ### Je vois des plaines sous mes îles SkyWars
 
@@ -605,8 +1137,8 @@ make cmd ARGS="mv delete sw-bones"
 # Multiverse demande confirmation : retape la commande dans les 5s
 make cmd ARGS="mv delete sw-bones"
 
-# 2) Recrée avec -g SkyWarsReloaded
-make cmd ARGS="mv create sw-bones normal -g SkyWarsReloaded"
+# 2) Recrée avec -g VoidWorldGenerator
+make cmd ARGS="mv create sw-bones normal -g VoidWorldGenerator"
 # Puis refais les mv modify + le paste schematic
 ```
 
@@ -661,11 +1193,93 @@ make cmd ARGS="mv modify sw-classico set autoLoad false"
 
 ---
 
+## Convention schematics (.schem > .schematic)
+
+Tous les schematics MineShark sont en format **`.schem`** (Sponge schematic, nouveau format WorldEdit 7+), **pas** l'ancien `.schematic` (MCEdit legacy).
+
+### Pourquoi `.schem` et pas `.schematic` ?
+
+| Critère | `.schematic` (legacy) | `.schem` (Sponge 3) |
+|---|---|---|
+| Year | 2011 (MCEdit) | 2017 (WorldEdit) |
+| Block IDs | numériques (1, 3, 35…) | namespaced (`minecraft:stone`) |
+| Block states | non supporté | oui (orientation portes, waterlogged…) |
+| Minecraft 1.13+ | cassé (flattening) | natif |
+| Biomes, entités | non | oui |
+| WorldEdit moderne | read-only, warn | lecture + écriture |
+
+À partir de MC 1.13, le "flattening" a supprimé les IDs numériques → `.schematic` devient un format dégradé qui perd les informations de blocs complexes (directions d'escaliers, slab half, etc.). Pour tout ce qui est posé/construit sur **Paper 1.21.x**, utilise **toujours** `.schem`.
+
+### Emplacement dans le repo
+
+```
+assets/schematics/
+├── hub.schem                     # lobby central
+├── tntrun-classico.schem
+├── skywars-bones.schem
+├── skywars-classico.schem
+├── skywars-dune.schem
+├── ...
+├── bedwars-classico.schem
+├── murdermystery-manoir.schem
+└── oitc-arena.schem
+```
+
+→ Au boot du pod `mc-main`, l'initContainer `copy-schematics` copie tout le dossier dans `/data/plugins/WorldEdit/schematics/`. Les fichiers y sont accessibles via `//schem load <nom-sans-extension>`.
+
+### Conversion `.schematic` → `.schem` (si tu récupères un vieux fichier)
+
+```bash
+# Depuis un client OP avec WorldEdit :
+//schem load ancien-fichier.schematic
+//schem save nouveau-fichier format=sponge
+# WorldEdit écrit dans .../WorldEdit/schematics/nouveau-fichier.schem
+
+# Récupère-le sur ta machine locale :
+make backup                     # tarball complet du PVC mc-main
+# ou directement :
+kubectl -n mineshark cp mc-main-xxx:/data/plugins/WorldEdit/schematics/nouveau-fichier.schem ./nouveau-fichier.schem
+```
+
+### Nommage
+
+Convention MineShark :
+
+```
+<minigame>-<map>.schem
+```
+
+Exemples :
+- `skywars-bones.schem`, `skywars-classico.schem`, …
+- `tntrun-classico.schem`
+- `bedwars-4teams-fantasy.schem`
+- `murdermystery-manoir.schem`
+
+Séparateur **tiret**, pas underscore. Pas de majuscules. Pas d'espace. Le **préfixe** identifie le plugin, le suffixe identifie la map.
+
+### Ajouter un nouveau schematic
+
+1. Place le `.schem` dans `assets/schematics/` (via WorldEdit ou rsync local).
+2. `git add assets/schematics/nouveau-fichier.schem && git commit -m "schem: add <description>"`.
+3. `make deploy` → push git + rollout mc-main → l'initContainer recopie.
+4. En jeu : `//schem load nouveau-fichier` puis `//paste -a -o`.
+
+> **`.schematic` sous la main ?** Ajoute-le dans `assets/schematics/legacy/` (gitignored) → convertis-le d'abord en `.schem` via la procédure ci-dessus, puis commit seulement le `.schem`.
+
+---
+
 ## Références
 
 - Paper 1.21.8 JavaDoc : <https://jd.papermc.io/paper/1.21.8/>
 - TntRun_reloaded (Spigot) : <https://www.spigotmc.org/resources/tntrun_reloaded-tntrun-for-1-13-1-21-11.53359/>
 - SkyWarsReloaded (lukasvdgaag) : <https://github.com/lukasvdgaag/SkyWarsReloaded> · <https://www.spigotmc.org/resources/69436/>
+- ScreamingBedWars : <https://www.spigotmc.org/resources/63714/> · <https://screamingsandals.gitbook.io/screaming-bedwars/>
+- Spleef_reloaded (steve4744) : <https://www.spigotmc.org/resources/118673/>
+- MurderMystery (Plugily-Projects) : <https://www.spigotmc.org/resources/66614/> · <https://wiki.plugily.xyz/murdermystery/>
+- OITC (Despical) : <https://www.spigotmc.org/resources/81185/>
+- BentoBox + AOneBlock : <https://docs.bentobox.world/> · <https://github.com/BentoBoxWorld/AOneBlock>
+- VoidWorldGenerator (HydrolienF) : <https://www.spigotmc.org/resources/113931/>
+- Advanced Portals (sekwah41) : <https://modrinth.com/plugin/advanced-portals>
 - itzg/minecraft-server docs (env vars plugin auto-install) : <https://docker-minecraft-server.readthedocs.io/en/latest/mods-and-plugins/>
 - API Spiget : <https://spiget.org/>
 - WorldGuard flags : <https://worldguard.enginehub.org/en/latest/regions/flags/>
