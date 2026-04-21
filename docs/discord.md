@@ -131,6 +131,27 @@ make discord-test      # SSH → RCON `say [TEST] MineShark → Discord` sur mc-
   `enableMinecraftChatCustomization`, etc.), tu modifies ce template
   puis `make discord-setup` régénère le Secret avec les nouvelles valeurs.
 
+### Piège `CF_OVERRIDES_EXCLUSIONS` (modpack CurseForge vs. mount readOnly)
+
+Si ton modpack CurseForge contient un `config/discord_chat_mod-common.toml`
+dans ses *overrides* (c'est le cas de **Modded Together** et d'autres packs
+qui embarquent la config du bridge par défaut), au boot `mc-image-helper`
+extrait le zip et tente de copier ce fichier par-dessus le nôtre.
+Comme notre mount est readOnly, le `Files.copy()` plante avec :
+
+```
+FileSystemException: config/discord_chat_mod-common.toml: Device or resource busy
+[init] [ERROR] Failed to auto-install CurseForge modpack
+```
+
+→ mc-mod entre en CrashLoopBackOff : l'install du modpack échoue
+systématiquement, donc aucun mod n'est chargé.
+
+**Fix** : `CF_OVERRIDES_EXCLUSIONS=config/discord_chat_mod-common.toml` dans
+`k8s/mod/deployment.yaml`. Itzg skip ce fichier lors de l'application des
+overrides, notre Secret reste intact. Déjà appliqué dans le repo, à ne
+jamais retirer tant qu'on utilise cette archi.
+
 ### Historique — pourquoi mount readOnly et pas initContainer sed
 
 Première itération : un initContainer `busybox + sed` patchait 3 lignes

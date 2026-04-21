@@ -122,6 +122,22 @@ spec:
             # hashes matchent, juste validation). Acceptable.
             - name: CF_FORCE_SYNCHRONIZE
               value: "true"
+            # ⚠️ CONFLIT mount readOnly vs. overrides du modpack.
+            # Le modpack Modded Together contient dans ses overrides un
+            # `config/discord_chat_mod-common.toml` par défaut. Au boot,
+            # mc-image-helper extrait le zip et tente de copier ce fichier
+            # par-dessus le nôtre. MAIS on a monté ce path en subPath
+            # readOnly depuis le Secret `discord-chat-mod-toml` (cf. plus
+            # bas), donc le `Files.copy()` échoue avec :
+            #   FileSystemException: config/discord_chat_mod-common.toml:
+            #   Device or resource busy
+            # → crash loop de mc-mod (impossible d'installer le modpack).
+            # CF_OVERRIDES_EXCLUSIONS dit à itzg de *skip* ce fichier lors
+            # de l'application des overrides. Notre version (rendue depuis
+            # le template, contenant le token) reste intacte.
+            # Glob relatif à la racine du zip (= même path que sous /data/).
+            - name: CF_OVERRIDES_EXCLUSIONS
+              value: "config/discord_chat_mod-common.toml"
             # Défense en profondeur : même si CF_EXCLUDE_MODS rate un slug,
             # REMOVE_OLD_MODS scanne /data/mods/ au boot et purge ces jars.
             # Matche par nom de fichier (wildcards glob), profondeur 2 pour
