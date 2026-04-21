@@ -249,6 +249,7 @@ spec:
                 https://github.com/ViaVersion/ViaVersion/releases/download/5.8.1/ViaVersion-5.8.1.jar
                 https://github.com/ViaVersion/ViaBackwards/releases/download/5.8.1/ViaBackwards-5.8.1.jar
                 https://github.com/EssentialsX/Essentials/releases/download/2.21.2/EssentialsX-2.21.2.jar
+                https://github.com/EssentialsX/Essentials/releases/download/2.21.2/EssentialsXSpawn-2.21.2.jar
 
           ports:
             - containerPort: 25565
