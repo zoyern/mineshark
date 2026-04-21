@@ -48,18 +48,17 @@ secrets: gen-secrets ## (Re)crée les Secrets K8s depuis data/secrets/ et .env
 	    --namespace=$(NAMESPACE) \
 	    --from-literal=forwarding-secret="$$(cat $(FWD_SECRET_FILE))" \
 	    --dry-run=client -o yaml | kubectl apply -f -
-	@# ─── discord-chat-mod-config ───────────────────────────────────────
-	@# Consommé par l'initContainer `discord-config-patch` du Deployment
-	@# mc-mod (cf. k8s/mod/deployment.yaml). Si DISCORD_* sont vides dans
-	@# .env, on crée quand même le Secret avec des chaînes vides : l'init
-	@# container ne crash pas, le mod boot sans se connecter (log WARN).
-	@# Ça permet `make mod-on` même sans bot Discord configuré.
-	@kubectl create secret generic discord-chat-mod-config \
-	    --namespace=$(NAMESPACE) \
-	    --from-literal=token='$(DISCORD_TOKEN)' \
-	    --from-literal=guild-id='$(DISCORD_GUILD_ID)' \
-	    --from-literal=channel-id='$(DISCORD_CHANNEL_ID)' \
-	    --dry-run=client -o yaml | kubectl apply -f -
+	@# ─── discord-chat-mod-toml ─────────────────────────────────────────
+	@# N'EST PLUS créé ici : ce Secret contient le TOML COMPLET rendu
+	@# depuis k8s/mod/discord_chat_mod-common.toml.tpl + substitutions
+	@# des placeholders @@DISCORD_TOKEN@@ etc. — rendu qui requiert le
+	@# `.env` LOCAL + `sed`. `make secrets` tourne sur le VPS qui n'a
+	@# pas ce .env, donc on laisse `make discord-setup` (depuis LOCAL)
+	@# gérer ce Secret. Tant que mc-mod est à replicas=0 (défaut),
+	@# l'absence du Secret n'est pas bloquante. Avant `make mod-on`,
+	@# lancer `make discord-setup` DEPUIS LOCAL.
+	@# Cleanup d'un ancien Secret obsolète (approche sed in-place) :
+	@kubectl -n $(NAMESPACE) delete secret discord-chat-mod-config --ignore-not-found >/dev/null 2>&1 || true
 	@echo "✓ Secrets K8s prêts."
 
 
@@ -162,31 +161,42 @@ rcon-mod: ## Ouvre une console RCON sur le serveur moddé
 
 
 # ─── Bridge Discord (discord-chat-mod sur mc-mod) ──────────────────
-# NB : les cibles `discord-setup` / `discord-status` / `discord-test`
-# sont définies dans make/admin.mk car elles doivent tourner DEPUIS
-# TA MACHINE LOCALE via SSH (kubectl n'est pas forcément installé en
-# WSL). La seule chose ici dans k8s.mk, c'est la création du Secret
-# vide par défaut dans `secrets` (voir plus haut), pour que `make up`
-# sur le VPS ne crash pas si DISCORD_TOKEN est vide.
+# NB : les cibles `discord-setup` / `discord-teardown` / `discord-status`
+# / `discord-test` sont définies dans make/admin.mk car elles doivent
+# tourner DEPUIS TA MACHINE LOCALE via SSH (kubectl n'est pas forcément
+# installé en WSL). `make secrets` ici NE crée PAS le Secret Discord :
+# le TOML est rendu localement à partir d'un template (sed substitue les
+# placeholders @@…@@) puis envoyé via stdin-SSH à `kubectl create
+# secret`. Voir admin.mk/discord-setup pour le détail.
 #
-# Architecture globale :
-#   .env (local)  ──[make discord-setup / make env-sync]──>  VPS
-#         │                                                      │
-#         │                                                      ▼
-#         │                                          kubectl create secret
-#         │                                          discord-chat-mod-config
-#         ▼                                                      │
-#   DISCORD_TOKEN / GUILD_ID / CHANNEL_ID                        │
-#                                                                ▼
-#                                          initContainer `discord-config-patch`
-#                                          dans k8s/mod/deployment.yaml
-#                                                                │
-#                                                                ▼
-#                                         /data/config/discord_chat_mod-common.toml
+# Architecture (refonte 2026-04-21 après bug "Token may not be empty") :
+#
+#   .env (LOCAL)  ──[make discord-setup]──> sed substitue 3 placeholders
+#                                          dans discord_chat_mod-common.toml.tpl
+#                                                        │
+#                                          stdin ──SSH──> VPS
+#                                                        │
+#                                                        ▼
+#                                          kubectl create secret generic
+#                                          discord-chat-mod-toml
+#                                          --from-file=discord_chat_mod-common.toml=/dev/stdin
+#                                                        │
+#                                                        ▼
+#                                          (pod mc-mod monte le Secret en
+#                                           subPath READ-ONLY sur
+#                                           /data/config/discord_chat_mod-common.toml)
+#                                                        │
+#                                                        ▼
+#                                          NeoForge ne peut PAS réécrire le
+#                                          fichier → token persiste → JDA connecte
 #
 # Le Secret survit à `make mod-reset` (pas attaché au PVC).
 # Universel : le mod est injecté via MODRINTH_PROJECTS, indépendant du
 # modpack CurseForge.
+#
+# Rollback d'urgence : `make discord-teardown` supprime les Secrets
+# `discord-chat-mod-{config,toml}` (l'ancien nom + le nouveau), puis
+# `make mod-off`.
 
 
 .PHONY: up _apply secrets sync-velocity-config sync-paper-config down clean fclean re reset-main-data nuke \

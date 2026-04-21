@@ -71,64 +71,17 @@ spec:
       # injecter Lithium/ServerCore ajoute des risques de conflit mixin
       # avec Quark/Create. À ré-évaluer si les TPS souffrent en prod.
       #
-      # ─── InitContainer : patch config discord_chat_mod à chaque boot ──
-      # But : injecter token + guild_id + channel_id depuis un Secret K8s
-      # dans /data/config/discord_chat_mod-common.toml AVANT que le container
-      # principal démarre. Survit à `make mod-reset` (Secret persiste).
-      # Si le fichier n'existe pas encore (1er boot vierge) : skip propre,
-      # le mod le créera, un 2e restart appliquera le patch.
-      initContainers:
-        - name: discord-config-patch
-          image: busybox:1.36.1                 # synced with .env IMG_BUSYBOX
-          command: ["sh", "-c"]
-          args:
-            - |
-              set -e
-              CONFIG=/data/config/discord_chat_mod-common.toml
-              if [ ! -f "$CONFIG" ]; then
-                echo "[discord-config] $CONFIG absent (1er boot ?), skip"
-                exit 0
-              fi
-              echo "[discord-config] Patching $CONFIG with values from Secret..."
-              # Indentation = 8 espaces (défaut du mod). Regex tolère 1+ space/tab.
-              # On escape les caractères spéciaux regex éventuels des valeurs.
-              TOKEN_ESC=$(printf '%s' "$DISCORD_TOKEN" | sed 's/[&|]/\\&/g')
-              GUILD_ESC=$(printf '%s' "$DISCORD_GUILD_ID" | sed 's/[&|]/\\&/g')
-              CHAN_ESC=$(printf '%s' "$DISCORD_CHANNEL_ID" | sed 's/[&|]/\\&/g')
-              sed -i \
-                -e "s|^discordBotToken[[:space:]]*=.*|discordBotToken = \"${TOKEN_ESC}\"|" \
-                -e "0,/^[[:space:]]\{1,\}guildId[[:space:]]*=/{s|^[[:space:]]\{1,\}guildId[[:space:]]*=.*|        guildId = \"${GUILD_ESC}\"|}" \
-                -e "0,/^[[:space:]]\{1,\}defaultChannelId[[:space:]]*=/{s|^[[:space:]]\{1,\}defaultChannelId[[:space:]]*=.*|        defaultChannelId = \"${CHAN_ESC}\"|}" \
-                "$CONFIG"
-              echo "[discord-config] Done. Vérif :"
-              grep -E '^(discordBotToken|[[:space:]]+guildId|[[:space:]]+defaultChannelId)' "$CONFIG" \
-                | sed 's/discordBotToken = ".*"/discordBotToken = "***REDACTED***"/'
-          env:
-            - name: DISCORD_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: discord-chat-mod-config
-                  key: token
-            - name: DISCORD_GUILD_ID
-              valueFrom:
-                secretKeyRef:
-                  name: discord-chat-mod-config
-                  key: guild-id
-            - name: DISCORD_CHANNEL_ID
-              valueFrom:
-                secretKeyRef:
-                  name: discord-chat-mod-config
-                  key: channel-id
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
-          volumeMounts:
-            - name: data
-              mountPath: /data
+      # ─── Config discord_chat_mod : Secret monté en read-only ──────────
+      # Le TOML complet (rendu depuis k8s/mod/discord_chat_mod-common.toml.tpl
+      # par `make discord-setup`) vit dans le Secret `discord-chat-mod-toml`
+      # et est monté en subPath READ-ONLY sur /data/config/discord_chat_mod-common.toml.
+      #
+      # Historique (vécu 2026-04-21) : l'approche précédente patchait le TOML
+      # via un initContainer sed après le boot. NeoForge ré-écrit ce fichier
+      # pendant sa phase de chargement pour normaliser le formatting et
+      # reset-ait les valeurs injectées à "" → JDA throw "Token may not be
+      # empty". Avec un mount readOnly, NeoForge ne peut PLUS réécrire, le
+      # token persiste, bridge Discord connecte. Détail Makefile + template.
       containers:
         - name: minecraft
           image: itzg/minecraft-server:java21      # synced with .env IMG_SERVER
@@ -209,11 +162,13 @@ spec:
             # ancien nom CurseForge = discord-chat-mod). Se tromper de
             # slug = `Project(s) could not be located` + crash loop du
             # pod. Toujours vérifier sur modrinth.com/mod/<slug>.
-            # Config patchée par l'initContainer discord-config-patch
-            # ci-dessus à partir du Secret `discord-chat-mod-config`
-            # (géré par `make secrets` / `make discord-setup`).
-            # Sans token configuré : le mod se charge mais ne se connecte
-            # pas (log WARN "Token may not be empty") — le serveur boot OK.
+            # Config lue depuis /data/config/discord_chat_mod-common.toml,
+            # monté en subPath READ-ONLY depuis le Secret
+            # `discord-chat-mod-toml` (voir volumes/volumeMounts plus bas).
+            # Le Secret est rendu par `make discord-setup` depuis le
+            # template k8s/mod/discord_chat_mod-common.toml.tpl.
+            # Si le Secret est absent → pod stuck en ContainerCreating
+            # (mount fail). Lance `make discord-setup` avant `make mod-on`.
             - name: MODRINTH_PROJECTS
               value: "chunky,discord-chat-connect"
 
@@ -287,7 +242,26 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            # Monte le TOML rendu (depuis le Secret discord-chat-mod-toml)
+            # en subPath READ-ONLY directement à l'emplacement attendu par
+            # discord_chat_mod. Le mod peut lire, ne peut PAS écraser.
+            # Si le Secret n'existe pas → mount échoue → pod stuck en
+            # ContainerCreating → lancer `make discord-setup` avant `make mod-on`.
+            - name: discord-toml
+              mountPath: /data/config/discord_chat_mod-common.toml
+              subPath: discord_chat_mod-common.toml
+              readOnly: true
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: server-mod-pvc
+        # Secret contenant le TOML complet rendu par make discord-setup.
+        # defaultMode 0444 : read-only pour owner/group/world, coherent
+        # avec le mount readOnly côté container.
+        - name: discord-toml
+          secret:
+            secretName: discord-chat-mod-toml
+            defaultMode: 0444
+            items:
+              - key: discord_chat_mod-common.toml
+                path: discord_chat_mod-common.toml

@@ -86,28 +86,31 @@ make discord-test      # SSH → RCON `say [TEST] MineShark → Discord` sur mc-
 ## Architecture technique
 
 ```
-┌─ LOCAL (WSL / Mac) ─────────────────────────────────────────┐
-│  .env  (DISCORD_TOKEN / DISCORD_GUILD_ID / DISCORD_CHANNEL_ID) │
-│    │                                                         │
-│    │  make discord-setup                                     │
-│    │  (lit .env local, encapsule ssh + kubectl)              │
-│    ▼                                                         │
-│  ssh -p $VPS_SSH_PORT $VPS_USER@$VPS_IP ' kubectl ... '      │
-└──────────────────────────┬──────────────────────────────────┘
-                           │  SSH
+┌─ LOCAL (WSL / Mac) ─────────────────────────────────────────────┐
+│  .env  (DISCORD_TOKEN / DISCORD_GUILD_ID / DISCORD_CHANNEL_ID)   │
+│  k8s/mod/discord_chat_mod-common.toml.tpl   (template commit)    │
+│    │                                                             │
+│    │  make discord-setup                                         │
+│    │    1. sed @@DISCORD_TOKEN@@ etc. → fichier temp local      │
+│    │    2. ssh VPS → kubectl create secret generic …            │
+│    │       --from-file=discord_chat_mod-common.toml=/dev/stdin  │
+│    ▼                                                             │
+│  ssh -p $VPS_SSH_PORT $VPS_USER@$VPS_IP ' kubectl apply -f - '  │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │  SSH (stdin = TOML rendu)
                            ▼
-┌─ VPS (K3s) ─────────────────────────────────────────────────┐
-│  Secret K8s `discord-chat-mod-config`                        │
-│      │                                                       │
-│      ▼   au boot du pod mc-mod                               │
-│  initContainer `discord-config-patch`  (busybox + sed)       │
-│      │                                                       │
-│      ▼                                                       │
-│  /data/config/discord_chat_mod-common.toml   (dans le PVC)   │
-│      │                                                       │
-│      ▼   lecture au démarrage du mod                         │
-│  JDA (lib Discord) ──────────────────────────►  salon Discord │
-└─────────────────────────────────────────────────────────────┘
+┌─ VPS (K3s) ─────────────────────────────────────────────────────┐
+│  Secret K8s `discord-chat-mod-toml`                              │
+│      key = discord_chat_mod-common.toml                          │
+│      value = contenu TOML complet (token, guildId, channelId)    │
+│      │                                                           │
+│      ▼  mount subPath READ-ONLY dans le pod mc-mod               │
+│  /data/config/discord_chat_mod-common.toml   (défini par K8s,    │
+│      read-only : NeoForge ne peut PAS réécrire)                  │
+│      │                                                           │
+│      ▼  lecture au démarrage du mod                              │
+│  JDA (lib Discord) ──────────────────────────►  salon Discord    │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 **Points clés :**
@@ -116,13 +119,36 @@ make discord-test      # SSH → RCON `say [TEST] MineShark → Discord` sur mc-
   appellent `kubectl` à distance via SSH (cf. `make/admin.mk`). Tu n'as
   donc rien à installer côté WSL à part `ssh` et `make`.
 - Le `.env` local reste source de vérité : pas besoin de le copier sur
-  le VPS pour les 3 variables Discord (le Secret K8s suffit). Si tu
-  veux tout de même propager d'autres variables `.env` (CF_API_KEY,
-  modpack, etc.), `make env-sync` fait un `scp` avec diff preview.
+  le VPS (le Secret K8s suffit). Si tu veux tout de même propager
+  d'autres variables (`CF_API_KEY`, modpack, etc.), `make env-sync`
+  fait un `scp` avec diff preview.
 - Le Secret K8s survit à `make mod-reset` (supprime seulement le PVC).
-- L'initContainer patche le fichier TOML à *chaque* boot → pas de dérive entre Secret et config.
-- Si le fichier TOML n'existe pas encore (1er boot vierge), l'initContainer skip proprement, le mod le crée à sa valeur par défaut, et le 2ᵉ restart applique le patch.
-- Les autres champs du TOML (`serverLogsChannelId`, `use_language`, etc.) ne sont **pas** touchés — tu peux les éditer directement dans le pod via `kubectl exec` si besoin.
+- Le mount est **read-only** : NeoForge ne peut pas altérer le fichier
+  au boot (cf. *Historique* ci-dessous). Les valeurs du `.env` local
+  sont donc la source unique, reproductible, survivant à tous les boot.
+- Le template `k8s/mod/discord_chat_mod-common.toml.tpl` est versionné
+  dans le repo. Pour éditer d'autres champs TOML (`serverLogsChannelId`,
+  `enableMinecraftChatCustomization`, etc.), tu modifies ce template
+  puis `make discord-setup` régénère le Secret avec les nouvelles valeurs.
+
+### Historique — pourquoi mount readOnly et pas initContainer sed
+
+Première itération : un initContainer `busybox + sed` patchait 3 lignes
+du TOML à chaque boot (token, guildId, defaultChannelId), à partir d'un
+Secret à 3 literal keys. Comportement observé le 2026-04-21 :
+
+1. L'initContainer patchait correctement le fichier (vérif grep OK).
+2. Le container principal démarrait, NeoForge chargeait sa config.
+3. **~30-40 s après le start**, NeoForge normalisait le TOML et
+   réécrivait le fichier, resettant les 3 valeurs à `""`.
+4. JDA partait avec un token vide → `Token may not be empty`.
+
+Diagnostic : `stat` sur le TOML montrait un `mtime` postérieur au
+`startTime` du container, avec le format original restauré. Cause
+probable : NeoForge rejette un format non-canonique (espaces vs tabs)
+et reset aux defaults. La parade "monter le fichier final en read-only"
+rend toute ré-écriture impossible et garantit que les valeurs injectées
+persistent.
 
 ---
 
@@ -151,22 +177,26 @@ make discord-status
 
 1. Édite `DISCORD_CHANNEL_ID` dans `.env`.
 2. `make discord-setup`.
-3. Le pod redémarre, l'initContainer repatche le TOML, le bot pointe vers le nouveau salon.
+3. Le Secret K8s est régénéré à partir du template, le pod redémarre, le nouveau TOML est monté en read-only, le bot pointe vers le nouveau salon.
 
 ### Je veux désactiver temporairement le bridge
 
-Vide les trois variables dans `.env` puis `make discord-setup` échouera (garde-fou). Pour désactiver proprement sans supprimer la config, connecte-toi au VPS et supprime manuellement le Secret :
+Le plus simple : `make discord-teardown` (depuis LOCAL). Ça supprime le Secret `discord-chat-mod-toml` (et l'ancien `discord-chat-mod-config` s'il traîne) puis restart mc-mod.
 
-```bash
-# Depuis LOCAL
-make ssh
-# (sur le VPS maintenant)
-kubectl -n mineshark delete secret discord-chat-mod-config
-kubectl -n mineshark rollout restart deployment/mc-mod
-exit
-```
+> ⚠️ **Attention** : sans le Secret, le mount readOnly ne peut plus se monter
+> et le pod mc-mod restera bloqué en `ContainerCreating`. Deux options :
+>
+> 1. **Désactiver temporairement l'injection du mod** : retire
+>    `discord-chat-connect` de `MODRINTH_PROJECTS` dans
+>    `k8s/mod/deployment.yaml` puis `make deploy`. Le mod n'est plus chargé,
+>    le volume n'est plus nécessaire côté config (mais le `volumeMount`
+>    reste déclaré dans le Deployment → retire-le aussi, ou simplement
+>    laisse le Secret en place avec des valeurs factices).
+> 2. **Garder le Secret avec un token factice** : mets `DISCORD_TOKEN=disabled`
+>    dans `.env`, `make discord-setup`. Le mod démarre, JDA échoue avec
+>    `Invalid token` (WARN non bloquant), le serveur tourne normalement.
 
-Le mod se chargera sans token (WARN non bloquant), le serveur tourne normalement.
+Le path n°2 est généralement le moins intrusif.
 
 ### Un token a fuité (log, capture, commit accidentel)
 
@@ -181,8 +211,9 @@ Le mod se chargera sans token (WARN non bloquant), le serveur tourne normalement
 
 | Commande                 | Exécutée depuis | Rôle                                                                 |
 |--------------------------|-----------------|----------------------------------------------------------------------|
-| `make secrets`           | VPS             | Crée *tous* les Secrets K8s (dont Discord). Appelé par `make up`.    |
-| `make discord-setup`     | **LOCAL**       | Lit `.env` local → SSH → (re)crée le Secret Discord sur K3s + rollout mc-mod. À lancer après modif des `DISCORD_*` dans `.env`. |
+| `make secrets`           | VPS             | Crée les Secrets K8s **non-Discord** (RCON, CF_API_KEY, Velocity forwarding). Appelé par `make up`. **Ne crée PAS** `discord-chat-mod-toml` — le TOML doit être rendu depuis un `.env` local → voir `make discord-setup`. |
+| `make discord-setup`     | **LOCAL**       | Rendu local du template `k8s/mod/discord_chat_mod-common.toml.tpl` via `sed` (substitue `@@DISCORD_*@@`) → SSH → `kubectl create secret discord-chat-mod-toml` (`--from-file`) → rollout mc-mod. À lancer après modif des `DISCORD_*` dans `.env` ou du template. |
+| `make discord-teardown`  | **LOCAL**       | SSH → supprime les Secrets `discord-chat-mod-{config,toml}` (ancien + nouveau). Rotation ou désactivation complète. |
 | `make discord-status`    | **LOCAL**       | SSH → tail des logs mc-mod filtré JDA / discord_chat_mod.            |
 | `make discord-test`      | **LOCAL**       | SSH → RCON `say [TEST] MineShark → Discord`. Doit apparaître dans le salon Discord.  |
 | `make env-sync`          | **LOCAL**       | Propage le `.env` entier (pas que Discord) sur le VPS via scp, avec diff preview + confirmation. Utile après un changement de `CF_API_KEY`, `MODPACK_SLUG`, etc. |
@@ -197,8 +228,22 @@ Le mod se chargera sans token (WARN non bloquant), le serveur tourne normalement
 
 ---
 
-## Pourquoi cette archi et pas une ConfigMap ?
+## Pourquoi un Secret monté readOnly et pas une ConfigMap ?
 
-- Une **ConfigMap** ne chiffre pas les données au repos et s'affiche en clair avec `kubectl describe`. Un Secret est affiché base64 et masqué par défaut (`kubectl get secret -o yaml` le montre mais `describe` non).
-- Le mod lit un **fichier TOML sur le disque**, pas des variables d'environnement. Il faut donc *patcher* ce fichier au boot.
-- L'approche "monter un TOML pré-rempli via ConfigMap/Secret" marcherait mais écraserait les autres champs du TOML (serverLogsChannelId, custom commands, etc.) — l'initContainer + sed est plus chirurgical.
+- Le TOML contient le **token Discord** : c'est un credential. Une
+  **ConfigMap** ne chiffre pas au repos et s'affiche en clair via
+  `kubectl describe configmap`. Un **Secret** est stocké base64 (avec
+  chiffrement activable via `--encryption-provider-config` côté etcd)
+  et masqué par défaut (`kubectl get secret -o yaml` le montre, mais
+  `describe` non).
+- Le mod lit un **fichier TOML sur le disque**, pas des variables
+  d'environnement — il faut donc lui fournir un fichier, pas des envs.
+- Le **mount readOnly** (via `subPath` + `defaultMode: 0444`) empêche
+  NeoForge de réécrire le fichier au boot (cf. *Historique* plus haut).
+  C'est le point critique qui distingue cette archi de la précédente
+  (initContainer + sed sur PVC en RW).
+- Le template complet `discord_chat_mod-common.toml.tpl` (415 lignes)
+  est **versionné dans le repo** : pour ajouter des custom commands ou
+  activer `enableMinecraftChatCustomization`, tu édites le template, tu
+  commit, puis `make discord-setup` régénère le Secret. Pas besoin de
+  toucher au cluster.

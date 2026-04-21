@@ -380,51 +380,79 @@ env-sync: ## Copie le .env local vers /opt/mineshark/.env sur le VPS (après con
 	@echo "  c'était juste les DISCORD_*)"
 
 
-# ─── Bridge Discord — wrappers SSH ─────────────────────────────────
+# ─── Bridge Discord — Secret TOML rendu depuis template ────────────
 # Ces cibles sont pensées pour être lancées DEPUIS TA MACHINE LOCALE
 # (WSL / Mac / Linux). Elles SSH-wrappent les opérations kubectl qui
-# tournent sur le VPS — pas besoin d'installer kubectl localement, pas
-# besoin de `make ssh` à la main.
+# tournent sur le VPS — pas besoin d'installer kubectl localement.
 #
-# Architecture rappel (détail dans docs/discord.md) :
-#   .env local  ─(make discord-setup)─>  SSH  ─>  kubectl create secret
-#                                                      discord-chat-mod-config
-#                                                → rollout restart mc-mod
-#                                                → initContainer patch TOML
+# Architecture actuelle (détail dans docs/discord.md) :
+#   k8s/mod/discord_chat_mod-common.toml.tpl         ← template commit en repo
+#           │
+#           ▼ (sed substitue @@DISCORD_TOKEN@@, _GUILD_ID, _CHANNEL_ID
+#              depuis .env local)
+#   rendu TOML complet (fichier temp local)
+#           │
+#           ▼ ssh VPS → kubectl create secret generic discord-chat-mod-toml
+#                       --from-file=discord_chat_mod-common.toml=/dev/stdin
+#           │
+#           ▼ rollout restart mc-mod → Secret monté en subPath READ-ONLY
+#              sur /data/config/discord_chat_mod-common.toml → NeoForge ne
+#              PEUT PAS réécrire le fichier → token persiste → JDA connecte.
 #
-# Le token/guild-id/channel-id sont transmis **via SSH** au moment
-# d'exécuter kubectl. Ils n'atterrissent PAS dans le .env du VPS,
-# uniquement dans le Secret K8s (base64-obfusqué). Si tu veux aussi
-# que le .env du VPS les contienne (pour `make up` standalone) : lance
-# `make env-sync` en plus.
+# Pourquoi le TOML complet (vs 3 literal keys + patch in-place) :
+# NeoForge réécrit /data/config/discord_chat_mod-common.toml au boot s'il
+# détecte un format non canonique (indentation, tabs vs spaces, ordre).
+# Patch sed in-place post-init → NeoForge reset aux defaults → token = ""
+# → JDA throw "Token may not be empty". Mount readOnly = mod lit, ne peut
+# pas écraser. Validé 2026-04-21 après diagnostic mtime + cat -A.
+#
+# Les DISCORD_* sont lus localement via `-include .env` (préambule du
+# Makefile principal) et transmis via sed → stdin SSH → kubectl. Ils
+# n'atterrissent PAS dans le .env du VPS.
+DISCORD_TEMPLATE := k8s/mod/discord_chat_mod-common.toml.tpl
 
-discord-setup: ## (Depuis LOCAL) Pousse DISCORD_* du .env local → Secret K8s sur VPS + redémarre mc-mod
+discord-setup: ## (Depuis LOCAL) Rendu template + Secret K8s discord-chat-mod-toml + restart mc-mod
+	@test -f .env \
+	    || (echo "❌ .env local absent — cp .env.example .env"; exit 1)
+	@test -f $(DISCORD_TEMPLATE) \
+	    || (echo "❌ Template $(DISCORD_TEMPLATE) absent"; exit 1)
 	@echo "▶ Vérification du .env local …"
-	@test -n "$(DISCORD_TOKEN)" \
-	    || (echo "❌ DISCORD_TOKEN vide dans .env local — voir docs/discord.md"; exit 1)
-	@test -n "$(DISCORD_GUILD_ID)" \
-	    || (echo "❌ DISCORD_GUILD_ID vide dans .env local"; exit 1)
-	@test -n "$(DISCORD_CHANNEL_ID)" \
-	    || (echo "❌ DISCORD_CHANNEL_ID vide dans .env local"; exit 1)
-	@echo "  ✓ token / guild-id / channel-id présents"
-	@echo "▶ SSH → (re)création du Secret discord-chat-mod-config sur le VPS …"
-	@# Le bloc SSH : crée le namespace si absent + (re)crée le Secret en
-	@# idempotent via `kubectl apply` + rollout restart. Si mc-mod n'est
-	@# pas déployé (replicas=0), le rollout restart log juste un warning,
-	@# non bloquant. Les DISCORD_* sont transmis au VPS via l'argument
-	@# SSH (pas via env SSH pour éviter les conflits avec ta shell locale).
+	@# DISCORD_* optionnels : on warn mais on crée quand même le Secret
+	@# (pod bootera avec token vide → erreur JDA logged, PAS de crash loop).
+	@if [ -z "$(DISCORD_TOKEN)" ];      then echo "  ⚠️  DISCORD_TOKEN vide (bot non-connecté tant que .env pas rempli)"; else echo "  ✓ token présent"; fi
+	@if [ -z "$(DISCORD_GUILD_ID)" ];   then echo "  ⚠️  DISCORD_GUILD_ID vide";   else echo "  ✓ guild-id présent"; fi
+	@if [ -z "$(DISCORD_CHANNEL_ID)" ]; then echo "  ⚠️  DISCORD_CHANNEL_ID vide"; else echo "  ✓ channel-id présent"; fi
+	@echo "▶ Rendu du template $(DISCORD_TEMPLATE) (sed → fichier temp local)…"
+	@# `sed` utilise `|` comme séparateur : les tokens Discord n'en contiennent
+	@# jamais (alphabet base64-url : [A-Za-z0-9_.-]), les IDs Discord sont
+	@# des digits purs (17-19 chars). Safe sans escape supplémentaire.
+	@tmp=$$(mktemp); \
+	 sed -e "s|@@DISCORD_TOKEN@@|$(DISCORD_TOKEN)|"       \
+	     -e "s|@@DISCORD_GUILD_ID@@|$(DISCORD_GUILD_ID)|" \
+	     -e "s|@@DISCORD_CHANNEL_ID@@|$(DISCORD_CHANNEL_ID)|" \
+	     $(DISCORD_TEMPLATE) > $$tmp; \
+	 echo "▶ SSH → (re)création Secret discord-chat-mod-toml (idempotent)…"; \
+	 ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	     "kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml \
+	         | kubectl apply -f - >/dev/null && \
+	      kubectl create secret generic discord-chat-mod-toml \
+	         --namespace=$(NAMESPACE) \
+	         --from-file=discord_chat_mod-common.toml=/dev/stdin \
+	         --dry-run=client -o yaml | kubectl apply -f -" < $$tmp; \
+	 rm -f $$tmp
+	@echo "▶ Rollout restart mc-mod (re-mount du Secret)…"
 	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
-	    "kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml \
-	        | kubectl apply -f - >/dev/null && \
-	     kubectl create secret generic discord-chat-mod-config \
-	        --namespace=$(NAMESPACE) \
-	        --from-literal=token='$(DISCORD_TOKEN)' \
-	        --from-literal=guild-id='$(DISCORD_GUILD_ID)' \
-	        --from-literal=channel-id='$(DISCORD_CHANNEL_ID)' \
-	        --dry-run=client -o yaml | kubectl apply -f - && \
-	     kubectl -n $(NAMESPACE) rollout restart deployment/mc-mod 2>/dev/null \
-	        || echo '  ℹ️  mc-mod pas encore déployé — le patch s'\\''appliquera au 1er make r-mod-on'"
-	@echo "✓ Secret Discord à jour sur le VPS. Vérifier : make discord-status"
+	    "kubectl -n $(NAMESPACE) rollout restart deployment/mc-mod 2>/dev/null \
+	        || echo '  ℹ️  mc-mod pas encore déployé — le mount s appliquera au 1er make r-mod-on'"
+	@echo "✓ Secret Discord à jour. Vérifier : make discord-status"
+
+discord-teardown: ## (Depuis LOCAL) Supprime les Secrets Discord (ancien + nouveau) — rotation / clean
+	@echo "▶ SSH → delete Secrets discord-chat-mod-{config,toml} (ignore-not-found)…"
+	@ssh -p $(VPS_SSH_PORT) $(VPS_USER)@$(VPS_IP) \
+	    "kubectl -n $(NAMESPACE) delete secret discord-chat-mod-config --ignore-not-found; \
+	     kubectl -n $(NAMESPACE) delete secret discord-chat-mod-toml   --ignore-not-found"
+	@echo "✓ Secrets supprimés. mc-mod ne bootera plus (mount manquant)."
+	@echo "  → relance \`make discord-setup\` pour les re-créer, ou \`make mod-off\` pour arrêter."
 
 discord-status: ## (Depuis LOCAL) Vérifie que le bot Discord est connecté (parse les logs mc-mod via SSH)
 	@echo "▶ SSH → recherche des traces discord_chat_mod dans les logs mc-mod …"
@@ -754,7 +782,7 @@ ci-lint: ## Reproduit la CI en local : yamllint + docker compose config + kubect
         deploy deploy-logs deploy-status \
         remote r-status r-logs-main r-logs-mod r-logs-proxy r-mod-on r-mod-off \
         env-sync \
-        discord-setup discord-status discord-test \
+        discord-setup discord-teardown discord-status discord-test \
         plugins-sync redeploy-plugins update-plugins wipe-worlds push-schematics \
         backup gen-secrets show-secrets doctor init ci-lint \
         old-server-reset old-server-prep old-server-run \
