@@ -108,8 +108,12 @@ spec:
             - -c
             - |
               set -e
+              echo "[discord-toml-install] Préparation du dossier config..."
               mkdir -p /data/config
-              cp -f /discord-toml/discord_chat_mod-common.toml /data/config/discord_chat_mod-common.toml
+              echo "[discord-toml-install] Nettoyage des anciennes configs bloquantes..."
+              rm -f /data/config/discord_chat_mod-common.toml || true
+              echo "[discord-toml-install] Création du nouveau fichier config (RW)..."
+              cat /discord-toml/discord_chat_mod-common.toml > /data/config/discord_chat_mod-common.toml
               chmod 644 /data/config/discord_chat_mod-common.toml
               echo "[discord-toml-install] Canonical TOML injected → /data/config/discord_chat_mod-common.toml"
           volumeMounts:
