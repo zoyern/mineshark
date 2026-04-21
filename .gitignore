@@ -109,3 +109,5 @@ coverage/
 !plugins/manual/bentobox-addons/
 !plugins/manual/bentobox-addons/*.jar
 !plugins/manual/bentobox-addons/.gitkeep
+
+SkyWarsReloaded-Extension/

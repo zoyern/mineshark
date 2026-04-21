@@ -156,6 +156,8 @@ spec:
               value: "FALSE"
             - name: ALLOW_END
               value: "FALSE"
+            - name: ENABLE_COMMAND_BLOCK
+              value: "TRUE"
 
             # Velocity authentifie ; ce backend trust le proxy via secret
             - name: ONLINE_MODE
