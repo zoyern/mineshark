@@ -71,17 +71,53 @@ spec:
       # injecter Lithium/ServerCore ajoute des risques de conflit mixin
       # avec Quark/Create. À ré-évaluer si les TPS souffrent en prod.
       #
-      # ─── Config discord_chat_mod : Secret monté en read-only ──────────
+      # ─── Config discord_chat_mod : Secret → PVC via initContainer ─────
       # Le TOML complet (rendu depuis k8s/mod/discord_chat_mod-common.toml.tpl
-      # par `make discord-setup`) vit dans le Secret `discord-chat-mod-toml`
-      # et est monté en subPath READ-ONLY sur /data/config/discord_chat_mod-common.toml.
+      # par `make discord-setup`) vit dans le Secret `discord-chat-mod-toml`.
+      # Un initContainer le copie dans le PVC à /data/config/ à CHAQUE boot
+      # → le mod lit/écrit normalement, nos valeurs canoniques sont
+      # ré-injectées à chaque démarrage.
       #
-      # Historique (vécu 2026-04-21) : l'approche précédente patchait le TOML
-      # via un initContainer sed après le boot. NeoForge ré-écrit ce fichier
-      # pendant sa phase de chargement pour normaliser le formatting et
-      # reset-ait les valeurs injectées à "" → JDA throw "Token may not be
-      # empty". Avec un mount readOnly, NeoForge ne peut PLUS réécrire, le
-      # token persiste, bridge Discord connecte. Détail Makefile + template.
+      # Historique debug 2026-04-21 :
+      #   1. V1 : initContainer sed patchait le TOML après le boot. NeoForge
+      #      normalisait le format et wipait les valeurs → "Token may not
+      #      be empty". Indent TAB vs 8 spaces mal géré par busybox sed.
+      #   2. V2 : Secret monté subPath READ-ONLY. Bloquait NeoForge OK, mais
+      #      discord_chat_mod v2.6.2 fait lui-même un autosave au load
+      #      (ConfigManager.removeDeprecatedParameters → night-config
+      #      AutosaveCommentedFileConfig.remove()) → FileSystemException:
+      #      Read-only file system. Les volumes Secret K8s sont readOnly au
+      #      niveau kernel, pas contournable.
+      #   3. V3 (actuelle) : initContainer busybox cp Secret → PVC. Le mod
+      #      peut autosave. Valeurs ré-injectées au prochain boot si un
+      #      rewrite les bouffe. Avec template en TAB-indent canonique, le
+      #      risque de rewrite NeoForge est faible.
+      initContainers:
+        # Injecte le TOML canonique du Secret discord-chat-mod-toml dans le
+        # PVC avant le boot de mc-image-helper. `cp -f` → idempotent, chaque
+        # boot part d'un état propre. Si le Secret n'existe pas → initContainer
+        # stuck en ContainerCreating → `make discord-setup` avant `make mod-on`.
+        - name: discord-toml-install
+          image: busybox:1.36
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              mkdir -p /data/config
+              cp -f /discord-toml/discord_chat_mod-common.toml /data/config/discord_chat_mod-common.toml
+              chmod 644 /data/config/discord_chat_mod-common.toml
+              echo "[discord-toml-install] Canonical TOML injected → /data/config/discord_chat_mod-common.toml"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: discord-toml
+              mountPath: /discord-toml
+              readOnly: true
       containers:
         - name: minecraft
           image: itzg/minecraft-server:java21      # synced with .env IMG_SERVER
@@ -122,19 +158,16 @@ spec:
             # hashes matchent, juste validation). Acceptable.
             - name: CF_FORCE_SYNCHRONIZE
               value: "true"
-            # ⚠️ CONFLIT mount readOnly vs. overrides du modpack.
+            # ⚠️ CONFLIT overrides du modpack vs. TOML pré-injecté.
             # Le modpack Modded Together contient dans ses overrides un
-            # `config/discord_chat_mod-common.toml` par défaut. Au boot,
-            # mc-image-helper extrait le zip et tente de copier ce fichier
-            # par-dessus le nôtre. MAIS on a monté ce path en subPath
-            # readOnly depuis le Secret `discord-chat-mod-toml` (cf. plus
-            # bas), donc le `Files.copy()` échoue avec :
-            #   FileSystemException: config/discord_chat_mod-common.toml:
-            #   Device or resource busy
-            # → crash loop de mc-mod (impossible d'installer le modpack).
+            # `config/discord_chat_mod-common.toml` par défaut (token vide).
+            # Au boot, mc-image-helper extrait le zip et tente de copier ce
+            # fichier par-dessus celui que notre initContainer vient
+            # d'injecter depuis le Secret. Sans exclusion, notre token
+            # disparaît → JDA "Token may not be empty" au load du mod.
             # CF_OVERRIDES_EXCLUSIONS dit à itzg de *skip* ce fichier lors
             # de l'application des overrides. Notre version (rendue depuis
-            # le template, contenant le token) reste intacte.
+            # le template, contenant le vrai token) reste intacte.
             # Glob relatif à la racine du zip (= même path que sous /data/).
             - name: CF_OVERRIDES_EXCLUSIONS
               value: "config/discord_chat_mod-common.toml"
@@ -178,13 +211,13 @@ spec:
             # ancien nom CurseForge = discord-chat-mod). Se tromper de
             # slug = `Project(s) could not be located` + crash loop du
             # pod. Toujours vérifier sur modrinth.com/mod/<slug>.
-            # Config lue depuis /data/config/discord_chat_mod-common.toml,
-            # monté en subPath READ-ONLY depuis le Secret
-            # `discord-chat-mod-toml` (voir volumes/volumeMounts plus bas).
-            # Le Secret est rendu par `make discord-setup` depuis le
-            # template k8s/mod/discord_chat_mod-common.toml.tpl.
-            # Si le Secret est absent → pod stuck en ContainerCreating
-            # (mount fail). Lance `make discord-setup` avant `make mod-on`.
+            # Config lue depuis /data/config/discord_chat_mod-common.toml.
+            # Ce fichier est injecté dans le PVC par l'initContainer
+            # `discord-toml-install` depuis le Secret `discord-chat-mod-toml`
+            # à chaque boot. Le Secret est rendu par `make discord-setup`
+            # depuis le template k8s/mod/discord_chat_mod-common.toml.tpl.
+            # Si le Secret est absent → initContainer stuck en
+            # ContainerCreating. Lance `make discord-setup` avant `make mod-on`.
             - name: MODRINTH_PROJECTS
               value: "chunky,discord-chat-connect"
 
@@ -255,29 +288,26 @@ spec:
             initialDelaySeconds: 300      # 5 min avant 1re check
             periodSeconds: 30
             failureThreshold: 5
+          # Pas de mount du Secret dans le container principal : le TOML a
+          # déjà été copié dans /data/config/ par l'initContainer
+          # discord-toml-install (voir initContainers plus haut). Le mod
+          # lit/écrit ce fichier via le PVC (RW), ce qui est nécessaire
+          # pour son autosave interne au load (removeDeprecatedParameters).
           volumeMounts:
             - name: data
               mountPath: /data
-            # Monte le TOML rendu (depuis le Secret discord-chat-mod-toml)
-            # en subPath READ-ONLY directement à l'emplacement attendu par
-            # discord_chat_mod. Le mod peut lire, ne peut PAS écraser.
-            # Si le Secret n'existe pas → mount échoue → pod stuck en
-            # ContainerCreating → lancer `make discord-setup` avant `make mod-on`.
-            - name: discord-toml
-              mountPath: /data/config/discord_chat_mod-common.toml
-              subPath: discord_chat_mod-common.toml
-              readOnly: true
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: server-mod-pvc
-        # Secret contenant le TOML complet rendu par make discord-setup.
-        # defaultMode 0444 : read-only pour owner/group/world, coherent
-        # avec le mount readOnly côté container.
+        # Secret contenant le TOML complet rendu par `make discord-setup`.
+        # Consommé UNIQUEMENT par l'initContainer discord-toml-install qui
+        # copie son contenu dans le PVC. Pas monté dans le container
+        # principal (sinon le mod rencontre un mount readOnly incompatible
+        # avec son autosave night-config).
         - name: discord-toml
           secret:
             secretName: discord-chat-mod-toml
-            defaultMode: 0444
             items:
               - key: discord_chat_mod-common.toml
                 path: discord_chat_mod-common.toml

@@ -104,10 +104,13 @@ make discord-test      # SSH → RCON `say [TEST] MineShark → Discord` sur mc-
 │      key = discord_chat_mod-common.toml                          │
 │      value = contenu TOML complet (token, guildId, channelId)    │
 │      │                                                           │
-│      ▼  mount subPath READ-ONLY dans le pod mc-mod               │
-│  /data/config/discord_chat_mod-common.toml   (défini par K8s,    │
-│      read-only : NeoForge ne peut PAS réécrire)                  │
+│      ▼  monté UNIQUEMENT dans l'initContainer                    │
+│  initContainer `discord-toml-install` (busybox)                  │
+│      cp -f /discord-toml/…  →  /data/config/…   (PVC, RW)        │
 │      │                                                           │
+│      ▼  container principal démarre ensuite                      │
+│  /data/config/discord_chat_mod-common.toml   (dans le PVC, RW)   │
+│      │      le mod peut lire ET écrire (autosave night-config)   │
 │      ▼  lecture au démarrage du mod                              │
 │  JDA (lib Discord) ──────────────────────────►  salon Discord    │
 └─────────────────────────────────────────────────────────────────┘
@@ -123,53 +126,91 @@ make discord-test      # SSH → RCON `say [TEST] MineShark → Discord` sur mc-
   d'autres variables (`CF_API_KEY`, modpack, etc.), `make env-sync`
   fait un `scp` avec diff preview.
 - Le Secret K8s survit à `make mod-reset` (supprime seulement le PVC).
-- Le mount est **read-only** : NeoForge ne peut pas altérer le fichier
-  au boot (cf. *Historique* ci-dessous). Les valeurs du `.env` local
-  sont donc la source unique, reproductible, survivant à tous les boot.
+- L'initContainer **re-copie** le TOML canonique du Secret vers le PVC
+  à CHAQUE boot du pod → valeurs du `.env` ré-injectées de façon
+  idempotente. Si un rewrite NeoForge ou un autosave du mod bouffe
+  des champs, le boot suivant les restaure.
+- Le container principal voit le fichier en **lecture/écriture** (PVC
+  normal). C'est nécessaire parce que `discord-chat-mod` v2.6.2 fait
+  lui-même un autosave au load (`ConfigManager.removeDeprecatedParameters`
+  → `AutosaveCommentedFileConfig.remove()`). Sans RW, crash au boot.
 - Le template `k8s/mod/discord_chat_mod-common.toml.tpl` est versionné
   dans le repo. Pour éditer d'autres champs TOML (`serverLogsChannelId`,
   `enableMinecraftChatCustomization`, etc.), tu modifies ce template
   puis `make discord-setup` régénère le Secret avec les nouvelles valeurs.
 
-### Piège `CF_OVERRIDES_EXCLUSIONS` (modpack CurseForge vs. mount readOnly)
+### Piège `CF_OVERRIDES_EXCLUSIONS` (overrides du modpack vs. TOML pré-injecté)
 
 Si ton modpack CurseForge contient un `config/discord_chat_mod-common.toml`
 dans ses *overrides* (c'est le cas de **Modded Together** et d'autres packs
 qui embarquent la config du bridge par défaut), au boot `mc-image-helper`
-extrait le zip et tente de copier ce fichier par-dessus le nôtre.
-Comme notre mount est readOnly, le `Files.copy()` plante avec :
-
-```
-FileSystemException: config/discord_chat_mod-common.toml: Device or resource busy
-[init] [ERROR] Failed to auto-install CurseForge modpack
-```
-
-→ mc-mod entre en CrashLoopBackOff : l'install du modpack échoue
-systématiquement, donc aucun mod n'est chargé.
+extrait le zip et tente de copier ce fichier par-dessus celui que notre
+initContainer vient d'injecter. Résultat : notre token canonique est
+écrasé par la version vide du pack → JDA throw `Token may not be empty`
+au load du mod.
 
 **Fix** : `CF_OVERRIDES_EXCLUSIONS=config/discord_chat_mod-common.toml` dans
 `k8s/mod/deployment.yaml`. Itzg skip ce fichier lors de l'application des
-overrides, notre Secret reste intact. Déjà appliqué dans le repo, à ne
+overrides, notre version reste intacte. Déjà appliqué dans le repo, à ne
 jamais retirer tant qu'on utilise cette archi.
 
-### Historique — pourquoi mount readOnly et pas initContainer sed
+### Historique — 3 itérations avant de converger (2026-04-21)
 
-Première itération : un initContainer `busybox + sed` patchait 3 lignes
-du TOML à chaque boot (token, guildId, defaultChannelId), à partir d'un
-Secret à 3 literal keys. Comportement observé le 2026-04-21 :
+**V1 — initContainer `busybox + sed` sur PVC RW**
 
-1. L'initContainer patchait correctement le fichier (vérif grep OK).
+Un initContainer patchait 3 lignes du TOML à chaque boot (token, guildId,
+defaultChannelId), à partir d'un Secret à 3 literal keys. Comportement observé :
+
+1. L'initContainer patchait correctement le fichier (vérif `grep` OK).
 2. Le container principal démarrait, NeoForge chargeait sa config.
-3. **~30-40 s après le start**, NeoForge normalisait le TOML et
-   réécrivait le fichier, resettant les 3 valeurs à `""`.
+3. **~30-40 s après le start**, NeoForge (ou le mod) normalisait le TOML
+   et réécrivait le fichier, resettant les 3 valeurs à `""`.
 4. JDA partait avec un token vide → `Token may not be empty`.
 
-Diagnostic : `stat` sur le TOML montrait un `mtime` postérieur au
-`startTime` du container, avec le format original restauré. Cause
-probable : NeoForge rejette un format non-canonique (espaces vs tabs)
-et reset aux defaults. La parade "monter le fichier final en read-only"
-rend toute ré-écriture impossible et garantit que les valeurs injectées
-persistent.
+Hypothèse : l'indent TAB natif du TOML du mod vs. les 8 espaces introduits
+par busybox `sed` → format non-canonique → reset aux defaults. Non vérifié
+à 100 % car on a pivoté direct vers V2.
+
+**V2 — Secret monté en subPath READ-ONLY**
+
+Template complet commité, Secret à 1 clef (le TOML entier rendu), `mount subPath
+readOnly: true` + `defaultMode: 0444`. NeoForge ne peut plus réécrire → token
+persiste. Problème :
+
+```
+FileSystemException: config/discord_chat_mod-common.toml: Read-only file system
+  at com.shadow.com.electronwill.nightconfig.core.io.WritingMode$2.open
+  at ...ConfigManager.removeDeprecatedParameters(ConfigManager.java:47)
+  at ...DiscordChatModNeoForge.<init>(DiscordChatModNeoForge.java:37)
+```
+
+`discord-chat-mod` v2.6.2 fait lui-même un autosave au load via
+`AutosaveCommentedFileConfig.remove()` (lib `night-config`) pour purger les
+clefs dépréciées. Le mount Secret K8s étant readOnly au niveau kernel
+(tmpfs bind-mount), aucune écriture n'est possible → crash `Read-only file
+system`. Retirer `readOnly: true` du mount spec ne résout pas : c'est le
+backend qui est readOnly.
+
+Collatéral V2 : le modpack Modded Together embarque `discord_chat_mod-common.toml`
+dans ses overrides → `mc-image-helper` tentait `Files.copy()` par-dessus →
+`Device or resource busy`. Fix : `CF_OVERRIDES_EXCLUSIONS` (gardé en V3).
+
+Collatéral V2 bis : la manifeste persistent itzg (`/data/.curseforge-manifest.json`)
+conservait l'entrée du TOML → au boot suivant, `Manifests.cleanup` tentait
+`deleteIfExists()` sur notre mount readOnly → `Device or resource busy`.
+Fix : pod one-shot pour purger `.curseforge-manifest.json` et `.modrinth-manifest.json`
+du PVC. Si tu re-migres un jour et que ça re-casse, c'est le pattern à reprendre.
+
+**V3 (actuelle) — initContainer copie Secret → PVC, container principal en RW**
+
+L'initContainer `discord-toml-install` (busybox) copie à chaque boot le TOML
+canonique du Secret vers `/data/config/discord_chat_mod-common.toml` dans le
+PVC. Le container principal le voit en **lecture/écriture** → l'autosave du
+mod fonctionne. Les valeurs canoniques sont ré-injectées au prochain boot si
+jamais un rewrite les modifiait. Le template étant en indent TAB (format
+canonique du mod), le risque "NeoForge rewrite + reset" observé en V1 est
+faible — et même s'il se déclenchait, la canonisation initContainer au boot
+suivant le ré-annulerait.
 
 ---
 
