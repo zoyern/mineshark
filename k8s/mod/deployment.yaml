@@ -254,7 +254,9 @@ spec:
             - name: MAX_PLAYERS
               value: "30"                          # synced with .env MOD_MAX_PLAYERS
             - name: DIFFICULTY
-              value: "hard"                        # synced with .env DIFFICULTY_MOD
+              value: "normal"                        # synced with .env DIFFICULTY_MOD
+            - name: PVP
+              value: "true"
 
             - name: VIEW_DISTANCE
               value: "8"                           # synced with .env VIEW_DISTANCE
