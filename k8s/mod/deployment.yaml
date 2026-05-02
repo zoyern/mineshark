@@ -226,7 +226,7 @@ spec:
               value: "chunky,discord-chat-connect"
 
             - name: MEMORY
-              value: "12G"                          # synced with .env MOD_MEMORY
+              value: "8G"                          # synced with .env MOD_MEMORY
             # Pourquoi 6G et pas 8G ? VPS Netcup = 16Go physique.
             # Budget si mc-main + mc-mod + velocity + system simultanément :
             #   system + K3s     ~1.5Gi
@@ -278,10 +278,10 @@ spec:
           resources:
             requests:
               memory: "5Gi"     # réserve ferme en dessous du heap (pod schedulable)
-              cpu: "1000m"
+              cpu: "2000m"
             limits:
               memory: "14Gi"     # = MOD_MEMORY (6G) × 1.33 (metaspace + direct + off-heap)
-              cpu: "4000m"
+              cpu: "7000m"
           # Modded Together : 1er boot ~3-5 min (download ~500 Mo + gen monde).
           # Boots suivants ~1-2 min. Probes tolérantes.
           readinessProbe:
