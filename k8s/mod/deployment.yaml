@@ -240,7 +240,9 @@ spec:
             # recommande 8G pour 5-10 joueurs ; 6G tient avec 3-6 joueurs
             # actifs + SIMULATION_DISTANCE=5. Au-delà : bumper le VPS.
             - name: USE_AIKAR_FLAGS
-              value: "true"
+              value: "false"
+            - name: JVM_OPTS
+              value: "-XX:+UseZGC -XX:+ZGenerational"
             # Safety net : sans flight, la mort = ghost qui flotte puis kick.
             # Les mods de mobilité (jetpacks, bottes élytres) en ont besoin.
             - name: ALLOW_FLIGHT
