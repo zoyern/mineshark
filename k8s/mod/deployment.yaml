@@ -243,6 +243,8 @@ spec:
               value: "false"
             - name: JVM_OPTS
               value: "-XX:+UseZGC -XX:+ZGenerational"
+            - name: MAX_TICK_TIME
+              value: "-1"
             # Safety net : sans flight, la mort = ghost qui flotte puis kick.
             # Les mods de mobilité (jetpacks, bottes élytres) en ont besoin.
             - name: ALLOW_FLIGHT
@@ -288,12 +290,12 @@ spec:
           # Boots suivants ~1-2 min. Probes tolérantes.
           readinessProbe:
             exec: { command: ["mc-health"] }
-            initialDelaySeconds: 300      # 5 min avant 1re check
+            initialDelaySeconds: 1200      # 5 min avant 1re check
             periodSeconds: 15
             failureThreshold: 20
           livenessProbe:
             exec: { command: ["mc-health"] }
-            initialDelaySeconds: 600      # 5 min avant 1re check
+            initialDelaySeconds: 1200      # 5 min avant 1re check
             periodSeconds: 30
             failureThreshold: 10
           # Pas de mount du Secret dans le container principal : le TOML a
