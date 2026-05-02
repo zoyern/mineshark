@@ -245,6 +245,8 @@ spec:
               value: "-XX:+UseZGC -XX:+ZGenerational"
             - name: MAX_TICK_TIME
               value: "-1"
+            - name: NETWORK_TIMEOUT
+              value: "120000" # 120 secondes d'attente au lieu des 30 par défaut
             # Safety net : sans flight, la mort = ghost qui flotte puis kick.
             # Les mods de mobilité (jetpacks, bottes élytres) en ont besoin.
             - name: ALLOW_FLIGHT
